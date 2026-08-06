@@ -208,27 +208,15 @@ func create_new_project(path: String, title: String, template_id: String) -> voi
 	var dir_path := path.get_base_dir()
 	if not dir_path.is_empty() and not DirAccess.dir_exists_absolute(dir_path):
 		DirAccess.make_dir_recursive_absolute(dir_path)
-
 	if not FileAccess.file_exists(path):
 		var file := FileAccess.open(path, FileAccess.WRITE)
 		if file != null:
-			var data := {
-				"name": title,
-				"template": template_id,
-				"version": APP_VERSION,
-				"created_at": Time.get_datetime_string_from_system(false, true)
-			}
-			file.store_string(JSON.stringify(data, "\t"))
+			file.store_string(JSON.stringify({"name": title, "template": template_id, "version": APP_VERSION}, "\t"))
 			file.close()
-
 	var srv := _get_recent_service()
-	if srv != null and srv.has_method("add_project"):
-		srv.call("add_project", path, title)
-
+	if srv != null and srv.has_method("add_project"): srv.call("add_project", path, title)
 	var app_st := _get_app_state()
-	if app_st != null and app_st.has_method("open_project"):
-		app_st.call("open_project", path)
-
+	if app_st != null and app_st.has_method("open_project"): app_st.call("open_project", path)
 	project_created.emit(path, title)
 	project_selected.emit(path)
 	refresh_recent_list()
@@ -237,8 +225,7 @@ func create_new_project(path: String, title: String, template_id: String) -> voi
 
 func _open_workspace(path: String) -> void:
 	workspace_transition_requested.emit(path)
-	if transition_to_workspace:
-		call_deferred("_change_to_main_workspace")
+	if transition_to_workspace: call_deferred("_change_to_main_workspace")
 
 
 func _change_to_main_workspace() -> void:
@@ -249,23 +236,13 @@ func _change_to_main_workspace() -> void:
 ## === Internal Signals & Connection =========================================
 
 func _connect_ui_signals() -> void:
-	if _recent_list != null:
-		_recent_list.item_activated.connect(_on_recent_item_activated)
+	if _recent_list != null: _recent_list.item_activated.connect(_on_recent_item_activated)
 	if _search_input != null:
-		_search_input.text_changed.connect(func(text):
-			_search_filter = text.strip_edges()
-			refresh_recent_list()
-		)
+		_search_input.text_changed.connect(func(t): _search_filter = t.strip_edges(); refresh_recent_list())
 	if _btn_new_project != null:
-		_btn_new_project.pressed.connect(func():
-			if _new_project_dialog != null and _new_project_dialog.has_method("open_dialog"):
-				_new_project_dialog.call("open_dialog")
-		)
+		_btn_new_project.pressed.connect(func(): if _new_project_dialog != null and _new_project_dialog.has_method("open_dialog"): _new_project_dialog.call("open_dialog"))
 	if _btn_open_project != null:
-		_btn_open_project.pressed.connect(func():
-			if _open_project_dialog != null:
-				_open_project_dialog.popup_centered_ratio(0.72)
-		)
+		_btn_open_project.pressed.connect(func(): if _open_project_dialog != null: _open_project_dialog.popup_centered_ratio(0.72))
 	if _btn_open_sample != null:
 		_btn_open_sample.pressed.connect(func(): open_project_path(SAMPLE_PROJECT_PATH))
 	if _btn_continue_last != null:
@@ -273,40 +250,30 @@ func _connect_ui_signals() -> void:
 			var srv := _get_recent_service()
 			if srv != null and srv.has_method("get_recent_projects"):
 				var projs: Array = srv.call("get_recent_projects")
-				if not projs.is_empty():
-					open_project_path(projs[0].get("path", ""))
+				if not projs.is_empty(): open_project_path(projs[0].get("path", ""))
 		)
 	if _btn_clear_missing != null:
 		_btn_clear_missing.pressed.connect(func():
 			var srv := _get_recent_service()
 			if srv != null and srv.has_method("clear_missing"):
-				srv.call("clear_missing")
-				refresh_recent_list()
+				srv.call("clear_missing"); refresh_recent_list()
 		)
 	if _btn_toggle_log != null and _log_drawer != null:
-		_btn_toggle_log.pressed.connect(func():
-			_log_drawer.visible = not _log_drawer.visible
-		)
+		_btn_toggle_log.pressed.connect(func(): _log_drawer.visible = not _log_drawer.visible)
 	if _new_project_dialog != null and _new_project_dialog.has_signal("project_created"):
 		_new_project_dialog.connect("project_created", Callable(self, "create_new_project"))
-	if _open_project_dialog != null:
-		_open_project_dialog.file_selected.connect(open_project_path)
+	if _open_project_dialog != null: _open_project_dialog.file_selected.connect(open_project_path)
 	if _missing_dialog != null:
 		_missing_dialog.confirmed.connect(func():
 			if not _pending_missing_path.is_empty():
 				var srv := _get_recent_service()
-				if srv != null and srv.has_method("remove_project"):
-					srv.call("remove_project", _pending_missing_path)
-				_pending_missing_path = ""
-				refresh_recent_list()
+				if srv != null and srv.has_method("remove_project"): srv.call("remove_project", _pending_missing_path)
+				_pending_missing_path = ""; refresh_recent_list()
 		)
 
 
 func _on_recent_item_activated(index: int) -> void:
-	if _recent_list == null:
-		return
-	var path: String = _recent_list.get_item_metadata(index)
-	open_project_path(path)
+	if _recent_list != null: open_project_path(_recent_list.get_item_metadata(index))
 
 
 func _append_log(msg: String) -> void:

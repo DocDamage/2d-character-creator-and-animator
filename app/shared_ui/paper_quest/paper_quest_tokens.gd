@@ -29,16 +29,20 @@ const COLORS := {
 }
 
 const DARK_COLORS := {
-	"paper_base": Color("#34291F"),
-	"paper_top": Color("#4B3B2B"),
-	"paper_muted": Color("#3E3025"),
-	"paper_dark": Color("#2A211A"),
-	"cardboard_base": Color("#201A15"),
-	"cardboard_light": Color("#4A3525"),
-	"cardboard_dark": Color("#120F0C"),
-	"cardboard_edge": Color("#6B4729"),
-	"ink_primary": Color("#FFF4DC"),
-	"ink_muted": Color("#D8C7A5"),
+	"paper_base": Color("#121319"),
+	"paper_top": Color("#1A1C24"),
+	"paper_muted": Color("#232633"),
+	"paper_dark": Color("#0E0F14"),
+	"cardboard_base": Color("#1A1C24"),
+	"cardboard_light": Color("#232633"),
+	"cardboard_dark": Color("#0E0F14"),
+	"cardboard_edge": Color("#2E3345"),
+	"ink_primary": Color("#E6E9EE"),
+	"ink_muted": Color("#8B94A5"),
+	"blue": Color("#00E5FF"),
+	"blue_dark": Color("#00A3B8"),
+	"purple": Color("#FF007F"),
+	"purple_dark": Color("#C70063"),
 }
 
 const HIGH_CONTRAST_COLORS := {

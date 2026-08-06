@@ -123,7 +123,8 @@ func _build_layout_if_needed() -> void:
 	_collapse_button = Button.new()
 	_collapse_button.name = "CollapseButton"
 	_collapse_button.text = "-"
-	_collapse_button.custom_minimum_size = Vector2(40, 40)
+	_collapse_button.tooltip_text = "Collapse / Expand Panel"
+	_collapse_button.custom_minimum_size = Vector2(28, 28)
 	_collapse_button.theme_type_variation = &"GhostButton"
 	_collapse_button.pressed.connect(toggle_collapse)
 	_header_bar.add_child(_collapse_button)
