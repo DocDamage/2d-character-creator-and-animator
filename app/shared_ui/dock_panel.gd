@@ -32,6 +32,12 @@ func _init() -> void:
 
 func _ready() -> void:
 	_build_layout_if_needed()
+	# The surrounding TabContainer already names the active tool. Keep only a
+	# compact collapse affordance so the title is not repeated inside the panel.
+	if get_parent() is TabContainer and _header_bar != null:
+		_title_label.text = ""
+		_header_bar.custom_minimum_size.y = 28
+		_collapse_button.custom_minimum_size = Vector2(28, 28)
 	_sync_tab_title()
 
 func set_panel_title(p_title: String) -> void:

@@ -4,6 +4,7 @@ extends Node
 
 const RecentProjectsServiceScript = preload("res://app/bootstrap/recent_projects_service.gd")
 const NewProjectDialogScript = preload("res://app/bootstrap/new_project_dialog.gd")
+const StartupScript = preload("res://app/bootstrap/startup.gd")
 const STARTUP_SCENE_PATH := "res://app/bootstrap/startup.tscn"
 const TEST_PROJ_PATH_1 := "user://test_project_1.json"
 const TEST_PROJ_PATH_2 := "user://test_project_2.json"
@@ -29,6 +30,7 @@ func run_tests() -> Dictionary:
 	_test_recent_service_persistence(results)
 	_test_recent_service_missing_handling(results)
 	_test_startup_scene_integration(results)
+	_test_packaged_sample_and_open_dialog(results)
 	_test_search_filtering(results)
 	_test_new_project_dialog(results)
 	_test_quick_start_actions(results)
@@ -178,6 +180,36 @@ func _test_search_filtering(results: Dictionary) -> void:
 		results["failed"] += 1
 		results["errors"].append("Search Edit or Item List missing for filter test.")
 
+	startup_node.queue_free()
+
+
+func _test_packaged_sample_and_open_dialog(results: Dictionary) -> void:
+	var startup_packed := ResourceLoader.load(STARTUP_SCENE_PATH) as PackedScene
+	var startup_node := startup_packed.instantiate()
+	startup_node.transition_to_workspace = false
+	add_child(startup_node)
+	var sample_path: String = StartupScript.SAMPLE_PROJECT_PATH
+	var dialog := startup_node.get_node_or_null("OpenProjectDialog") as FileDialog
+	var open_button := startup_node.get_node_or_null("MarginContainer/MainLayout/ContentSplit/QuickStartPanel/VBox/BtnOpenProject") as Button
+	if FileAccess.file_exists(sample_path) and sample_path.begins_with("res://samples/"):
+		print("  PASS: Quick Start points to a bundled production sample.")
+		results["passed"] += 1
+	else:
+		results["failed"] += 1
+		results["errors"].append("Quick Start sample is missing or not production packaged: " + sample_path)
+	if dialog != null and open_button != null and dialog.filters.size() >= 2:
+		open_button.pressed.emit()
+		if dialog.visible:
+			print("  PASS: Open Project launches a filtered file picker instead of the sample shortcut.")
+			results["passed"] += 1
+		else:
+			results["failed"] += 1
+			results["errors"].append("Open Project file picker did not become visible.")
+	else:
+		results["failed"] += 1
+		results["errors"].append("Open Project file picker or filters are missing.")
+	if dialog != null:
+		dialog.hide()
 	startup_node.queue_free()
 
 

@@ -6,3 +6,7 @@ godot --path . --audio-driver Dummy --rendering-method gl_compatibility --scene 
 godot --path . --audio-driver Dummy --rendering-method gl_compatibility --scene tools/capture_ui.tscn -- --scene res://app/shared_ui/main_window.tscn --project res://tests/fixtures/baseline/sample_project.json --output res://docs/implementation/evidence/PQ-UI/main-shell-craft.png
 godot --path . --audio-driver Dummy --rendering-method gl_compatibility --scene tools/capture_ui.tscn -- --scene res://app/shared_ui/main_window.tscn --project res://tests/fixtures/baseline/sample_project.json --workspace weapon_equipment --output res://docs/implementation/evidence/PQ-UI/weapon-workspace-craft.png
 godot --path . --audio-driver Dummy --rendering-method gl_compatibility --scene tools/capture_ui.tscn -- --scene res://app/shared_ui/main_window.tscn --project res://tests/fixtures/baseline/sample_project.json --workspace preview_export --output res://docs/implementation/evidence/PQ-UI/export-workspace-craft.png
+godot --headless --path . --scene res://tests/packaged_ui_acceptance.tscn
+godot --headless --path . --export-release "Windows Desktop" release/windows/Modular2DCharacterStudio.exe
+release/windows/Modular2DCharacterStudio.exe --headless -- --packaged-ui-acceptance
+Windows live capture: release EXE resized to a 1440x960 client, then Explore starter sample clicked and both states captured.

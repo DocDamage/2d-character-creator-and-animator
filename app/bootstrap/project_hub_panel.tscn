@@ -30,7 +30,7 @@ theme_override_constants/margin_bottom = 12
 layout_mode = 2
 theme_override_constants/separation = 12
 
-[node name="Header" type="HBoxContainer" parent="Margin/Root"]
+[node name="Header" type="VBoxContainer" parent="Margin/Root"]
 layout_mode = 2
 
 [node name="TitleGroup" type="VBoxContainer" parent="Margin/Root/Header"]
@@ -50,6 +50,7 @@ text = "Your papercraft adventure"
 [node name="ProjectState" parent="Margin/Root/Header" instance=ExtResource("4_chip")]
 unique_name_in_owner = true
 layout_mode = 2
+size_flags_horizontal = 8
 status = 3
 status_text = "Choose a project"
 
@@ -59,7 +60,7 @@ size_flags_vertical = 3
 theme_override_constants/separation = 12
 
 [node name="Left" type="VBoxContainer" parent="Margin/Root/Content"]
-custom_minimum_size = Vector2(250, 0)
+custom_minimum_size = Vector2(208, 0)
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_stretch_ratio = 0.25
@@ -159,14 +160,14 @@ layout_mode = 2
 
 [node name="ContinueButton" type="Button" parent="Margin/Root/Content/Center/Current/Margin/VBox/Buttons"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(180, 44)
+custom_minimum_size = Vector2(140, 44)
 layout_mode = 2
 theme_type_variation = &"PrimaryButton"
 text = "Continue in Create"
 
 [node name="SaveButton" type="Button" parent="Margin/Root/Content/Center/Current/Margin/VBox/Buttons"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(120, 44)
+custom_minimum_size = Vector2(100, 44)
 layout_mode = 2
 text = "Save project"
 
@@ -197,7 +198,7 @@ size_flags_vertical = 3
 focus_mode = 2
 
 [node name="Right" type="VBoxContainer" parent="Margin/Root/Content"]
-custom_minimum_size = Vector2(275, 0)
+custom_minimum_size = Vector2(210, 0)
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_stretch_ratio = 0.25

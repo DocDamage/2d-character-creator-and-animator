@@ -15,8 +15,11 @@ signal workspace_transition_requested(path: String)
 const APP_NAME := "Paper Quest Character Studio"
 const APP_VERSION := "0.1.0-dev"
 const APP_BUILD_DATE := "2026-08-05"
-const SAMPLE_PROJECT_PATH := "res://tests/fixtures/baseline/sample_project.json"
+const SAMPLE_PROJECT_PATH := "res://samples/humanoid_modular.chrproj"
 const MAIN_WINDOW_SCENE_PATH := "res://app/shared_ui/main_window.tscn"
+const PACKAGED_ACCEPTANCE_SCENE_PATH := "res://tests/packaged_ui_acceptance.tscn"
+const PACKAGED_ACCEPTANCE_ARG := "--packaged-ui-acceptance"
+const PACKAGED_ACCEPTANCE_META := &"paper_quest_packaged_acceptance_started"
 
 const StartupDiagnosticsScript = preload("res://app/bootstrap/startup_diagnostics.gd")
 
@@ -37,6 +40,7 @@ const StartupDiagnosticsScript = preload("res://app/bootstrap/startup_diagnostic
 @onready var _btn_toggle_log: Button = get_node_or_null("MarginContainer/MainLayout/Header/HeaderRight/BtnToggleLog")
 
 @onready var _new_project_dialog: ConfirmationDialog = get_node_or_null("NewProjectDialog")
+@onready var _open_project_dialog: FileDialog = get_node_or_null("OpenProjectDialog")
 @onready var _missing_dialog: ConfirmationDialog = get_node_or_null("MissingProjectDialog")
 @onready var _log_drawer: PanelContainer = get_node_or_null("MarginContainer/MainLayout/LogDrawer")
 
@@ -53,12 +57,33 @@ var _search_filter: String = ""
 ## === Lifecycle ==============================================================
 
 func _ready() -> void:
+	if _redirect_to_packaged_acceptance_if_requested():
+		return
 	if ThemeService != null: ThemeService.apply_to_window(get_window())
 	if _version_label != null:
 		_version_label.text = "Project dashboard · v%s" % APP_VERSION
 	_connect_ui_signals()
 	_run_startup_sequence()
 	refresh_recent_list()
+
+
+func _redirect_to_packaged_acceptance_if_requested() -> bool:
+	if not OS.has_feature("template"):
+		return false
+	if PACKAGED_ACCEPTANCE_ARG not in OS.get_cmdline_user_args():
+		return false
+	if Engine.has_meta(PACKAGED_ACCEPTANCE_META):
+		return false
+	Engine.set_meta(PACKAGED_ACCEPTANCE_META, true)
+	call_deferred("_launch_packaged_acceptance")
+	return true
+
+
+func _launch_packaged_acceptance() -> void:
+	var error := get_tree().change_scene_to_file(PACKAGED_ACCEPTANCE_SCENE_PATH)
+	if error != OK:
+		printerr("PACKAGED UI ACCEPTANCE: unable to launch (%s)" % error_string(error))
+		get_tree().quit(3)
 
 
 func _get_recent_service() -> Node:
@@ -237,7 +262,10 @@ func _connect_ui_signals() -> void:
 				_new_project_dialog.call("open_dialog")
 		)
 	if _btn_open_project != null:
-		_btn_open_project.pressed.connect(func(): open_project_path(SAMPLE_PROJECT_PATH))
+		_btn_open_project.pressed.connect(func():
+			if _open_project_dialog != null:
+				_open_project_dialog.popup_centered_ratio(0.72)
+		)
 	if _btn_open_sample != null:
 		_btn_open_sample.pressed.connect(func(): open_project_path(SAMPLE_PROJECT_PATH))
 	if _btn_continue_last != null:
@@ -261,6 +289,8 @@ func _connect_ui_signals() -> void:
 		)
 	if _new_project_dialog != null and _new_project_dialog.has_signal("project_created"):
 		_new_project_dialog.connect("project_created", Callable(self, "create_new_project"))
+	if _open_project_dialog != null:
+		_open_project_dialog.file_selected.connect(open_project_path)
 	if _missing_dialog != null:
 		_missing_dialog.confirmed.connect(func():
 			if not _pending_missing_path.is_empty():

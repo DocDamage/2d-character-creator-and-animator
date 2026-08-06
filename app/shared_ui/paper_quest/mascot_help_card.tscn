@@ -4,7 +4,7 @@
 [ext_resource type="Script" path="res://app/shared_ui/paper_quest/paper_quest_mascot.gd" id="2_mascot"]
 
 [node name="MascotHelpCard" type="PanelContainer"]
-custom_minimum_size = Vector2(260, 126)
+custom_minimum_size = Vector2(208, 126)
 theme_type_variation = &"GuidePanel"
 script = ExtResource("1_card")
 

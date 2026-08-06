@@ -2,7 +2,6 @@
 .godot/
 *.import
 *.godot
-export_presets.cfg
 .mono/
 *.translation
 
@@ -39,6 +38,7 @@ autosave/
 backups/
 user/
 exported/
+paper-quest-figma-generator.zip
 
 # Evidence artifacts (keep structure, ignore large binary outputs)
 docs/implementation/evidence/*/screenshots/*.png

@@ -1,7 +1,7 @@
 class_name ProjectHubPanel
 extends Control
 
-const SAMPLE_PROJECT_PATH := "res://tests/fixtures/baseline/sample_project.json"
+const SAMPLE_PROJECT_PATH := "res://samples/humanoid_modular.chrproj"
 
 @onready var _project_name: Label = %ProjectName
 @onready var _project_path: Label = %ProjectPath
