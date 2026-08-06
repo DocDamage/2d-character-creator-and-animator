@@ -3,6 +3,8 @@
 class_name DockPanel
 extends PanelContainer
 
+const StudioSurfaceScript = preload("res://app/shared_ui/studio_surface.gd")
+
 signal dock_region_changed(panel_id: String, new_region: String)
 signal collapse_toggled(panel_id: String, is_collapsed: bool)
 signal closed(panel_id: String)
@@ -121,6 +123,24 @@ func _build_layout_if_needed() -> void:
 	_content_container.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_content_container.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	main_box.add_child(_content_container)
+	_add_default_surface_if_needed()
+
+
+func _add_default_surface_if_needed() -> void:
+	var modes := {
+		"panel_assets": "assets",
+		"panel_hierarchy": "hierarchy",
+		"panel_viewport": "viewport",
+		"panel_inspector": "inspector",
+		"panel_timeline": "timeline",
+	}
+	if not modes.has(panel_id):
+		return
+	var surface := StudioSurfaceScript.new() as Control
+	surface.set("surface_mode", modes[panel_id])
+	surface.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	surface.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_content_container.add_child(surface)
 
 
 func _sync_tab_title() -> void:

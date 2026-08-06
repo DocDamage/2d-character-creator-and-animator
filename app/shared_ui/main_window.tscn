@@ -1,9 +1,10 @@
-[gd_scene load_steps=5 format=3 uid="uid://main_window_app_shell_002"]
+[gd_scene load_steps=6 format=3 uid="uid://main_window_app_shell_002"]
 
 [ext_resource type="Script" path="res://app/shared_ui/main_window.gd" id="1_main_win"]
 [ext_resource type="Script" path="res://app/shared_ui/dock_layout_manager.gd" id="2_layout_mgr"]
 [ext_resource type="PackedScene" path="res://app/commands/command_palette.tscn" id="3_cmdpal"]
 [ext_resource type="PackedScene" path="res://app/application_state/unsaved_changes_dialog.tscn" id="4_unsaved"]
+[ext_resource type="Script" path="res://app/shared_ui/workspace_navigation.gd" id="5_navigation"]
 
 [node name="MainWindow" type="Control"]
 layout_mode = 3
@@ -17,6 +18,16 @@ script = ExtResource("1_main_win")
 [node name="DockLayoutManager" type="Node" parent="."]
 script = ExtResource("2_layout_mgr")
 
+[node name="RootBackground" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+color = Color(0.0352941, 0.0431373, 0.0627451, 1)
+
 [node name="RootVBox" type="VBoxContainer" parent="."]
 layout_mode = 1
 anchors_preset = 15
@@ -27,12 +38,73 @@ grow_vertical = 2
 
 [node name="TopHeaderBar" type="HBoxContainer" parent="RootVBox"]
 layout_mode = 2
-custom_minimum_size = Vector2(0, 36)
+custom_minimum_size = Vector2(0, 64)
+theme_override_constants/separation = 8
+
+[node name="HeaderInsetLeft" type="Control" parent="RootVBox/TopHeaderBar"]
+custom_minimum_size = Vector2(18, 0)
+layout_mode = 2
+
+[node name="BrandMark" type="Button" parent="RootVBox/TopHeaderBar"]
+custom_minimum_size = Vector2(36, 36)
+layout_mode = 2
+theme_type_variation = &"PrimaryButton"
+text = "CS"
+
+[node name="BrandCopy" type="VBoxContainer" parent="RootVBox/TopHeaderBar"]
+custom_minimum_size = Vector2(184, 0)
+layout_mode = 2
+theme_override_constants/separation = 0
+
+[node name="Title" type="Label" parent="RootVBox/TopHeaderBar/BrandCopy"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Character Studio"
+
+[node name="ProjectContext" type="Label" parent="RootVBox/TopHeaderBar/BrandCopy"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.560784, 0.611765, 0.698039, 1)
+theme_override_font_sizes/font_size = 11
+text = "Project dashboard"
+
+[node name="WorkspaceNavigation" type="HBoxContainer" parent="RootVBox/TopHeaderBar" node_paths=PackedStringArray("project_context_path")]
+layout_mode = 2
+theme_override_constants/separation = 6
+script = ExtResource("5_navigation")
+project_context_path = NodePath("../BrandCopy/ProjectContext")
+
+[node name="ProjectButton" type="Button" parent="RootVBox/TopHeaderBar/WorkspaceNavigation"]
+layout_mode = 2
+text = "PROJECT"
+
+[node name="CreateButton" type="Button" parent="RootVBox/TopHeaderBar/WorkspaceNavigation"]
+layout_mode = 2
+text = "CREATE"
+
+[node name="RigButton" type="Button" parent="RootVBox/TopHeaderBar/WorkspaceNavigation"]
+layout_mode = 2
+text = "RIG"
+
+[node name="AnimateButton" type="Button" parent="RootVBox/TopHeaderBar/WorkspaceNavigation"]
+layout_mode = 2
+text = "ANIMATE"
+
+[node name="WeaponButton" type="Button" parent="RootVBox/TopHeaderBar/WorkspaceNavigation"]
+layout_mode = 2
+text = "WEAPON"
+
+[node name="ExportButton" type="Button" parent="RootVBox/TopHeaderBar/WorkspaceNavigation"]
+layout_mode = 2
+text = "EXPORT"
+
+[node name="HeaderSpacer" type="Control" parent="RootVBox/TopHeaderBar"]
+layout_mode = 2
+size_flags_horizontal = 3
 
 [node name="TopMenuBar" type="MenuBar" parent="RootVBox/TopHeaderBar"]
 unique_name_in_owner = true
+visible = false
 layout_mode = 2
-size_flags_horizontal = 3
 
 [node name="FileMenu" type="PopupMenu" parent="RootVBox/TopHeaderBar/TopMenuBar"]
 title = "File"
@@ -46,23 +118,33 @@ title = "View"
 [node name="CommandPaletteButton" type="Button" parent="RootVBox/TopHeaderBar"]
 unique_name_in_owner = true
 layout_mode = 2
-text = "Command Palette (Ctrl+Shift+P)"
+custom_minimum_size = Vector2(126, 32)
+text = "⌘  Search"
+
+[node name="MoreButton" type="Button" parent="RootVBox/TopHeaderBar"]
+custom_minimum_size = Vector2(36, 32)
+layout_mode = 2
+text = "⋯"
 
 [node name="WorkspaceLabel" type="Label" parent="RootVBox/TopHeaderBar"]
+visible = false
 layout_mode = 2
 text = "Workspace:"
 
 [node name="WorkspaceOptionButton" type="OptionButton" parent="RootVBox/TopHeaderBar"]
 unique_name_in_owner = true
+visible = false
 layout_mode = 2
 custom_minimum_size = Vector2(180, 28)
 
 [node name="PresetLabel" type="Label" parent="RootVBox/TopHeaderBar"]
+visible = false
 layout_mode = 2
 text = "Layout Preset:"
 
 [node name="PresetOptionButton" type="OptionButton" parent="RootVBox/TopHeaderBar"]
 unique_name_in_owner = true
+visible = false
 layout_mode = 2
 custom_minimum_size = Vector2(160, 28)
 
@@ -74,7 +156,7 @@ size_flags_vertical = 3
 [node name="LeftDockRegion" type="TabContainer" parent="RootVBox/MainHSplit"]
 unique_name_in_owner = true
 layout_mode = 2
-custom_minimum_size = Vector2(250, 0)
+custom_minimum_size = Vector2(260, 0)
 size_flags_horizontal = 3
 size_flags_stretch_ratio = 0.25
 
@@ -99,14 +181,14 @@ size_flags_stretch_ratio = 0.7
 [node name="RightDockRegion" type="TabContainer" parent="RootVBox/MainHSplit/CenterVSplit/InnerHSplit"]
 unique_name_in_owner = true
 layout_mode = 2
-custom_minimum_size = Vector2(250, 0)
+custom_minimum_size = Vector2(280, 0)
 size_flags_horizontal = 3
 size_flags_stretch_ratio = 0.3
 
 [node name="BottomDockRegion" type="TabContainer" parent="RootVBox/MainHSplit/CenterVSplit"]
 unique_name_in_owner = true
 layout_mode = 2
-custom_minimum_size = Vector2(0, 180)
+custom_minimum_size = Vector2(0, 240)
 size_flags_vertical = 3
 size_flags_stretch_ratio = 0.25
 

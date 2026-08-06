@@ -54,7 +54,7 @@ var _search_filter: String = ""
 
 func _ready() -> void:
 	if _version_label != null:
-		_version_label.text = "%s v%s (%s)" % [APP_NAME, APP_VERSION, APP_BUILD_DATE]
+		_version_label.text = "Project dashboard · v%s" % APP_VERSION
 	_connect_ui_signals()
 	_run_startup_sequence()
 	refresh_recent_list()
@@ -91,13 +91,13 @@ func _run_startup_sequence() -> void:
 	if _startup_errors.is_empty():
 		var msg := "Startup completed successfully (%d/%d checks passed)." % [_passed_checks, _total_checks]
 		if _status_label != null:
-			_status_label.text = "Status: OK — Diagnostics passed."
+			_status_label.text = "All systems ready · %d/%d checks passed" % [_passed_checks, _total_checks]
 			_status_label.modulate = Color.GREEN
 		_startup_complete = true
 		startup_completed.emit(true, _startup_errors)
 	else:
 		if _status_label != null:
-			_status_label.text = "Status: ERROR — Issues detected."
+			_status_label.text = "Attention required · %d check(s) need review" % _startup_errors.size()
 			_status_label.modulate = Color.RED
 		startup_completed.emit(false, _startup_errors)
 

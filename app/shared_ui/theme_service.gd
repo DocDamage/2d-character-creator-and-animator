@@ -126,16 +126,52 @@ func _apply_dpi_scale() -> void:
 
 func _build_dark_theme() -> Theme:
 	var t := Theme.new()
-	var bg_panel := Color("#222228")
-	var text_col := Color("#f0f0f5")
-	var border_col := Color("#333340")
-	var accent_col := Color.WHITE if _high_contrast else Color("#4f80ff")
-	
-	_style_theme_flat_box(t, "Panel", bg_panel, border_col)
-	_style_theme_flat_box(t, "PanelContainer", bg_panel, border_col)
-	_style_theme_button(t, Color("#2c2c36"), Color("#3a3a48"), accent_col, text_col, border_col)
-	_style_theme_line_edit(t, Color("#1a1a20"), text_col, accent_col, border_col)
+	var panel := Color("#11141b")
+	var raised := Color("#161921")
+	var header := Color("#0c0e14")
+	var text_col := Color("#ebf0fa")
+	var muted := Color("#8f9cb2")
+	var border := Color("#292e3b")
+	var accent := Color.WHITE if _high_contrast else Color("#8240f5")
+	var accent_border := Color.WHITE if _high_contrast else Color("#ad73ff")
+
+	_style_theme_flat_box(t, "Panel", panel, border, 10)
+	_style_theme_flat_box(t, "PanelContainer", panel, border, 10)
+	_style_theme_button(t, raised, Color("#202633"), accent, text_col, border, 8)
+	_style_theme_button(t, accent, Color("#975cf8"), Color("#6931cc"), Color.WHITE, accent_border, 8, "PrimaryButton")
+	_style_theme_line_edit(t, raised, text_col, accent, border)
+	_style_theme_item_list(t, raised, text_col, muted, border, accent)
+	_style_theme_tabs(t, panel, raised, accent, text_col, muted, border, accent_border)
 	t.set_color("font_color", "Label", text_col)
+	t.set_color("font_shadow_color", "Label", Color.TRANSPARENT)
+	t.set_color("font_color", "Button", text_col)
+	t.set_color("font_hover_color", "Button", Color.WHITE)
+	t.set_color("font_color", "OptionButton", text_col)
+	t.set_color("font_color", "CheckBox", text_col)
+	t.set_color("font_color", "MenuBar", muted)
+	t.set_color("font_color", "TabBar", muted)
+	t.set_color("font_selected_color", "TabBar", text_col)
+	t.set_color("font_color", "RichTextLabel", text_col)
+	t.set_color("font_uneditable_color", "LineEdit", muted)
+	t.set_color("font_color", "SpinBox", text_col)
+	t.set_color("font_color", "TextEdit", text_col)
+	t.set_color("font_color", "PopupMenu", text_col)
+	t.set_color("font_hover_color", "PopupMenu", Color.WHITE)
+	t.set_color("font_color", "Tree", text_col)
+	t.set_color("font_selected_color", "Tree", text_col)
+	t.set_color("font_color", "GraphEdit", text_col)
+	t.set_color("font_color", "GraphNode", text_col)
+	t.set_color("font_color", "ItemList", text_col)
+	t.set_color("font_selected_color", "ItemList", text_col)
+	t.set_constant("outline_size", "Label", 0)
+	t.set_font_size("font_size", "Label", 14)
+	t.set_font_size("font_size", "Button", 13)
+	t.set_stylebox("panel", "GraphEdit", _box(Color("#0e1116"), border, 12))
+	t.set_stylebox("panel", "GraphNode", _box(raised, border, 8))
+	t.set_stylebox("panel", "TextEdit", _box(raised, border, 8))
+	t.set_stylebox("normal", "OptionButton", _box(raised, border, 8))
+	t.set_stylebox("hover", "OptionButton", _box(Color("#202633"), border, 8))
+	t.set_stylebox("pressed", "OptionButton", _box(accent, accent_border, 8))
 	return t
 
 func _build_light_theme() -> Theme:
@@ -152,37 +188,51 @@ func _build_light_theme() -> Theme:
 	t.set_color("font_color", "Label", text_col)
 	return t
 
-func _style_theme_flat_box(t: Theme, item_type: String, bg: Color, border: Color) -> void:
-	var style := StyleBoxFlat.new()
-	style.bg_color = bg
-	style.border_color = border
-	style.set_border_width_all(1)
-	style.set_corner_radius_all(4)
-	t.set_stylebox("panel", item_type, style)
+func _style_theme_flat_box(t: Theme, item_type: String, bg: Color, border: Color, radius: int = 4) -> void:
+	t.set_stylebox("panel", item_type, _box(bg, border, radius))
 
-func _style_theme_button(t: Theme, normal_bg: Color, hover_bg: Color, pressed_bg: Color, text_col: Color, border: Color) -> void:
-	var normal_box := StyleBoxFlat.new()
-	normal_box.bg_color = normal_bg
-	normal_box.border_color = border
-	normal_box.set_border_width_all(1)
-	normal_box.set_corner_radius_all(4)
-	
-	var hover_box := normal_box.duplicate() as StyleBoxFlat
-	hover_box.bg_color = hover_bg
-	
-	var pressed_box := normal_box.duplicate() as StyleBoxFlat
-	pressed_box.bg_color = pressed_bg
-	
-	t.set_stylebox("normal", "Button", normal_box)
-	t.set_stylebox("hover", "Button", hover_box)
-	t.set_stylebox("pressed", "Button", pressed_box)
-	t.set_color("font_color", "Button", text_col)
+func _style_theme_button(t: Theme, normal_bg: Color, hover_bg: Color, pressed_bg: Color, text_col: Color, border: Color, radius: int = 4, variation: StringName = &"Button") -> void:
+	t.set_stylebox("normal", variation, _box(normal_bg, border, radius))
+	t.set_stylebox("hover", variation, _box(hover_bg, border, radius))
+	t.set_stylebox("pressed", variation, _box(pressed_bg, border, radius))
+	t.set_stylebox("disabled", variation, _box(normal_bg.darkened(0.25), border.darkened(0.2), radius))
+	t.set_color("font_color", variation, text_col)
+	t.set_color("font_hover_color", variation, text_col)
+	t.set_color("font_pressed_color", variation, text_col)
 
 func _style_theme_line_edit(t: Theme, bg: Color, text_col: Color, _accent: Color, border: Color) -> void:
+	t.set_stylebox("normal", "LineEdit", _box(bg, border, 8))
+	t.set_stylebox("focus", "LineEdit", _box(bg, _accent, 8, 2))
+	t.set_color("font_color", "LineEdit", text_col)
+
+
+func _style_theme_item_list(t: Theme, bg: Color, text_col: Color, muted: Color, border: Color, accent: Color) -> void:
+	t.set_stylebox("panel", "ItemList", _box(bg, border, 8))
+	t.set_stylebox("selected", "ItemList", _box(accent, accent.lightened(0.28), 6))
+	t.set_stylebox("selected_focus", "ItemList", _box(accent, accent.lightened(0.28), 6))
+	t.set_color("font_color", "ItemList", text_col)
+	t.set_color("font_selected_color", "ItemList", Color.WHITE)
+	t.set_color("font_outline_color", "ItemList", muted)
+
+
+func _style_theme_tabs(t: Theme, panel: Color, raised: Color, accent: Color, text_col: Color, muted: Color, border: Color, accent_border: Color) -> void:
+	t.set_stylebox("panel", "TabContainer", _box(panel, border, 10))
+	t.set_stylebox("tab_selected", "TabContainer", _box(accent, accent_border, 8))
+	t.set_stylebox("tab_unselected", "TabContainer", _box(raised, border, 8))
+	t.set_stylebox("tab_hovered", "TabContainer", _box(Color("#202633"), border, 8))
+	t.set_color("font_selected_color", "TabContainer", Color.WHITE)
+	t.set_color("font_unselected_color", "TabContainer", muted)
+	t.set_color("font_hovered_color", "TabContainer", text_col)
+
+
+func _box(bg: Color, border: Color, radius: int, border_width: int = 1) -> StyleBoxFlat:
 	var box := StyleBoxFlat.new()
 	box.bg_color = bg
 	box.border_color = border
-	box.set_border_width_all(1)
-	box.set_corner_radius_all(4)
-	t.set_stylebox("normal", "LineEdit", box)
-	t.set_color("font_color", "LineEdit", text_col)
+	box.set_border_width_all(border_width)
+	box.set_corner_radius_all(radius)
+	box.content_margin_left = 10.0
+	box.content_margin_top = 6.0
+	box.content_margin_right = 10.0
+	box.content_margin_bottom = 6.0
+	return box

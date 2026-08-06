@@ -1,7 +1,7 @@
 === LOC Checker Report ===
-Generated: 2026-08-06T08:44:28
+Generated: 2026-08-06T13:29:08
 Limit: 300 lines per file
-Total scanned: 290
+Total scanned: 292
 Violations: 0
 
 PASS    66 lines  res://animation/authoring/animation_composition_panel.gd
@@ -58,7 +58,7 @@ PASS    58 lines  res://app/shared_ui/canvas_camera.gd
 PASS    71 lines  res://app/shared_ui/canvas_grid_guides.gd
 PASS    64 lines  res://app/shared_ui/canvas_selection.gd
 PASS   179 lines  res://app/shared_ui/dock_layout_manager.gd
-PASS   147 lines  res://app/shared_ui/dock_panel.gd
+PASS   167 lines  res://app/shared_ui/dock_panel.gd
 PASS    62 lines  res://app/shared_ui/focus_ring_overlay.gd
 PASS   222 lines  res://app/shared_ui/focus_service.gd
 PASS   300 lines  res://app/shared_ui/main_window.gd
@@ -66,9 +66,11 @@ PASS    48 lines  res://app/shared_ui/numeric_transform_editor.gd
 PASS    36 lines  res://app/shared_ui/pivot_editor.gd
 PASS    32 lines  res://app/shared_ui/pixel_perfect_canvas.gd
 PASS    77 lines  res://app/shared_ui/selection_sets.gd
-PASS   188 lines  res://app/shared_ui/theme_service.gd
+PASS   193 lines  res://app/shared_ui/studio_surface.gd
+PASS   238 lines  res://app/shared_ui/theme_service.gd
 PASS    74 lines  res://app/shared_ui/transform_gizmo.gd
 PASS    61 lines  res://app/shared_ui/undo_history_ui.gd
+PASS    94 lines  res://app/shared_ui/workspace_navigation.gd
 PASS    76 lines  res://app/shared_ui/z_order_editor.gd
 PASS   113 lines  res://app/workspaces/asset_browser.gd
 PASS    51 lines  res://app/workspaces/asset_drag_drop.gd

@@ -115,7 +115,7 @@ func run_tests() -> Dictionary:
 	# 2e. Verify the CHR-015 creator dock is reachable and keyboard focusable.
 	var p_creator: Control = mw_node.call("get_panel", "panel_character_creator") as Control
 	var creator: Control = p_creator.call("get_content_container").get_node_or_null("CharacterCreatorPanel") as Control if p_creator != null else null
-	var creator_search: LineEdit = creator.get_node_or_null("Margin/Root/Search") as LineEdit if creator != null else null
+	var creator_search: LineEdit = creator.get_node_or_null("Margin/Root/Content/Picker/PickerMargin/PickerVBox/Search") as LineEdit if creator != null else null
 	layout_mgr.call("apply_preset_by_name", DockLayoutManagerScript.PRESET_CHARACTER_CREATOR)
 	var creator_tab_is_active := center_tabs.current_tab == p_creator.get_index() if center_tabs != null and p_creator != null else false
 	if creator != null and creator.has_method("bind_context") and creator_search != null and creator_search.focus_mode == Control.FOCUS_ALL and creator_tab_is_active:

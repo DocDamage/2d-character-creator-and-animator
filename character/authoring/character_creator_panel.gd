@@ -4,10 +4,10 @@ extends Control
 
 const ModelScript = preload("res://character/authoring/character_creator_model.gd")
 
-@onready var search_input: LineEdit = $Margin/Root/Search
-@onready var part_list: ItemList = $Margin/Root/PartList
+@onready var search_input: LineEdit = $Margin/Root/Content/Picker/PickerMargin/PickerVBox/Search
+@onready var part_list: ItemList = $Margin/Root/Content/Picker/PickerMargin/PickerVBox/PartList
 @onready var status_label: Label = $Margin/Root/Status
-@onready var seed_input: SpinBox = $Margin/Root/Actions/Seed
+@onready var seed_input: SpinBox = $Margin/Root/Content/Picker/PickerMargin/PickerVBox/Actions/Seed
 
 var model = null
 
@@ -15,9 +15,9 @@ var model = null
 func _ready() -> void:
 	search_input.text_changed.connect(func(_text): refresh_parts())
 	part_list.item_activated.connect(_on_part_activated)
-	$Margin/Root/Actions/Randomize.pressed.connect(_on_randomize)
-	$Margin/Root/Actions/Undo.pressed.connect(_on_undo)
-	$Margin/Root/Actions/Redo.pressed.connect(_on_redo)
+	$Margin/Root/Content/Picker/PickerMargin/PickerVBox/Actions/Randomize.pressed.connect(_on_randomize)
+	$Margin/Root/Content/Picker/PickerMargin/PickerVBox/Actions/Undo.pressed.connect(_on_undo)
+	$Margin/Root/Content/Picker/PickerMargin/PickerVBox/Actions/Redo.pressed.connect(_on_redo)
 	_refresh_status("Bind character registries to begin.")
 
 
