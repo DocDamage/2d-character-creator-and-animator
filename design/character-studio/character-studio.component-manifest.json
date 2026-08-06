@@ -1,0 +1,162 @@
+{
+  "$schema": "character-studio-component-manifest-v1",
+  "meta": {
+    "name": "Character Studio Playful Console",
+    "figmaFile": "https://www.figma.com/design/OWBAoX5TObGOwIZv10loHG",
+    "figmaSync": "pending-starter-plan-mcp-reset",
+    "engine": "Godot 4.7.1",
+    "codeFilesShouldRemainUnder300LinesWhenPractical": true
+  },
+  "figmaPages": [
+    "00 Cover",
+    "01 Foundations",
+    "02 Components",
+    "10 Project Play Hub",
+    "20 Character Creator",
+    "30 Rig Studio",
+    "40 Animation Studio",
+    "50 Equipment Studio",
+    "60 Export"
+  ],
+  "components": [
+    {
+      "figmaName": "Button/Joy",
+      "godotScene": "res://app/shared_ui/components/joy_button.tscn",
+      "purpose": "Primary tactile action button",
+      "properties": ["Label:text", "Accent:workspace-color", "Icon:instance-swap", "Disabled:boolean"],
+      "states": ["Default", "Hover", "Pressed", "Focus", "Disabled"],
+      "rules": ["44x44 minimum", "3px visible focus", "pressed offset 2px", "never rely on color alone"]
+    },
+    {
+      "figmaName": "Tile/Sticker",
+      "godotScene": "res://app/shared_ui/components/sticker_tile.tscn",
+      "purpose": "Asset, category, project, pose, animation, weapon, and package selection",
+      "properties": ["Title:text", "Subtitle:text", "Thumbnail:instance-swap", "Selected:boolean", "Badge:instance-swap"],
+      "states": ["Default", "Hover", "Selected", "Invalid", "Disabled"]
+    },
+    {
+      "figmaName": "Bubble/Guide",
+      "godotScene": "res://app/shared_ui/components/guide_bubble.tscn",
+      "purpose": "Contextual guidance and non-blocking validation explanation",
+      "properties": ["Title:text", "Body:text", "Tone:Info|Success|Warning|Danger", "Dismissible:boolean"]
+    },
+    {
+      "figmaName": "Badge/Status",
+      "godotScene": "res://app/shared_ui/components/status_badge.tscn",
+      "purpose": "Compact validation, save, compatibility, and readiness state",
+      "properties": ["Label:text", "Tone:Neutral|Success|Warning|Danger", "Icon:instance-swap"]
+    },
+    {
+      "figmaName": "Hint/Controller",
+      "godotScene": "res://app/shared_ui/components/controller_hint.tscn",
+      "purpose": "Keyboard/controller hint with platform-aware glyph",
+      "properties": ["Action:text", "Binding:text", "Glyph:instance-swap"]
+    },
+    {
+      "figmaName": "Navigation/WorkspaceTab",
+      "godotOwner": "res://app/shared_ui/workspace_navigation.gd",
+      "purpose": "Persistent PROJECT/CREATE/RIG/ANIMATE/EQUIP/EXPORT switcher",
+      "states": ["Idle", "Hover", "Active", "Focus"],
+      "rules": ["workspace accent identifies active tab", "text label remains visible", "state persists after workspace switch"]
+    },
+    {
+      "figmaName": "Surface/HeroCanvas",
+      "godotOwner": "res://app/shared_ui/studio_surface.gd",
+      "purpose": "Central character, rig, animation, equipment, or export preview",
+      "modes": ["viewport", "rig", "animation", "equipment", "export"],
+      "rules": ["center of gravity", "checkerboard transparency", "zoom/pan preserved", "real project data only"]
+    }
+  ],
+  "screens": [
+    {
+      "figmaFrame": "10 Project Play Hub/Desktop 1440",
+      "workspaceId": "project_assets",
+      "accentToken": "color.project",
+      "contextLabel": "Frontier Heroes · Project Play Hub",
+      "layout": "1028px main + 360px readiness rail",
+      "heroAction": "Open selected project",
+      "sections": ["Welcome hero", "Recent projects", "Quick start", "Production metrics", "Readiness checklist", "Recovery state"],
+      "existingGodot": ["res://app/shared_ui/main_window.tscn", "res://app/bootstrap/startup.gd"]
+    },
+    {
+      "figmaFrame": "20 Character Creator/Desktop 1440",
+      "workspaceId": "character_creator",
+      "accentToken": "color.create",
+      "contextLabel": "Character Creator",
+      "layout": "72px mode rail + 220px journey + 760px hero canvas + 316px context drawer",
+      "heroAction": "Apply and validate character",
+      "sections": ["Body/Head/Hair/Face/Upper/Lower/Hands/Feet/Accessories/Props rail", "Layers and compatible assets", "Live layered preview", "Eight directions", "Body type, skin, height, build", "Flip, seeded randomize, undo/redo"],
+      "existingGodot": ["res://character/authoring/character_creator_panel.tscn", "res://character/authoring/character_creator_panel.gd"]
+    },
+    {
+      "figmaFrame": "30 Rig Studio/Desktop 1440",
+      "workspaceId": "rigging_deformation",
+      "accentToken": "color.rig",
+      "contextLabel": "Rig Studio",
+      "layout": "250px library + 794px hero canvas + 336px inspector",
+      "heroAction": "Validate rig",
+      "sections": ["Rig map", "Bone hierarchy", "Pose library", "IK and constraints", "Deformation/weights", "Facing coverage", "Retarget preview"],
+      "existingGodot": ["res://rigging/poses/pose_library_panel.tscn", "res://rigging/retargeting/retarget_preview_panel.tscn"]
+    },
+    {
+      "figmaFrame": "40 Animation Studio/Desktop 1440",
+      "workspaceId": "animation_studio",
+      "accentToken": "color.animate",
+      "contextLabel": "Animation Studio",
+      "layout": "250px clip/state rail + 794px stage/graph + 336px key inspector",
+      "heroAction": "Play animation / add key",
+      "sections": ["Story Track", "Advanced Timeline", "Layered blend stack", "State transitions", "Rule graph", "Onion skin", "Curves", "Frame and event inspector"],
+      "existingGodot": ["res://animation/authoring/animation_composition_panel.tscn", "res://animation/authoring/animation_composition_panel.gd"]
+    },
+    {
+      "figmaFrame": "50 Equipment Studio/Desktop 1440",
+      "workspaceId": "weapon_equipment",
+      "accentToken": "color.equip",
+      "contextLabel": "Equipment Studio",
+      "layout": "250px weapon library + 794px grip stage + 336px solver/coverage inspector",
+      "heroAction": "Solve hands / save grip profile",
+      "sections": ["Weapon cards", "Grip sockets", "Hand pose", "Arm/elbow/wrist solver", "Body type coverage", "Eight-direction coverage", "Compatibility diagnostics"],
+      "existingGodot": ["res://weapons/authoring/weapon_authoring_wizard.tscn", "res://weapons/authoring/weapon_authoring_wizard.gd"]
+    },
+    {
+      "figmaFrame": "60 Export/Desktop 1440",
+      "workspaceId": "preview_export",
+      "accentToken": "color.export",
+      "contextLabel": "Export",
+      "layout": "968px package/readiness content + 420px summary rail",
+      "heroAction": "Export character package",
+      "sections": ["Package cards", "Queue", "Output path", "Readiness checklist", "Validation summary", "Clean-consumer import state", "Cancel/retry"],
+      "existingGodot": ["res://export/batch/batch_export_panel.tscn", "res://quality/dashboard/quality_dashboard_panel.tscn"]
+    }
+  ],
+  "globalShell": {
+    "existingGodot": [
+      "res://app/shared_ui/main_window.tscn",
+      "res://app/shared_ui/main_window.gd",
+      "res://app/shared_ui/workspace_navigation.gd",
+      "res://app/shared_ui/dock_layout_manager.gd",
+      "res://app/shared_ui/theme_service.gd",
+      "res://app/shared_ui/default_theme.tres"
+    ],
+    "required": [
+      "74px persistent top bar",
+      "42px status/controller bar",
+      "workspace context label",
+      "search/command palette",
+      "autosave and compatibility status",
+      "A Select, B Back, X Randomize, Y Validate hints where applicable"
+    ]
+  },
+  "figmaNodeUrls": {
+    "status": "pending",
+    "instructions": "Replace each pending entry with a node-specific Figma URL after MCP access resumes. Never guess node IDs."
+  },
+  "codexReadOrder": [
+    "docs/implementation/handoffs/UI-FIGMA-001_HANDOFF.md",
+    "design/character-studio/character-studio.tokens.json",
+    "design/character-studio/character-studio.component-manifest.json",
+    "docs/ui/character-studio-playful-console-ui-ux-spec.md",
+    "design/character-studio/character-studio-playful-console-prototype.html",
+    "design/character-studio/character-studio-playful-console-board.svg"
+  ]
+}
