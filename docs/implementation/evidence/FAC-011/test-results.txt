@@ -1,0 +1,6 @@
+Godot 4.7.1 full suite: 457 PASS, 0 FAIL.
+Focused suite scan: no direction-editor acceptance failure, engine error, script error, warning, loader error, or clean-consumer failure.
+FAC-011 acceptance: the panel lists the exact missing directions and selecting one activates it for correction.
+LOC checker: 211 files scanned; no files exceed the 300-line limit.
+Stub scanner: 208 production files scanned; no stubs or placeholders found.
+Evidence checker: 88 bundles checked; 88 valid; 0 invalid.

@@ -1,0 +1,9 @@
+Godot 4.7.1 test_runner.tscn
+
+Result: 446 PASS, 0 FAIL
+
+Focused results:
+- Facing-grid direction resolution, mirroring, persistence, and mesh blending: PASS
+- State transitions, trigger conditions, cross-fades, and rule actions: PASS
+- Atlas, sequence, GIF, MP4, WebM, package, `.tres`, and `.tscn` exports: PASS
+- `.chrproj` importer, CharacterPlayer2D playback, Skeleton2D/Bone2D IK, and equipment: PASS

@@ -1,0 +1,48 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://facing/facing_mesh_blend_controls.gd" id="1_controls"]
+
+[node name="MeshBlendControls" type="VBoxContainer"]
+layout_mode = 2
+script = ExtResource("1_controls")
+
+[node name="MeshDataRow" type="HBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="MeshIdInput" type="LineEdit" parent="MeshDataRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Mesh ID"
+tooltip_text = "The shared mesh ID for compatible directional deformation states."
+
+[node name="TopologyIdInput" type="LineEdit" parent="MeshDataRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Topology ID"
+tooltip_text = "Optional topology key; matching adjacent keys are required when both are supplied."
+
+[node name="MeshVerticesInput" type="LineEdit" parent="MeshDataRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "x,y; x,y"
+tooltip_text = "Directional deformation vertices, entered as semicolon-separated x,y pairs."
+
+[node name="ApplyMeshDataButton" type="Button" parent="MeshDataRow"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Store Mesh"
+
+[node name="MeshBlendEnabled" type="CheckButton" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Allow deformable mesh blending"
+tooltip_text = "Blend compatible mesh deformation vertices with the next directional cell."
+
+[node name="MeshBlendStatusLabel" type="Label" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+autowrap_mode = 2
+text = "Select a populated direction cell to configure mesh blending."

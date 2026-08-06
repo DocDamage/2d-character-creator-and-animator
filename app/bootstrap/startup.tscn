@@ -1,0 +1,266 @@
+[gd_scene load_steps=3 format=3 uid="uid://startup000000000001"]
+
+[ext_resource type="Script" path="res://app/bootstrap/startup.gd" id="1_startup"]
+[ext_resource type="Script" path="res://app/bootstrap/new_project_dialog.gd" id="2_new_proj_dlg"]
+
+[node name="Startup" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_startup")
+
+[node name="Background" type="ColorRect" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.0352941, 0.0431373, 0.0627451, 1)
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 48
+theme_override_constants/margin_top = 32
+theme_override_constants/margin_right = 48
+theme_override_constants/margin_bottom = 32
+
+[node name="MainLayout" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="Header" type="HBoxContainer" parent="MarginContainer/MainLayout"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 64)
+theme_override_constants/separation = 12
+
+[node name="BrandMark" type="Button" parent="MarginContainer/MainLayout/Header"]
+custom_minimum_size = Vector2(36, 36)
+layout_mode = 2
+theme_type_variation = &"PrimaryButton"
+text = "CS"
+
+[node name="HeaderLeft" type="VBoxContainer" parent="MarginContainer/MainLayout/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+
+[node name="TitleLabel" type="Label" parent="MarginContainer/MainLayout/Header/HeaderLeft"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Character Studio"
+
+[node name="VersionLabel" type="Label" parent="MarginContainer/MainLayout/Header/HeaderLeft"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.560784, 0.611765, 0.698039, 1)
+theme_override_font_sizes/font_size = 14
+text = "Project dashboard"
+
+[node name="StatusLabel" type="Label" parent="MarginContainer/MainLayout/Header/HeaderLeft"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.321569, 0.8, 0.501961, 1)
+theme_override_font_sizes/font_size = 11
+text = "Checking studio services…"
+
+[node name="HeaderRight" type="HBoxContainer" parent="MarginContainer/MainLayout/Header"]
+layout_mode = 2
+alignment = 2
+
+[node name="BtnToggleLog" type="Button" parent="MarginContainer/MainLayout/Header/HeaderRight"]
+layout_mode = 2
+text = "Diagnostics"
+
+[node name="Greeting" type="VBoxContainer" parent="MarginContainer/MainLayout"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Title" type="Label" parent="MarginContainer/MainLayout/Greeting"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 30
+text = "Good morning"
+
+[node name="Subtitle" type="Label" parent="MarginContainer/MainLayout/Greeting"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.560784, 0.611765, 0.698039, 1)
+theme_override_font_sizes/font_size = 14
+text = "Pick up where you left off or start a new character production."
+
+[node name="ContentSplit" type="HSplitContainer" parent="MarginContainer/MainLayout"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="RecentPanel" type="VBoxContainer" parent="MarginContainer/MainLayout/ContentSplit"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 10
+
+[node name="HeaderBar" type="HBoxContainer" parent="MarginContainer/MainLayout/ContentSplit/RecentPanel"]
+layout_mode = 2
+
+[node name="RecentTitle" type="Label" parent="MarginContainer/MainLayout/ContentSplit/RecentPanel/HeaderBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 18
+text = "Recent projects"
+
+[node name="BtnClearMissing" type="Button" parent="MarginContainer/MainLayout/ContentSplit/RecentPanel/HeaderBar"]
+layout_mode = 2
+text = "Manage"
+
+[node name="SearchBar" type="HBoxContainer" parent="MarginContainer/MainLayout/ContentSplit/RecentPanel"]
+layout_mode = 2
+
+[node name="SearchEdit" type="LineEdit" parent="MarginContainer/MainLayout/ContentSplit/RecentPanel/SearchBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Search projects…"
+
+[node name="RecentList" type="ItemList" parent="MarginContainer/MainLayout/ContentSplit/RecentPanel"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="EmptyLabel" type="Label" parent="MarginContainer/MainLayout/ContentSplit/RecentPanel"]
+visible = false
+layout_mode = 2
+text = "No recent projects found."
+horizontal_alignment = 1
+
+[node name="QuickStartPanel" type="PanelContainer" parent="MarginContainer/MainLayout/ContentSplit"]
+custom_minimum_size = Vector2(330, 0)
+layout_mode = 2
+
+[node name="VBox" type="VBoxContainer" parent="MarginContainer/MainLayout/ContentSplit/QuickStartPanel"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="QuickTitle" type="Label" parent="MarginContainer/MainLayout/ContentSplit/QuickStartPanel/VBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Quick start"
+
+[node name="BtnNewProject" type="Button" parent="MarginContainer/MainLayout/ContentSplit/QuickStartPanel/VBox"]
+layout_mode = 2
+theme_type_variation = &"PrimaryButton"
+text = "New character project"
+
+[node name="BtnOpenProject" type="Button" parent="MarginContainer/MainLayout/ContentSplit/QuickStartPanel/VBox"]
+layout_mode = 2
+text = "Open project"
+
+[node name="BtnOpenSample" type="Button" parent="MarginContainer/MainLayout/ContentSplit/QuickStartPanel/VBox"]
+layout_mode = 2
+text = "Open starter sample"
+
+[node name="BtnContinueLast" type="Button" parent="MarginContainer/MainLayout/ContentSplit/QuickStartPanel/VBox"]
+layout_mode = 2
+text = "Continue last project"
+
+[node name="Overview" type="PanelContainer" parent="MarginContainer/MainLayout"]
+custom_minimum_size = Vector2(0, 96)
+layout_mode = 2
+
+[node name="OverviewVBox" type="VBoxContainer" parent="MarginContainer/MainLayout/Overview"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Title" type="Label" parent="MarginContainer/MainLayout/Overview/OverviewVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.560784, 0.611765, 0.698039, 1)
+theme_override_font_sizes/font_size = 11
+text = "PRODUCTION OVERVIEW"
+
+[node name="Metrics" type="HBoxContainer" parent="MarginContainer/MainLayout/Overview/OverviewVBox"]
+layout_mode = 2
+theme_override_constants/separation = 32
+
+[node name="Characters" type="Label" parent="MarginContainer/MainLayout/Overview/OverviewVBox/Metrics"]
+layout_mode = 2
+text = "Characters\n0 active"
+
+[node name="Clips" type="Label" parent="MarginContainer/MainLayout/Overview/OverviewVBox/Metrics"]
+layout_mode = 2
+text = "Animation clips\n0 ready"
+
+[node name="Validation" type="Label" parent="MarginContainer/MainLayout/Overview/OverviewVBox/Metrics"]
+layout_mode = 2
+text = "Validation\nNo conflicts"
+
+[node name="Autosave" type="Label" parent="MarginContainer/MainLayout/Overview/OverviewVBox/Metrics"]
+layout_mode = 2
+text = "Autosave\nEnabled"
+
+[node name="LogDrawer" type="PanelContainer" parent="MarginContainer/MainLayout"]
+custom_minimum_size = Vector2(0, 120)
+layout_mode = 2
+
+[node name="LogText" type="TextEdit" parent="MarginContainer/MainLayout/LogDrawer"]
+layout_mode = 2
+editable = false
+wrap_mode = 1
+
+[node name="NewProjectDialog" type="ConfirmationDialog" parent="."]
+title = "Create New Project"
+initial_position = 2
+size = Vector2i(450, 260)
+script = ExtResource("2_new_proj_dlg")
+
+[node name="VBox" type="VBoxContainer" parent="NewProjectDialog"]
+offset_left = 8.0
+offset_top = 8.0
+offset_right = 442.0
+offset_bottom = 211.0
+theme_override_constants/separation = 10
+
+[node name="NameBox" type="HBoxContainer" parent="NewProjectDialog/VBox"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="NewProjectDialog/VBox/NameBox"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+text = "Name:"
+
+[node name="NameEdit" type="LineEdit" parent="NewProjectDialog/VBox/NameBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="PathBox" type="HBoxContainer" parent="NewProjectDialog/VBox"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="NewProjectDialog/VBox/PathBox"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+text = "Path:"
+
+[node name="PathEdit" type="LineEdit" parent="NewProjectDialog/VBox/PathBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="TemplateBox" type="HBoxContainer" parent="NewProjectDialog/VBox"]
+layout_mode = 2
+
+[node name="Label" type="Label" parent="NewProjectDialog/VBox/TemplateBox"]
+custom_minimum_size = Vector2(100, 0)
+layout_mode = 2
+text = "Template:"
+
+[node name="TemplateSelect" type="OptionButton" parent="NewProjectDialog/VBox/TemplateBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ErrorLabel" type="Label" parent="NewProjectDialog/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.4, 0.4, 1)
+
+[node name="MissingProjectDialog" type="ConfirmationDialog" parent="."]
+title = "Project Not Found"
+initial_position = 2
+size = Vector2i(400, 180)
+dialog_text = "Project file not found."

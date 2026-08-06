@@ -1,0 +1,7 @@
+=== Stub Scanner Report ===
+Generated: 2026-08-06T13:29:09
+Files scanned: 287
+Findings: 0
+
+
+Classification:

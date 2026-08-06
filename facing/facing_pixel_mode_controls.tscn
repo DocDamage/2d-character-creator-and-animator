@@ -1,0 +1,19 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://facing/facing_pixel_mode_controls.gd" id="1_controls"]
+
+[node name="PixelModeControls" type="HBoxContainer"]
+layout_mode = 2
+script = ExtResource("1_controls")
+
+[node name="PixelModeEnabled" type="CheckButton" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Pixel mode (no crossfade)"
+tooltip_text = "Force hard directional changes for crisp pixel-art output."
+
+[node name="PixelModeStatusLabel" type="Label" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+autowrap_mode = 2
+text = "Crossfades follow the selected direction blend mode."

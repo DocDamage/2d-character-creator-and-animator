@@ -1,0 +1,55 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://app/workspaces/asset_browser.gd" id="1_ab"]
+
+[node name="AssetBrowser" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_ab")
+
+[node name="VBox" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Header" type="HBoxContainer" parent="VBox"]
+layout_mode = 2
+
+[node name="SearchInput" type="LineEdit" parent="VBox/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Search assets..."
+
+[node name="CategorySelect" type="OptionButton" parent="VBox/Header"]
+layout_mode = 2
+
+[node name="FavoritesToggle" type="CheckBox" parent="VBox/Header"]
+layout_mode = 2
+text = "Favs"
+
+[node name="Content" type="ScrollContainer" parent="VBox"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ItemGrid" type="ItemList" parent="VBox/Content"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+max_columns = 4
+same_column_width = true
+fixed_icon_size = Vector2i(64, 64)
+
+[node name="Footer" type="HBoxContainer" parent="VBox"]
+layout_mode = 2
+
+[node name="DetailsLabel" type="Label" parent="VBox/Footer"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "No asset selected"

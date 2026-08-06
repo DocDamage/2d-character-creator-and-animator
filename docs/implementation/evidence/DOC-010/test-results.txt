@@ -1,0 +1,9 @@
+[TEST 23] Clone & Save-As Workflows (REQ-DOC-010)...
+  PASS: Cloned project name updated
+  PASS: cloned_from metadata references original ID
+  PASS: Cloned manifest is valid against ProjectSchema
+  PASS: Cloned project_id is distinct from original
+  PASS: save_as returned true
+  PASS: Save-As file created on disk
+
+Automated Test Suite Summary: 313 PASS, 0 FAIL

@@ -1,0 +1,167 @@
+# Dock Panel — Dockable container UI element for application shell
+# Extends PanelContainer to support panel titles, docking state, and collapse operations
+class_name DockPanel
+extends PanelContainer
+
+const StudioSurfaceScript = preload("res://app/shared_ui/studio_surface.gd")
+
+signal dock_region_changed(panel_id: String, new_region: String)
+signal collapse_toggled(panel_id: String, is_collapsed: bool)
+signal closed(panel_id: String)
+
+enum DockRegion {
+	LEFT,
+	RIGHT,
+	BOTTOM,
+	CENTER
+}
+
+@export var panel_id: String = "panel_default"
+@export var panel_title: String = "Dock Panel":
+	set = set_panel_title
+@export var current_region: DockRegion = DockRegion.LEFT
+
+var _is_collapsed: bool = false
+var _header_bar: HBoxContainer = null
+var _title_label: Label = null
+var _content_container: MarginContainer = null
+var _collapse_button: Button = null
+
+func _init() -> void:
+	custom_minimum_size = Vector2(180, 120)
+
+func _ready() -> void:
+	_build_layout_if_needed()
+	_sync_tab_title()
+
+func set_panel_title(p_title: String) -> void:
+	panel_title = p_title
+	if _title_label != null:
+		_title_label.text = panel_title
+	_sync_tab_title()
+
+func get_panel_id() -> String:
+	return panel_id
+
+func set_dock_region(region: DockRegion) -> void:
+	if current_region != region:
+		current_region = region
+		var region_str := _region_to_string(region)
+		dock_region_changed.emit(panel_id, region_str)
+
+func get_dock_region_string() -> String:
+	return _region_to_string(current_region)
+
+func toggle_collapse() -> void:
+	_is_collapsed = not _is_collapsed
+	if _content_container != null:
+		_content_container.visible = not _is_collapsed
+	if _collapse_button != null:
+		_collapse_button.text = "+" if _is_collapsed else "-"
+	collapse_toggled.emit(panel_id, _is_collapsed)
+
+func is_collapsed() -> bool:
+	return _is_collapsed
+
+func get_content_container() -> MarginContainer:
+	_build_layout_if_needed()
+	return _content_container
+
+func add_content(node: Control) -> void:
+	var container := get_content_container()
+	if container != null and node != null:
+		container.add_child(node)
+
+func serialize_state() -> Dictionary:
+	return {
+		"panel_id": panel_id,
+		"panel_title": panel_title,
+		"region": _region_to_string(current_region),
+		"collapsed": _is_collapsed,
+		"visible": visible
+	}
+
+func deserialize_state(data: Dictionary) -> void:
+	if data.has("panel_title"):
+		set_panel_title(data["panel_title"] as String)
+	if data.has("region"):
+		current_region = _string_to_region(data["region"] as String)
+	if data.has("collapsed"):
+		var should_collapse: bool = data["collapsed"] as bool
+		if should_collapse != _is_collapsed:
+			toggle_collapse()
+	if data.has("visible"):
+		visible = data["visible"] as bool
+
+func _build_layout_if_needed() -> void:
+	if get_child_count() > 0 and _content_container != null:
+		return
+
+	var main_box := VBoxContainer.new()
+	main_box.name = "MainVBox"
+	add_child(main_box)
+
+	_header_bar = HBoxContainer.new()
+	_header_bar.name = "HeaderBar"
+	main_box.add_child(_header_bar)
+
+	_title_label = Label.new()
+	_title_label.name = "TitleLabel"
+	_title_label.text = panel_title
+	_title_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_header_bar.add_child(_title_label)
+
+	_collapse_button = Button.new()
+	_collapse_button.name = "CollapseButton"
+	_collapse_button.text = "-"
+	_collapse_button.custom_minimum_size = Vector2(24, 24)
+	_collapse_button.pressed.connect(toggle_collapse)
+	_header_bar.add_child(_collapse_button)
+
+	_content_container = MarginContainer.new()
+	_content_container.name = "ContentContainer"
+	_content_container.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_content_container.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	main_box.add_child(_content_container)
+	_add_default_surface_if_needed()
+
+
+func _add_default_surface_if_needed() -> void:
+	var modes := {
+		"panel_assets": "assets",
+		"panel_hierarchy": "hierarchy",
+		"panel_viewport": "viewport",
+		"panel_inspector": "inspector",
+		"panel_timeline": "timeline",
+	}
+	if not modes.has(panel_id):
+		return
+	var surface := StudioSurfaceScript.new() as Control
+	surface.set("surface_mode", modes[panel_id])
+	surface.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	surface.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_content_container.add_child(surface)
+
+
+func _sync_tab_title() -> void:
+	if get_parent() is TabContainer:
+		var tabs := get_parent() as TabContainer
+		var tab_index := get_index()
+		if tab_index >= 0 and tab_index < tabs.get_tab_count():
+			tabs.set_tab_title(tab_index, panel_title)
+
+func _region_to_string(region: DockRegion) -> String:
+	match region:
+		DockRegion.LEFT: return "LEFT"
+		DockRegion.RIGHT: return "RIGHT"
+		DockRegion.BOTTOM: return "BOTTOM"
+		DockRegion.CENTER: return "CENTER"
+		_: return "LEFT"
+
+func _string_to_region(region_str: String) -> DockRegion:
+	match region_str.to_upper():
+		"LEFT": return DockRegion.LEFT
+		"RIGHT": return DockRegion.RIGHT
+		"BOTTOM": return DockRegion.BOTTOM
+		"CENTER": return DockRegion.CENTER
+		_: return DockRegion.LEFT

@@ -1,0 +1,7 @@
+Command: godot --headless --path . --scene tests/test_runner.tscn
+Result: 485 PASS, 0 FAIL
+
+Focused checks:
+- GMD-001 through GMD-008 frame-accurate metadata timeline inspection.
+- MED-001 through MED-005 audio metadata, waveform cache, sound cues, and lip sync.
+- MED-007 through MED-010 synchronized reference media, exclusion, repair, and restore.

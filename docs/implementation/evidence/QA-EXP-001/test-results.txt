@@ -1,0 +1,6 @@
+Godot 4.7.1 full suite: 452 PASS, 0 FAIL.
+Focused suite scan: no ERROR, SCRIPT ERROR, WARNING, clean-consumer failure, or test failure lines.
+Export artifact acceptance: runtime package, deterministic atlas, PNG/WebP sequence, JSON/XML spritesheets, GIF, MP4, WebM, and native Godot artifacts all opened successfully.
+LOC checker: 197 files scanned; no files exceed 300 lines.
+Stub scanner: 194 production files scanned; no findings.
+Evidence checker: 76 bundles checked; 76 valid; 0 invalid.

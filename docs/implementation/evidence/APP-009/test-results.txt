@@ -1,0 +1,192 @@
+=== Automated Test Suite Output ===
+Godot Engine v4.7.1.stable.official.a13da4feb - https://godotengine.org
+
+=== Running Automated Test Suite ===
+
+[TEST 1] Baseline valid fixture loading...
+  PASS: Baseline fixture loaded and validated successfully.
+[TEST 2] Malformed corrupt fixture handling...
+  PASS: Malformed fixture handled safely without crash.
+[TEST 3] IDService UUID & registration...
+  PASS: IDService generated and registered valid UUID: a9e1b2c3-4d5e-6f7a-8b9c-0d1e2f3a4b5c
+[TEST 4] CommandService stack...
+  PASS: CommandService initialized clean stack.
+[TEST 5] Startup script instantiation & diagnostic sequence...
+  PASS: Startup sequence reported completion successfully.
+  PASS: All 5 startup diagnostic checks passed (5/5).
+  PASS: Zero startup errors reported.
+  PASS: DiagnosticsService recorded 7 diagnostic entries.
+[TEST 6] Main window instantiation & dock layout management...
+  PASS: DockLayoutManager registered 6 default panels.
+  PASS: Retrieved DockPanel 'panel_assets' successfully.
+  PASS: DockPanel toggle_collapse operates correctly.
+  PASS: Applied preset 'Minimal' successfully.
+  PASS: Exported layout preset dictionary successfully.
+  PASS: Imported layout preset dictionary successfully.
+  PASS: Status bar message updated and verified.
+[TEST 7] Workspace Manager workflows & state preservation...
+  PASS: WorkspaceManager registers 6 default workspaces
+  PASS: project_assets workspace registered
+  PASS: character_creator workspace registered
+  PASS: rigging_deformation workspace registered
+  PASS: animation_studio workspace registered
+  PASS: weapon_equipment workspace registered
+  PASS: preview_export workspace registered
+  PASS: Default active workspace is project_assets
+  PASS: switch_workspace returns true for valid target
+  PASS: Active workspace updated to animation_studio
+  PASS: workspace_changed signal emitted on switch
+  PASS: Signal reported new_id animation_studio
+  PASS: Signal reported old_id project_assets
+  PASS: project_assets zoom level stored
+  PASS: character_creator zoom level preserved independently
+  PASS: project_assets zoom level preserved after switch
+  PASS: Command executed and added to undo stack
+  PASS: CommandService undo stack survives workspace switch
+  PASS: Undo count unchanged after workspace switch
+  PASS: Undo succeeds after workspace switch
+  PASS: DockLayoutManager bound successfully
+  PASS: Character Creator preset applied on workspace switch
+  PASS: Minimal preset applied on preview_export switch
+  PASS: Export contains active_workspace
+  PASS: Export active workspace is animation_studio
+  PASS: import_all_workspace_states returns true
+  PASS: Imported active workspace matches exported
+  PASS: Imported state matches exported playhead position
+  PASS: switch_workspace returns false for invalid workspace ID
+  PASS: Active workspace unchanged after failed switch
+[TEST 8] Command Palette & Shortcut Registry workflows...
+  PASS: ShortcutRegistry command registration and lookup verified.
+  PASS: ShortcutRegistry search filtering verified.
+  PASS: ShortcutRegistry command execution verified.
+  PASS: Shortcut matching and rebinding verified.
+  PASS: Shortcut bindings export and import verified.
+  PASS: CommandPalette UI behavior verified.
+  PASS: ShortcutRebindDialog UI behavior verified.
+[TEST 9] Dirty State & Application State Workflows...
+  PASS: AppState initially clean.
+  PASS: Unsaved changes counter initially 0.
+  PASS: AppState is dirty after mark_dirty().
+  PASS: Unsaved changes counter incremented to 1.
+  PASS: Unsaved changes counter incremented to 2.
+  PASS: AppState clean after clear_dirty().
+  PASS: Unsaved changes counter reset to 0.
+  PASS: Project clean after mark_clean().
+  PASS: State clean when undo count matches clean undo index.
+  PASS: State dirty when undo count differs from clean undo index.
+  PASS: State clean when returning to clean undo index.
+  PASS: Unloaded title matches default application name.
+  PASS: Clean project title includes file name.
+  PASS: Dirty project title appends dirty indicator '*'.
+  PASS: Autosave enabled state verified.
+  PASS: Autosave interval verified.
+  PASS: autosave_triggered signal emitted when project is dirty.
+  PASS: UnsavedChangesDialog scene instantiated.
+  PASS: UnsavedChangesDialog initially hidden.
+  PASS: UnsavedChangesDialog visible after prompt().
+  PASS: Prompt callback received Choice.SAVE on Save button press.
+  PASS: UnsavedChangesDialog hidden after choice made.
+  PASS: No project loaded initially.
+  PASS: Project loaded after open_project().
+  PASS: Project path verified.
+  PASS: New project opened clean.
+  PASS: Project marked dirty.
+  PASS: Project closed successfully.
+  PASS: Dirty flag cleared on project close.
+[TEST 10] Diagnostics Drawer UI & Integration...
+  PASS: DiagnosticsDrawer instantiated successfully.
+  PASS: Level filter correctly restricts entries to Error.
+  PASS: Level filter ALL includes all 4 entries.
+  PASS: Search query matching functions correctly.
+  PASS: source_navigated signal dispatched with source and line.
+  PASS: Log export generated valid log text.
+  PASS: Clear logs emptied DiagnosticsService entries.
+  PASS: MainWindow contains panel_diagnostics dock panel.
+  PASS: view.toggle_diagnostics command registered in ShortcutRegistry.
+[TEST 11] Theme Service & DPI Scaling Workflows...
+  PASS: ThemeService autoload is available.
+  PASS: ThemeService initializes with valid theme mode.
+  PASS: ThemeService initializes with DPI scale in valid range.
+  PASS: ThemeService provides valid Theme resource.
+  PASS: Theme mode set to LIGHT.
+  PASS: Theme mode name returns 'LIGHT'.
+  PASS: theme_changed signal emitted for LIGHT mode.
+  PASS: toggle_theme_mode switches back to DARK.
+  PASS: theme_changed signal emitted for DARK mode.
+  PASS: bg_main color differs between DARK and LIGHT modes.
+  PASS: bg_panel color differs between DARK and LIGHT modes.
+  PASS: text_primary color differs between DARK and LIGHT modes.
+  PASS: DPI scale set to 150%.
+  PASS: dpi_scale_changed signal emitted with 1.5.
+  PASS: Under-bound DPI scale 0.5 clamped to 1.0.
+  PASS: Over-bound DPI scale 3.0 clamped to 2.0.
+  PASS: cycle_dpi_scale advances from 1.0 to 1.25.
+  PASS: cycle_dpi_scale advances from 1.25 to 1.5.
+  PASS: cycle_dpi_scale wraps around from 2.0 to 1.0.
+  PASS: Export contains theme_mode 'LIGHT'.
+  PASS: Export contains dpi_scale 1.75.
+  PASS: import_settings returns true.
+  PASS: Import restored LIGHT theme mode.
+  PASS: Import restored 1.75 DPI scale.
+  PASS: view.toggle_theme command registered.
+  PASS: view.set_dpi_scale command registered.
+  PASS: Executing view.toggle_theme changed theme mode.
+  PASS: MainWindow instantiated for theme integration test.
+  PASS: MainWindow status updated on _cmd_toggle_theme.
+  PASS: MainWindow status updated on _cmd_cycle_dpi_scale.
+[TEST 12] Keyboard & Controller Focus Framework Workflows...
+  PASS: FocusService autoload is available.
+  PASS: FocusService initializes in KEYBOARD input mode.
+  PASS: Focus ring is enabled by default.
+  PASS: Input mode set to CONTROLLER.
+  PASS: Input mode name returns 'CONTROLLER'.
+  PASS: input_mode_changed signal dispatched.
+  PASS: Input mode set to MOUSE.
+  PASS: Input mode name returns 'MOUSE'.
+  PASS: current_focused_control updated to btn1.
+  PASS: current_focused_control updated to btn2.
+  PASS: previous_focused_control updated to btn1.
+  PASS: focus_changed signal emitted with correct controls.
+  PASS: group_a registered.
+  PASS: group_b registered.
+  PASS: focus_group('group_a') succeeded.
+  PASS: Focused control inside group_a.
+  PASS: b2 manually focused in mem_panel.
+  PASS: Focus cleared.
+  PASS: focus_group restored focus to mem_panel.
+  PASS: Focus restored to last focused widget (b2) in panel.
+  PASS: main_btn focused before trap.
+  PASS: is_focus_trapped returns true.
+  PASS: active focus trap matches modal node.
+  PASS: Focus pushed to modal_btn inside modal dialog.
+  PASS: is_focus_trapped returns false after pop.
+  PASS: Focus restored to main_btn after popping trap.
+  PASS: Export contains focus_ring_enabled true.
+  PASS: Export contains input_mode CONTROLLER.
+  PASS: import_settings returns true for valid dict.
+  PASS: Import restored focus_ring_enabled true.
+  PASS: Import restored input_mode CONTROLLER.
+  PASS: import_settings handles empty dictionary safely.
+  PASS: focus.next_panel command registered.
+  PASS: focus.prev_panel command registered.
+  PASS: focus.menu_bar command registered.
+  PASS: focus.clear command registered.
+  PASS: Executing focus.next_panel command returned true.
+  PASS: MainWindow instantiated for focus integration test.
+  PASS: MainWindow registered menu_bar focus group.
+  PASS: MainWindow registered panel_assets focus group.
+[TEST 13] Recent Projects Service & Startup Screen Workflows...
+  PASS: RecentProjectsService initializes cleanly when cleared.
+  PASS: Project added to RecentProjectsService successfully.
+  PASS: RecentProjectsService deduplicates and moves item to front.
+  PASS: RecentProjectsService exports settings dictionary successfully.
+  PASS: RecentProjectsService imported settings dictionary successfully.
+  PASS: Missing project correctly identified with exists=false.
+  PASS: clear_missing() pruned invalid paths successfully.
+  PASS: Startup screen instantiated and completed diagnostic sequence.
+  PASS: Startup screen contains RecentList UI component.
+  PASS: Search filter correctly filtered recent list to matching items.
+  PASS: NewProjectDialog emitted project_created signal on confirmation.
+  PASS: create_new_project creates file, updates AppState, and emits signal.
+
+=== Test Suite Finished: 166 PASS, 0 FAIL ===

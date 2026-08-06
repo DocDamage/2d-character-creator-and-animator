@@ -1,0 +1,2 @@
+Godot 4.7.1 full suite: 451 PASS, 0 FAIL.
+The isolated clean-consumer export test passed.

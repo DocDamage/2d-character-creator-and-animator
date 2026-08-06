@@ -1,0 +1,2 @@
+Full Godot suite: 460 PASS, 0 FAIL. Two named source poses batch-retargeted to
+sorted `small_*` library entries without data loss.

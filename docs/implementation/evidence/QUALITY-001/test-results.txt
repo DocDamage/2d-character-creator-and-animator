@@ -1,0 +1,8 @@
+Command: godot --headless --path . --scene tests/test_runner.tscn
+Result: 496 PASS, 0 FAIL
+
+Focused checks:
+- Recovery browser candidate detection and restore quarantine path.
+- Profiler, progressive chunks, lazy thumbnail deduplication, and large-project fixture.
+- Keyboard focus and high-contrast/reduced-motion preference controls.
+- Safe-path, plugin-boundary, ffmpeg, and license-manifest release audit.

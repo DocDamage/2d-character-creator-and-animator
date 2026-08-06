@@ -1,0 +1,44 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://facing/facing_direction_scrub_preview.gd" id="1_preview"]
+[ext_resource type="Script" path="res://facing/facing_direction_preview_canvas.gd" id="2_canvas"]
+
+[node name="DirectionScrubPreview" type="VBoxContainer"]
+layout_mode = 2
+script = ExtResource("1_preview")
+
+[node name="PreviewTitle" type="Label" parent="."]
+layout_mode = 2
+text = "Continuous Direction Preview"
+
+[node name="DirectionScrubSlider" type="HSlider" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+min_value = 0.0
+max_value = 360.0
+step = 1.0
+tooltip_text = "Continuously scrub the facing angle and inspect the selected cells."
+
+[node name="PreviewAngleLabel" type="Label" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Scrub angle: 0°"
+
+[node name="DirectionPreviewCanvas" type="Control" parent="."]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(128, 128)
+layout_mode = 2
+size_flags_horizontal = 4
+script = ExtResource("2_canvas")
+
+[node name="PreviewSelectionLabel" type="Label" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+autowrap_mode = 2
+text = "Preview unavailable."
+
+[node name="PreviewMeshLabel" type="Label" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+autowrap_mode = 2
+text = "Mesh preview unavailable."

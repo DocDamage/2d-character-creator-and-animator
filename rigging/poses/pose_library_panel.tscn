@@ -1,0 +1,177 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://rigging/poses/pose_library_panel.gd" id="1_panel"]
+[ext_resource type="Script" path="res://rigging/poses/pose_sketch_canvas.gd" id="2_sketch"]
+
+[node name="PoseLibraryPanel" type="VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+script = ExtResource("1_panel")
+
+[node name="Heading" type="Label" parent="."]
+layout_mode = 2
+text = "Saved Poses"
+theme_override_font_sizes/font_size = 18
+
+[node name="Hint" type="Label" parent="."]
+layout_mode = 2
+autowrap_mode = 2
+text = "Capture the current rig transform into a named absolute pose, then select it to restore that pose."
+
+[node name="Form" type="GridContainer" parent="."]
+layout_mode = 2
+columns = 2
+
+[node name="PoseIdLabel" type="Label" parent="Form"]
+layout_mode = 2
+text = "Pose ID"
+
+[node name="PoseIdInput" type="LineEdit" parent="Form"]
+unique_name_in_owner = true
+layout_mode = 2
+placeholder_text = "idle"
+
+[node name="DisplayNameLabel" type="Label" parent="Form"]
+layout_mode = 2
+text = "Name"
+
+[node name="DisplayNameInput" type="LineEdit" parent="Form"]
+unique_name_in_owner = true
+layout_mode = 2
+placeholder_text = "Idle"
+
+[node name="PoseModeLabel" type="Label" parent="Form"]
+layout_mode = 2
+text = "Mode"
+
+[node name="PoseMode" type="OptionButton" parent="Form"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="SavedPoseLabel" type="Label" parent="Form"]
+layout_mode = 2
+text = "Saved pose"
+
+[node name="PoseList" type="OptionButton" parent="Form"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Actions" type="HBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="CaptureButton" type="Button" parent="Actions"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Capture Current Rig"
+
+[node name="ApplyButton" type="Button" parent="Actions"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Apply Selected Pose"
+
+[node name="MirrorPairsLabel" type="Label" parent="."]
+layout_mode = 2
+text = "Mirror pairs"
+
+[node name="MirrorPairsInput" type="LineEdit" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+placeholder_text = "hand_left:hand_right; foot_left:foot_right"
+tooltip_text = "Explicit left:right bone pairs. The selected pose becomes a new mirrored pose."
+
+[node name="MirrorButton" type="Button" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Mirror Selected to Named Pose"
+
+[node name="BlendHeading" type="Label" parent="."]
+layout_mode = 2
+text = "Blend Saved Poses"
+theme_override_font_sizes/font_size = 16
+
+[node name="BlendTargetLabel" type="Label" parent="."]
+layout_mode = 2
+text = "Blend target"
+
+[node name="BlendTargetList" type="OptionButton" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="BlendWeightLabel" type="Label" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Blend weight: 50%"
+
+[node name="BlendWeight" type="HSlider" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+min_value = 0.0
+max_value = 1.0
+step = 0.01
+value = 0.5
+
+[node name="BlendActions" type="HBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="SaveBlendButton" type="Button" parent="BlendActions"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Save Blended Pose"
+
+[node name="PreviewBlendButton" type="Button" parent="BlendActions"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Preview Blend on Rig"
+
+[node name="ThumbnailHeading" type="Label" parent="."]
+layout_mode = 2
+text = "Selected Pose Thumbnail"
+theme_override_font_sizes/font_size = 16
+
+[node name="ThumbnailPreview" type="TextureRect" parent="."]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(128, 96)
+layout_mode = 2
+expand_mode = 1
+stretch_mode = 5
+
+[node name="ThumbnailLabel" type="Label" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+autowrap_mode = 2
+text = "Select a saved pose to preview its thumbnail."
+
+[node name="SketchHeading" type="Label" parent="."]
+layout_mode = 2
+text = "Sketch-to-Pose Suggestion"
+theme_override_font_sizes/font_size = 16
+
+[node name="SketchHint" type="Label" parent="."]
+layout_mode = 2
+autowrap_mode = 2
+text = "Draw a simple gesture, name the new pose above, then generate a reviewable suggestion."
+
+[node name="SketchCanvas" type="Control" parent="."]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(240, 120)
+layout_mode = 2
+script = ExtResource("2_sketch")
+
+[node name="SketchActions" type="HBoxContainer" parent="."]
+layout_mode = 2
+
+[node name="SuggestSketchButton" type="Button" parent="SketchActions"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Generate Suggested Pose"
+
+[node name="ClearSketchButton" type="Button" parent="SketchActions"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Clear Sketch"
+
+[node name="PoseStatusLabel" type="Label" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+autowrap_mode = 2
+text = "Bind a rig to capture or apply poses."

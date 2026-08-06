@@ -1,0 +1,5 @@
+Godot 4.7.1 full suite: 460 PASS, 0 FAIL.
+Focused acceptance: matching root/hand roles formed a complete explicit map; a
+partial target profile reported `hand_left` as unsupported; a many-to-one map
+was rejected.
+Policy scans and evidence validation are recorded after this bundle completes.

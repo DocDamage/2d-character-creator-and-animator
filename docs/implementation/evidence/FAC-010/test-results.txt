@@ -1,0 +1,6 @@
+Godot 4.7.1 full suite: 457 PASS, 0 FAIL.
+Focused suite scan: no direction-editor acceptance failure, engine error, script error, warning, loader error, or clean-consumer failure.
+FAC-010 acceptance: a 45-degree scrub preview reports the same forward-to-right 50% crossfade selected by the runtime evaluator.
+LOC checker: 210 files scanned; no files exceed the 300-line limit.
+Stub scanner: 207 production files scanned; no stubs or placeholders found.
+Evidence checker: 87 bundles checked; 87 valid; 0 invalid.

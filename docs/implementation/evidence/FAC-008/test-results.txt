@@ -1,0 +1,6 @@
+Godot 4.7.1 full suite: 457 PASS, 0 FAIL.
+Focused suite scan: no direction-editor acceptance failure, engine error, script error, warning, loader error, or clean-consumer failure.
+FAC-008 acceptance: the user-reachable Sprite crossfade selector updates the grid default and returns a runtime crossfade evaluation result.
+LOC checker: 206 files scanned; no files exceed the 300-line limit.
+Stub scanner: 203 production files scanned; no stubs or placeholders found.
+Evidence checker: 85 bundles checked; 85 valid; 0 invalid.

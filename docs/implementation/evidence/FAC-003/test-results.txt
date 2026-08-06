@@ -1,0 +1,6 @@
+Godot 4.7.1 full suite: 456 PASS, 0 FAIL.
+Focused suite scan: no direction-editor acceptance failure, engine error, script error, warning, loader error, or clean-consumer failure.
+FAC-003 acceptance: selected cells accept, replace, and clear asset IDs; empty IDs and absent assignments fail with recoverable diagnostics; cleared cells become missing and persisted grids round-trip.
+LOC checker: 201 files scanned; no files exceed the 300-line limit.
+Stub scanner: 198 production files scanned; no stubs or placeholders found.
+Evidence checker: 80 bundles checked; 80 valid; 0 invalid.

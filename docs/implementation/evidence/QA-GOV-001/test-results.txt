@@ -1,0 +1,32 @@
+=== QA-GOV-001 Verification Test Results ===
+Engine: Godot 4.7.1.stable.official.a13da4feb
+Timestamp: 2026-08-05T06:49:00Z
+
+[TEST 1] Baseline valid fixture loading...
+  PASS: Baseline fixture loaded and validated successfully.
+[TEST 2] Malformed corrupt fixture handling...
+  PASS: Malformed fixture handled safely without crash.
+[TEST 3] IDService UUID & registration...
+  PASS: IDService generated and registered valid UUID.
+[TEST 4] CommandService stack...
+  PASS: CommandService initialized clean stack.
+
+[LOC Compliance]
+  app/application_state/app_state.gd - 97 lines (PASS)
+  app/commands/command_service.gd - 171 lines (PASS)
+  app/bootstrap/startup.gd - 93 lines (PASS)
+  core/ids/id_service.gd - 122 lines (PASS)
+  core/serialization/serialization_service.gd - 247 lines (PASS)
+  core/diagnostics/diagnostics_service.gd - 189 lines (PASS)
+  tools/loc_checker/loc_checker.gd - 136 lines (PASS)
+  tools/stub_scanner/stub_scanner.gd - 191 lines (PASS)
+  tools/evidence_checker/evidence_checker.gd - 186 lines (PASS)
+
+[Stub Scanner]
+  Scanned 6 production files.
+  Findings: 0.
+
+[Evidence Bundle Checker]
+  All 9 evidence bundles valid per Section 22.4 requirements.
+
+Final Result: ALL VERIFICATION CHECKS PASSED (100%)

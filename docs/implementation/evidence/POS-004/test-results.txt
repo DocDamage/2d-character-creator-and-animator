@@ -1,0 +1,5 @@
+Godot 4.7.1 full suite: 459 PASS, 0 FAIL.
+Focused acceptance: a 25% blend transformed `[0, 2]`, 0.0, `[1, 1]` toward
+`[10, -2]`, 0.6, `[1.4, .8]` into `[2.5, 1]`, 0.15, `[1.1, .95]`; the Saved
+Poses dock preview applied the expected 50% root transform to the bound rig.
+Policy scans and evidence validation are recorded after this bundle completes.

@@ -1,0 +1,12 @@
+Godot 4.7.1 full suite: 471 PASS, 0 FAIL.
+
+Focused solver coverage confirms:
+- shoulder allowance and recoverable unreachable diagnostics;
+- analytic target solving, pole choice, and wrist preservation;
+- joint-limit diagnostics, grip-gap failure, and pixel quantization;
+- dual-grip overlays and instrumentation; and
+- body/direction target compensation with numerical gap refinement.
+
+The 20-weapon matrix in `tests/integration/test_weapon_phase2_acceptance.gd`
+passes numerical grip-gap, joint-limit, coverage, and native export/reopen
+checks. Formal independent QA-SOL-001 record closure remains pending.

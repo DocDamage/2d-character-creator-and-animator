@@ -1,0 +1,23 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://facing/facing_missing_cell_diagnostics.gd" id="1_diagnostics"]
+
+[node name="MissingCellDiagnostics" type="VBoxContainer"]
+layout_mode = 2
+script = ExtResource("1_diagnostics")
+
+[node name="MissingCellTitle" type="Label" parent="."]
+layout_mode = 2
+text = "Missing Cell Diagnostics"
+
+[node name="MissingCellSummaryLabel" type="Label" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+autowrap_mode = 2
+text = "All directional cells are assigned."
+
+[node name="MissingCellList" type="ItemList" parent="."]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 72)
+layout_mode = 2
+tooltip_text = "Select a missing direction to make it active for asset or mesh assignment."

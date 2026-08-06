@@ -1,0 +1,6 @@
+Godot 4.7.1 full suite: 457 PASS, 0 FAIL.
+Focused suite scan: no direction-editor acceptance failure, engine error, script error, warning, loader error, or clean-consumer failure.
+FAC-005 acceptance: selected-cell left/right mappings are exchanged without changing unrelated cell data; a cell with no mappings produces recoverable feedback.
+LOC checker: 204 files scanned; no files exceed the 300-line limit.
+Stub scanner: 201 production files scanned; no stubs or placeholders found.
+Evidence checker: 82 bundles checked; 82 valid; 0 invalid.

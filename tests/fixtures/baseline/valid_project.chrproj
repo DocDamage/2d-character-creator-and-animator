@@ -1,0 +1,24 @@
+{
+	"schema_version": "1.0.0",
+	"project_id": "baseline-test-00000000-0000-0000-0000-000000000001",
+	"project_name": "Baseline Test Project",
+	"created_at": 1755729600,
+	"modified_at": 1755729600,
+	"objects": {
+		"characters": {},
+		"rigs": {},
+		"animations": {},
+		"weapons": {},
+		"assets": {}
+	},
+	"settings": {
+		"default_facing_directions": 8,
+		"default_fps": 30,
+		"pixel_mode": false,
+		"default_body_type": "humanoid_male"
+	},
+	"metadata": {
+		"author": "Test Suite",
+		"description": "Minimal valid project for baseline fixture tests"
+	}
+}

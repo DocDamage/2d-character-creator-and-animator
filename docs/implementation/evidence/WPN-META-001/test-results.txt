@@ -1,0 +1,10 @@
+Focused WPN/META coverage in `tests/unit/test_weapon_gameplay.gd`: 5 PASS / 0 FAIL.
+
+Full automated suite: 440 PASS / 0 FAIL, process exit 0.
+
+Covered behavior:
+- Weapon, grip, pose profile, hand pose, family, and registry round trips.
+- Primary/secondary bindings, body-type offset preview, and analytic hand-to-grip solve.
+- Action-point interpolation and hitbox shape evaluation.
+- Animation events, audio cues, visemes, script parameters, tags, and variables.
+- Specialized gameplay track restoration from serialized timeline data.

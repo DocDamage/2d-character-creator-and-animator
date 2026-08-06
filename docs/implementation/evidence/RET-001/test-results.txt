@@ -1,0 +1,4 @@
+Godot 4.7.1 full suite: 460 PASS, 0 FAIL.
+Focused acceptance: a profile normalized `hand left` to `hand_left`,
+round-tripped identity/metadata, and rejected duplicate/unknown role mappings.
+Policy scans and evidence validation are recorded after this bundle completes.

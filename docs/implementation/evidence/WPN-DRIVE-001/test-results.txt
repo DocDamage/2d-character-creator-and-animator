@@ -1,0 +1,13 @@
+Godot 4.7.1 full suite: 466 PASS, 0 FAIL.
+
+Weapon drive assertions:
+- WPN-008 primary-hand drive derives the weapon transform from a bound hand.
+- WPN-009 controller drive resolves controller context and offsets.
+- WPN-010 body-socket drive follows an authored body-bone socket.
+- WPN-011 path drive serializes, resolves progress, and orients to tangent.
+- WPN-012 world drive anchors a floating weapon with local offsets.
+- WPN-013 custom-plugin drive resolves through its registered interface.
+
+The 20-weapon matrix in `tests/integration/test_weapon_phase2_acceptance.gd`
+passes, including every drive resolver and native export/reopen. Formal
+independent QA-WPN-001 record closure remains pending.

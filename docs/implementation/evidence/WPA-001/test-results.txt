@@ -1,0 +1,9 @@
+Godot 4.7.1 full suite: 475 PASS, 0 FAIL.
+
+Focused authoring coverage confirms body/direction coverage reports,
+reachability/repair actions, dual-wield/shield/bow/flexible workflows,
+holster and draw/sheath data, session restoration, and focusable controls.
+
+The 20-weapon matrix in `tests/integration/test_weapon_phase2_acceptance.gd`
+passes body/direction coverage and native export/reopen. Formal independent
+QA-WPA-001 record closure remains pending.

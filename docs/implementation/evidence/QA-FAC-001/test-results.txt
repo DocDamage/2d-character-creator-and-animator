@@ -1,0 +1,7 @@
+Fresh headless editor load: completed without parse or load error. Expected warning: the nested clean-consumer fixture project is ignored by the parent project scanner.
+Godot 4.7.1 full suite: 457 PASS, 0 FAIL.
+Focused acceptance scan: direction-editor and filename-batch acceptance passed; no engine error, script error, loader error, warning, clean-consumer failure, or test failure was reported by the suite.
+QA-FAC-001 acceptance: authored direction sets, assignments, safe mutations, hard/crossfade and mesh behavior, scrub preview, missing diagnostics, pixel override, and serialized state passed the integrated workflow.
+LOC checker: 212 files scanned; no files exceed the 300-line limit.
+Stub scanner: 209 production files scanned; no stubs or placeholders found.
+Evidence checker: 90 bundles checked; 90 valid; 0 invalid.

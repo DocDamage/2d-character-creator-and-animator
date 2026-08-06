@@ -1,0 +1,250 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://character/authoring/character_creator_panel.gd" id="1_script"]
+[ext_resource type="Script" path="res://app/shared_ui/studio_surface.gd" id="2_surface"]
+
+[node name="CharacterCreatorPanel" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="Margin" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
+
+[node name="Root" type="VBoxContainer" parent="Margin"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Header" type="HBoxContainer" parent="Margin/Root"]
+layout_mode = 2
+
+[node name="TitleGroup" type="VBoxContainer" parent="Margin/Root/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 2
+
+[node name="Eyebrow" type="Label" parent="Margin/Root/Header/TitleGroup"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.560784, 0.611765, 0.698039, 1)
+theme_override_font_sizes/font_size = 11
+text = "CHARACTER"
+
+[node name="Title" type="Label" parent="Margin/Root/Header/TitleGroup"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "Character Creator"
+
+[node name="Hint" type="Label" parent="Margin/Root/Header/TitleGroup"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.560784, 0.611765, 0.698039, 1)
+theme_override_font_sizes/font_size = 12
+text = "Choose compatible modular parts and validate the live character."
+
+[node name="Apply" type="Button" parent="Margin/Root/Header"]
+layout_mode = 2
+theme_type_variation = &"PrimaryButton"
+text = "Apply & Validate"
+
+[node name="Content" type="HSplitContainer" parent="Margin/Root"]
+layout_mode = 2
+size_flags_vertical = 3
+split_offset = 244
+
+[node name="Picker" type="PanelContainer" parent="Margin/Root/Content"]
+custom_minimum_size = Vector2(210, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.34
+
+[node name="PickerMargin" type="MarginContainer" parent="Margin/Root/Content/Picker"]
+layout_mode = 2
+theme_override_constants/margin_left = 10
+theme_override_constants/margin_top = 10
+theme_override_constants/margin_right = 10
+theme_override_constants/margin_bottom = 10
+
+[node name="PickerVBox" type="VBoxContainer" parent="Margin/Root/Content/Picker/PickerMargin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="PickerTitle" type="Label" parent="Margin/Root/Content/Picker/PickerMargin/PickerVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.560784, 0.611765, 0.698039, 1)
+theme_override_font_sizes/font_size = 11
+text = "ASSETS"
+
+[node name="Search" type="LineEdit" parent="Margin/Root/Content/Picker/PickerMargin/PickerVBox"]
+layout_mode = 2
+focus_mode = 2
+placeholder_text = "Search compatible parts…"
+
+[node name="FilterRow" type="HBoxContainer" parent="Margin/Root/Content/Picker/PickerMargin/PickerVBox"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="All" type="Button" parent="Margin/Root/Content/Picker/PickerMargin/PickerVBox/FilterRow"]
+layout_mode = 2
+theme_type_variation = &"PrimaryButton"
+text = "All"
+
+[node name="Recent" type="Button" parent="Margin/Root/Content/Picker/PickerMargin/PickerVBox/FilterRow"]
+layout_mode = 2
+text = "Recent"
+
+[node name="Favorites" type="Button" parent="Margin/Root/Content/Picker/PickerMargin/PickerVBox/FilterRow"]
+layout_mode = 2
+text = "Favorites"
+
+[node name="PartList" type="ItemList" parent="Margin/Root/Content/Picker/PickerMargin/PickerVBox"]
+layout_mode = 2
+size_flags_vertical = 3
+focus_mode = 2
+
+[node name="Actions" type="HBoxContainer" parent="Margin/Root/Content/Picker/PickerMargin/PickerVBox"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Seed" type="SpinBox" parent="Margin/Root/Content/Picker/PickerMargin/PickerVBox/Actions"]
+layout_mode = 2
+custom_minimum_size = Vector2(72, 0)
+focus_mode = 2
+min_value = 0.0
+max_value = 2147483647.0
+value = 1.0
+
+[node name="Randomize" type="Button" parent="Margin/Root/Content/Picker/PickerMargin/PickerVBox/Actions"]
+layout_mode = 2
+focus_mode = 2
+text = "Randomize"
+
+[node name="Undo" type="Button" parent="Margin/Root/Content/Picker/PickerMargin/PickerVBox/Actions"]
+layout_mode = 2
+focus_mode = 2
+text = "Undo"
+
+[node name="Redo" type="Button" parent="Margin/Root/Content/Picker/PickerMargin/PickerVBox/Actions"]
+layout_mode = 2
+focus_mode = 2
+text = "Redo"
+
+[node name="PreviewCard" type="PanelContainer" parent="Margin/Root/Content"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.66
+
+[node name="PreviewMargin" type="MarginContainer" parent="Margin/Root/Content/PreviewCard"]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="PreviewVBox" type="VBoxContainer" parent="Margin/Root/Content/PreviewCard/PreviewMargin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="ToolRow" type="HBoxContainer" parent="Margin/Root/Content/PreviewCard/PreviewMargin/PreviewVBox"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Select" type="Button" parent="Margin/Root/Content/PreviewCard/PreviewMargin/PreviewVBox/ToolRow"]
+layout_mode = 2
+theme_type_variation = &"PrimaryButton"
+text = "Select"
+
+[node name="Move" type="Button" parent="Margin/Root/Content/PreviewCard/PreviewMargin/PreviewVBox/ToolRow"]
+layout_mode = 2
+text = "Move"
+
+[node name="Rotate" type="Button" parent="Margin/Root/Content/PreviewCard/PreviewMargin/PreviewVBox/ToolRow"]
+layout_mode = 2
+text = "Rotate"
+
+[node name="Scale" type="Button" parent="Margin/Root/Content/PreviewCard/PreviewMargin/PreviewVBox/ToolRow"]
+layout_mode = 2
+text = "Scale"
+
+[node name="ToolSpacer" type="Control" parent="Margin/Root/Content/PreviewCard/PreviewMargin/PreviewVBox/ToolRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="PixelGrid" type="Button" parent="Margin/Root/Content/PreviewCard/PreviewMargin/PreviewVBox/ToolRow"]
+layout_mode = 2
+text = "Pixel grid"
+
+[node name="PreviewSurface" type="Control" parent="Margin/Root/Content/PreviewCard/PreviewMargin/PreviewVBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 260)
+size_flags_vertical = 3
+script = ExtResource("2_surface")
+surface_mode = "viewport"
+
+[node name="DirectionLabel" type="Label" parent="Margin/Root/Content/PreviewCard/PreviewMargin/PreviewVBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.560784, 0.611765, 0.698039, 1)
+theme_override_font_sizes/font_size = 11
+text = "DIRECTION PREVIEW"
+
+[node name="Directions" type="HBoxContainer" parent="Margin/Root/Content/PreviewCard/PreviewMargin/PreviewVBox"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="N" type="Button" parent="Margin/Root/Content/PreviewCard/PreviewMargin/PreviewVBox/Directions"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "N"
+
+[node name="NE" type="Button" parent="Margin/Root/Content/PreviewCard/PreviewMargin/PreviewVBox/Directions"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "NE"
+
+[node name="E" type="Button" parent="Margin/Root/Content/PreviewCard/PreviewMargin/PreviewVBox/Directions"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "E"
+
+[node name="SE" type="Button" parent="Margin/Root/Content/PreviewCard/PreviewMargin/PreviewVBox/Directions"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "SE"
+
+[node name="S" type="Button" parent="Margin/Root/Content/PreviewCard/PreviewMargin/PreviewVBox/Directions"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_type_variation = &"PrimaryButton"
+text = "S"
+
+[node name="SW" type="Button" parent="Margin/Root/Content/PreviewCard/PreviewMargin/PreviewVBox/Directions"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "SW"
+
+[node name="W" type="Button" parent="Margin/Root/Content/PreviewCard/PreviewMargin/PreviewVBox/Directions"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "W"
+
+[node name="NW" type="Button" parent="Margin/Root/Content/PreviewCard/PreviewMargin/PreviewVBox/Directions"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "NW"
+
+[node name="Status" type="Label" parent="Margin/Root"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.321569, 0.8, 0.501961, 1)
+theme_override_font_sizes/font_size = 12
+autowrap_mode = 2

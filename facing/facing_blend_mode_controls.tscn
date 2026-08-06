@@ -1,0 +1,22 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://facing/facing_blend_mode_controls.gd" id="1_controls"]
+
+[node name="BlendModeControls" type="HBoxContainer"]
+layout_mode = 2
+script = ExtResource("1_controls")
+
+[node name="BlendModeLabel" type="Label" parent="."]
+layout_mode = 2
+text = "Direction blend"
+
+[node name="BlendModeOption" type="OptionButton" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "Hard selection, nearest direction, or adjacent sprite crossfade."
+
+[node name="BlendModeStatusLabel" type="Label" parent="."]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Select a direction-blending mode."

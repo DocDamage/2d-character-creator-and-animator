@@ -1,0 +1,48 @@
+=== Automated Test Results — DOC-005 ===
+Date: 2026-08-05
+Command: godot --headless tests/test_runner.tscn
+
+[TEST 1] Baseline valid fixture loading...
+  PASS: Baseline fixture loaded and validated successfully.
+[TEST 2] Malformed corrupt fixture handling...
+  PASS: Malformed fixture handled safely without crash.
+...
+[TEST 14] Project Manifest Schema Workflows (REQ-DOC-001)...
+  ProjectSchema tests finished: 18 PASS, 0 FAIL
+[TEST 15] Stable ID Service Workflows (REQ-DOC-002)...
+  IDService tests finished: 35 PASS, 0 FAIL
+[TEST 16] Deterministic Serialization Workflows (REQ-DOC-003)...
+  Serialization tests finished: 12 PASS, 0 FAIL
+[TEST 17] Transactional Save Workflows (REQ-DOC-004)...
+  Transactional Save tests finished: 22 PASS, 0 FAIL
+[TEST 18] Project Load & Diagnostics Workflows (REQ-DOC-005)...
+  PASS: Saved project cleanly to user://test_load_valid.chrproj
+  PASS: load_project returned non-empty dictionary
+  PASS: Loaded project_name matches
+  PASS: Loaded settings.pixel_mode matches
+  PASS: load_completed signal emitted for valid project
+  PASS: load_completed schema_version matches
+  PASS: load_project returned empty dict for non-existent file
+  PASS: load_failed signal emitted for non-existent file
+  PASS: Diagnostics reported success=false
+  PASS: Diagnostics contains error message for missing file
+  PASS: load_project returned empty dict for corrupt JSON
+  PASS: load_failed signal emitted for corrupt JSON
+  PASS: Diagnostics reported success=false for corrupt JSON
+  PASS: load_project returned empty dict for schema validation failure
+  PASS: Diagnostics reported success=false for schema validation error
+  PASS: Diagnostics captured schema validation errors
+  PASS: load_project loaded project with unknown fields successfully
+  PASS: Preserved unknown root field 'custom_plugin_data'
+  PASS: Preserved unknown root field contents
+  PASS: Preserved unknown object category 'unknown_category'
+  PASS: Diagnostics reported success=true when unknown fields present
+  PASS: Diagnostics identified unknown root field
+  PASS: Diagnostics identified unknown object category
+  PASS: Diagnostics generated warning entries for unknown fields
+  PASS: get_last_load_diagnostics returned non-empty dictionary
+  PASS: Last load diagnostics indicates success
+  PASS: Last load diagnostics schema_version matches
+  Project Load tests finished: 27 PASS, 0 FAIL
+
+=== Test Suite Finished: 280 PASS, 0 FAIL ===
