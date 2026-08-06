@@ -1,0 +1,103 @@
+{
+  "$schema": "character-studio-design-tokens-v1",
+  "meta": {
+    "name": "Character Studio Playful Console",
+    "version": "1.0.0",
+    "engine": "Godot 4.7.1",
+    "figmaFile": "https://www.figma.com/design/OWBAoX5TObGOwIZv10loHG",
+    "source": "Recovered approved design from the 2026-08-06 project thread"
+  },
+  "color": {
+    "paper": "#F4F7FC",
+    "surface": "#FFFFFF",
+    "ink": "#16233B",
+    "muted": "#66738A",
+    "line": "#DBE4F1",
+    "navy": "#1E3155",
+    "project": "#FF5F62",
+    "create": "#4AB8FF",
+    "rig": "#FFD34D",
+    "animate": "#8D72FF",
+    "equip": "#FF9B4B",
+    "export": "#58D5A1",
+    "pink": "#FF8EC7",
+    "success": "#2FAD77",
+    "warning": "#D58B00",
+    "danger": "#D9474A",
+    "focus": "#1E3155",
+    "checkerLight": "#F2F5FA",
+    "checkerDark": "#E4EAF3",
+    "overlay": "#16233BCC"
+  },
+  "workspace": {
+    "project_assets": { "label": "PROJECT", "accent": "{color.project}" },
+    "character_creator": { "label": "CREATE", "accent": "{color.create}" },
+    "rigging_deformation": { "label": "RIG", "accent": "{color.rig}" },
+    "animation_studio": { "label": "ANIMATE", "accent": "{color.animate}" },
+    "weapon_equipment": { "label": "EQUIP", "accent": "{color.equip}" },
+    "preview_export": { "label": "EXPORT", "accent": "{color.export}" }
+  },
+  "spacing": {
+    "2xs": 2,
+    "xs": 4,
+    "sm": 8,
+    "md": 12,
+    "lg": 16,
+    "xl": 20,
+    "2xl": 24,
+    "3xl": 32,
+    "4xl": 40
+  },
+  "radius": {
+    "control": 14,
+    "panel": 20,
+    "card": 26,
+    "pill": 999
+  },
+  "border": {
+    "default": 1,
+    "selected": 3,
+    "focus": 3
+  },
+  "shadow": {
+    "card": { "x": 0, "y": 10, "blur": 24, "spread": 0, "color": "#1E31551A" },
+    "raised": { "x": 0, "y": 5, "blur": 12, "spread": 0, "color": "#1E315526" },
+    "pressedOffset": 2
+  },
+  "type": {
+    "family": ["Trebuchet MS", "Segoe UI", "sans-serif"],
+    "display": { "size": 34, "weight": 800, "lineHeight": 1.05 },
+    "title": { "size": 28, "weight": 800, "lineHeight": 1.1 },
+    "panelTitle": { "size": 18, "weight": 800, "lineHeight": 1.2 },
+    "body": { "size": 14, "weight": 600, "lineHeight": 1.45 },
+    "caption": { "size": 12, "weight": 700, "lineHeight": 1.3 },
+    "eyebrow": { "size": 11, "weight": 900, "lineHeight": 1.2, "tracking": 0.12, "uppercase": true }
+  },
+  "control": {
+    "minimumTarget": 44,
+    "topBarHeight": 74,
+    "statusBarHeight": 42,
+    "modeRailWidth": 72,
+    "journeyPanelWidth": 220,
+    "heroCanvasWidth": 760,
+    "contextDrawerWidth": 316
+  },
+  "motion": {
+    "controlMs": 150,
+    "panelMs": 220,
+    "toastMs": 1800,
+    "easing": "ease-out",
+    "reducedMotionMs": 0
+  },
+  "accessibility": {
+    "contrastTarget": "WCAG AA",
+    "keyboardParity": true,
+    "controllerParity": true,
+    "visibleFocus": true,
+    "hoverOnlyCriticalActions": false,
+    "dpiScaleMinimum": 1.0,
+    "dpiScaleMaximum": 2.0,
+    "reducedMotion": true,
+    "highContrast": true
+  }
+}
