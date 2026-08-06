@@ -1,0 +1,71 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://app/shared_ui/numeric_transform_editor.gd" id="1_nte"]
+
+[node name="NumericTransformEditor" type="Control"]
+layout_mode = 3
+anchors_preset = 0
+script = ExtResource("1_nte")
+
+[node name="VBox" type="VBoxContainer" parent="."]
+layout_mode = 0
+
+[node name="Grid" type="GridContainer" parent="VBox"]
+layout_mode = 2
+columns = 2
+
+[node name="PosXLabel" type="Label" parent="VBox/Grid"]
+layout_mode = 2
+text = "Pos X:"
+
+[node name="PosXInput" type="SpinBox" parent="VBox/Grid"]
+layout_mode = 2
+min_value = -10000.0
+max_value = 10000.0
+
+[node name="PosYLabel" type="Label" parent="VBox/Grid"]
+layout_mode = 2
+text = "Pos Y:"
+
+[node name="PosYInput" type="SpinBox" parent="VBox/Grid"]
+layout_mode = 2
+min_value = -10000.0
+max_value = 10000.0
+
+[node name="RotLabel" type="Label" parent="VBox/Grid"]
+layout_mode = 2
+text = "Rotation (°):"
+
+[node name="RotInput" type="SpinBox" parent="VBox/Grid"]
+layout_mode = 2
+min_value = -360.0
+max_value = 360.0
+
+[node name="ScaleXLabel" type="Label" parent="VBox/Grid"]
+layout_mode = 2
+text = "Scale X:"
+
+[node name="ScaleXInput" type="SpinBox" parent="VBox/Grid"]
+layout_mode = 2
+min_value = -100.0
+max_value = 100.0
+step = 0.01
+
+[node name="ScaleYLabel" type="Label" parent="VBox/Grid"]
+layout_mode = 2
+text = "Scale Y:"
+
+[node name="ScaleYInput" type="SpinBox" parent="VBox/Grid"]
+layout_mode = 2
+min_value = -100.0
+max_value = 100.0
+step = 0.01
+
+[node name="OpacityLabel" type="Label" parent="VBox/Grid"]
+layout_mode = 2
+text = "Opacity:"
+
+[node name="OpacityInput" type="SpinBox" parent="VBox/Grid"]
+layout_mode = 2
+max_value = 1.0
+step = 0.01

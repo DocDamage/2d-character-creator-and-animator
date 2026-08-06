@@ -1,0 +1,13 @@
+{
+  "project_id": "portable_editor_import",
+  "facing_grid": {
+    "grid_id": "portable_import_grid",
+    "direction_set": 4,
+    "cells": {
+      "north": {"asset_id": "portable_north"},
+      "east": {"asset_id": "portable_east"},
+      "south": {"asset_id": "portable_south"},
+      "west": {"asset_id": "portable_west"}
+    }
+  }
+}

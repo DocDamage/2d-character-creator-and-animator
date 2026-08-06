@@ -1,0 +1,61 @@
+=== Automated Test Runner Output ===
+Execution Timestamp: 2026-08-05T15:07:44Z
+
+[TEST 1] Baseline valid fixture loading...
+  PASS: Baseline fixture loaded and validated successfully.
+[TEST 2] Malformed corrupt fixture handling...
+  PASS: Malformed fixture handled safely without crash.
+[TEST 3] IDService UUID & registration...
+  PASS: IDService generated and registered valid UUID: f47ac10b-58cc-4372-a567-0e02b2c3d479
+[TEST 4] CommandService stack...
+  PASS: CommandService initialized clean stack.
+[TEST 5] Startup Diagnostics Workflows...
+  PASS: 10/10 assertions passed.
+[TEST 6] Dock Layout Workflows...
+  PASS: 12/12 assertions passed.
+[TEST 7] Workspace Manager Workflows...
+  PASS: 15/15 assertions passed.
+[TEST 8] Command Palette Workflows...
+  PASS: 14/14 assertions passed.
+[TEST 9] Dirty State Workflows...
+  PASS: 18/18 assertions passed.
+[TEST 10] Diagnostics Drawer Workflows...
+  PASS: 16/16 assertions passed.
+[TEST 11] Theme Service & DPI Scaling Workflows...
+  PASS: 28/28 assertions passed.
+[TEST 12] Keyboard & Controller Focus Framework Workflows...
+  PASS: 32/32 assertions passed.
+[TEST 13] Recent Projects Service & Startup Screen Workflows...
+  PASS: 12/12 assertions passed.
+[TEST 14] Project Manifest Schema Workflows (REQ-DOC-001)...
+  PASS: 18/18 assertions passed.
+[TEST 15] Stable ID Service Workflows (REQ-DOC-002)...
+  PASS: 35/35 assertions passed.
+[TEST 16] Deterministic Serialization Workflows (REQ-DOC-003)...
+  PASS: 12/12 assertions passed.
+[TEST 17] Transactional Save Workflows (REQ-DOC-004)...
+  PASS: save_project returned true for valid data
+  PASS: Target file exists after save
+  PASS: Temp file removed after save
+  PASS: save_completed signal emitted
+  PASS: save_completed path matches target
+  PASS: Dirty state cleared after successful save
+  PASS: save_project returned false for invalid manifest
+  PASS: save_failed signal emitted on validation error
+  PASS: Error message mentions validation
+  PASS: Temp file cleaned up after failed validation
+  PASS: Dirty state remains active when save fails
+  PASS: AppState is dirty before save attempt
+  PASS: AppState remains dirty after failed save
+  PASS: AppState clean after successful save
+  PASS: Current save file exists
+  PASS: Backups query executes cleanly
+  PASS: autosave returned true
+  PASS: Autosave file created at designated path
+  PASS: Autosave did NOT clear manual save dirty state
+  PASS: Autosave file loads back successfully
+  PASS: Autosave data matches snapshot
+  PASS: Diagnostic journal entry logged for completed save
+  Transactional Save tests finished: 22 PASS, 0 FAIL
+
+=== Test Suite Finished: 253 PASS, 0 FAIL ===

@@ -1,0 +1,1 @@
+{"schema_version":"1.0.0","project_id":"sample-weapons","project_name":"20 Weapon Sample","created_at":0,"modified_at":0,"objects":{"characters":{},"rigs":{},"animations":{},"weapons":{"count":20},"assets":{}},"settings":{"default_facing_directions":8,"default_fps":30,"pixel_mode":false},"metadata":{"author":"Sample Catalog","description":"20-weapon posing fixture"}}

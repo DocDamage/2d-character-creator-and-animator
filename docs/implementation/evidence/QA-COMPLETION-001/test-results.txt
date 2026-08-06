@@ -1,0 +1,23 @@
+Scoped completion QA: 0 failed.
+
+- QA-WPN-001, QA-SOL-001, QA-WPA-001: 20 weapon profiles resolved, solved,
+  covered, serialized, and native-exported; every solved arm required a grip
+  gap <= 0.05 and no limited joint.
+- QA-CHR-001: 2/2 creator assertions passed, including a deterministic batch
+  of 100 distinct valid assemblies.
+- QA-GMD-001, QA-MED-001: 3/3 audio, metadata, lip-sync, reference-media,
+  repair, exclusion, and persistence assertions passed.
+- QA-RUL-001: 3/3 blend, nested-state-machine, and rule/cycle-parity assertions
+  passed.
+- QA-LNK-001: linked refresh, conflict, broken-link recovery, packaging, preview,
+  and persistence assertion passed.
+- QA-EXP-BATCH-001: progress, cancellation, validation, output opening, and
+  controller restoration assertion passed.
+- QA-GDT-001: 2/2 portable-runtime mapping and isolated clean-consumer project
+  assertions passed.
+- QA-PRF-001: recovery, performance, accessibility, security, and release-safety
+  assertion passed.
+
+Regression gate: 496 PASS, 0 FAIL.
+LOC gate: 290 files scanned; no file exceeds 300 lines.
+Stub gate: 285 production files scanned; no findings.

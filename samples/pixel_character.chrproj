@@ -1,0 +1,1 @@
+{"schema_version":"1.0.0","project_id":"sample-pixel","project_name":"Pixel Character Sample","created_at":0,"modified_at":0,"objects":{"characters":{"pixel_hero":{}},"rigs":{},"animations":{},"weapons":{},"assets":{}},"settings":{"default_facing_directions":8,"default_fps":12,"pixel_mode":true},"metadata":{"author":"Sample Catalog","description":"Pixel-safe hard-switch sample"}}

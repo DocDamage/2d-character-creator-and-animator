@@ -1,0 +1,60 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://animation/authoring/animation_composition_panel.gd" id="1_script"]
+
+[node name="AnimationCompositionPanel" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="Margin" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="Root" type="VBoxContainer" parent="Margin"]
+layout_mode = 2
+
+[node name="Hint" type="Label" parent="Margin/Root"]
+layout_mode = 2
+text = "Layered blends, state transitions, and rule graph"
+
+[node name="Graph" type="GraphEdit" parent="Margin/Root"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 220)
+size_flags_vertical = 3
+show_zoom_label = true
+
+[node name="Controls" type="HBoxContainer" parent="Margin/Root"]
+layout_mode = 2
+
+[node name="Time" type="SpinBox" parent="Margin/Root/Controls"]
+layout_mode = 2
+focus_mode = 2
+step = 0.033333
+max_value = 3600.0
+
+[node name="Preview" type="Button" parent="Margin/Root/Controls"]
+layout_mode = 2
+focus_mode = 2
+text = "Preview"
+
+[node name="Output" type="RichTextLabel" parent="Margin/Root"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 72)
+bbcode_enabled = false
+
+[node name="Status" type="Label" parent="Margin/Root"]
+layout_mode = 2
+autowrap_mode = 2

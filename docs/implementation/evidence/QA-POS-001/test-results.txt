@@ -1,0 +1,6 @@
+Godot 4.7.1 full suite: 460 PASS, 0 FAIL.
+Fresh headless editor load: no parse/load errors. Expected warning only: nested
+clean-consumer fixture project ignored by the parent project scanner.
+LOC checker: 230 files, none over 300 lines.
+Stub scanner: 227 production files, no stubs/placeholders.
+Evidence checker: validation re-run after this QA bundle is complete.

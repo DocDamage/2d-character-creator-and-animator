@@ -1,0 +1,7 @@
+Godot 4.7.1 full suite: 459 PASS, 0 FAIL.
+Focused acceptance: the Saved Poses dock captured and applied a bound rig; the
+pose library test captured, serialized, restored, and rejected a wrong rig
+without engine or script errors.
+Policy scans: LOC checker found 217 files within the 300-line limit; stub
+scanner found no production placeholders; evidence validation is recorded
+after this bundle is complete.

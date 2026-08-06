@@ -1,0 +1,20 @@
+Automated package checks passed:
+
+- Windows export generated `Modular2DCharacterStudio.exe` and its companion
+  `.pck`.
+- The executable is PE32+ x86-64 and launched from a fresh Windows temporary
+  folder with `--headless --quit`, returning exit status 0.
+- The rebuild corrects a false startup failure by checking packaged resources
+  instead of source-only `docs` and `editor_plugins` folders.
+- The rebuild corrects a launcher handoff defect where a newly created project
+  remained on the startup screen instead of opening the editor workspace.
+- The rebuild corrects the editor layout by placing docks in labeled tab
+  regions and focusing the active workspace's primary authoring tab.
+- Scoped completion QA: 0 failed. Full regression: 496 PASS, 0 FAIL.
+
+Not yet accepted:
+
+- Start the package interactively on a clean Windows machine.
+- Open and exercise all six samples through their named workflows.
+- Export a package and load its runtime scene in a clean consumer project.
+- Attach the clean-machine smoke log and any findings to this evidence bundle.

@@ -1,0 +1,74 @@
+Godot Engine v4.7.1.stable.official.a13da4feb - https://godotengine.org
+
+=== Running Automated Test Suite ===
+
+[TEST 1] Baseline valid fixture loading...
+  PASS: Baseline fixture loaded and validated successfully.
+[TEST 2] Malformed corrupt fixture handling...
+  PASS: Malformed fixture handled safely without crash.
+[TEST 3] IDService UUID & registration...
+  PASS: IDService generated and registered valid UUID: 23167536-9bc0-4a76-ba64-9287f6077c6b
+[TEST 4] CommandService stack...
+  PASS: CommandService initialized clean stack.
+[TEST 5] Startup script instantiation & diagnostic sequence...
+
+============================================
+  Modular 2D Character Studio
+  Version 0.1.0-dev
+  Target: Godot 4.7
+============================================
+
+Startup ready. Application shell loaded.
+  PASS: Startup sequence reported completion successfully.
+  PASS: All 5 startup diagnostic checks passed (5/5).
+  PASS: Zero startup errors reported.
+  PASS: DiagnosticsService recorded 7 diagnostic entries.
+[TEST 6] Main window instantiation & dock layout management...
+  PASS: DockLayoutManager registered 6 default panels.
+  PASS: Retrieved DockPanel 'panel_assets' successfully.
+  PASS: DockPanel toggle_collapse operates correctly.
+  PASS: Applied preset 'Minimal' successfully.
+  PASS: Exported layout preset dictionary successfully.
+  PASS: Imported layout preset dictionary successfully.
+  PASS: Status bar message updated and verified.
+[TEST 7] Workspace Manager workflows & state preservation...
+  PASS: WorkspaceManager registers 6 default workspaces
+  PASS: project_assets workspace registered
+  PASS: character_creator workspace registered
+  PASS: rigging_deformation workspace registered
+  PASS: animation_studio workspace registered
+  PASS: weapon_equipment workspace registered
+  PASS: preview_export workspace registered
+  PASS: Default active workspace is project_assets
+  PASS: switch_workspace returns true for valid target
+  PASS: Active workspace updated to animation_studio
+  PASS: workspace_changed signal emitted on switch
+  PASS: Signal reported new_id animation_studio
+  PASS: Signal reported old_id project_assets
+  PASS: project_assets zoom level stored
+  PASS: character_creator zoom level preserved independently
+  PASS: project_assets zoom level preserved after switch
+  PASS: Command executed and added to undo stack
+  PASS: CommandService undo stack survives workspace switch
+  PASS: Undo count unchanged after workspace switch
+  PASS: Undo succeeds after workspace switch
+  PASS: DockLayoutManager bound successfully
+  PASS: Character Creator preset applied on workspace switch
+  PASS: Minimal preset applied on preview_export switch
+  PASS: Export contains active_workspace
+  PASS: Export active workspace is animation_studio
+  PASS: import_all_workspace_states returns true
+  PASS: Imported active workspace matches exported
+  PASS: Imported state matches exported playhead position
+  PASS: switch_workspace returns false for invalid workspace ID
+  PASS: Active workspace unchanged after failed switch
+[TEST 8] Command Palette & Shortcut Registry workflows...
+  PASS: ShortcutRegistry command registration and lookup verified.
+  PASS: ShortcutRegistry search filtering verified.
+  PASS: ShortcutRegistry command execution verified.
+  PASS: Shortcut matching and rebinding verified.
+  PASS: Shortcut bindings export and import verified.
+  PASS: CommandPalette UI behavior verified.
+  PASS: ShortcutRebindDialog UI behavior verified.
+
+=== Test Suite Finished: 46 PASS, 0 FAIL ===

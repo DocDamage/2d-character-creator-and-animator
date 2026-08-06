@@ -1,0 +1,76 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://quality/dashboard/quality_dashboard_panel.gd" id="1_script"]
+
+[node name="QualityDashboardPanel" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="Margin" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="Root" type="VBoxContainer" parent="Margin"]
+layout_mode = 2
+
+[node name="Hint" type="Label" parent="Margin/Root"]
+layout_mode = 2
+text = "Recovery, performance, accessibility, and release safety"
+
+[node name="ProjectPath" type="LineEdit" parent="Margin/Root"]
+layout_mode = 2
+focus_mode = 2
+placeholder_text = "Project path (res:// or user://)"
+
+[node name="Actions" type="HBoxContainer" parent="Margin/Root"]
+layout_mode = 2
+
+[node name="Scan" type="Button" parent="Margin/Root/Actions"]
+layout_mode = 2
+focus_mode = 2
+text = "Scan Recovery"
+
+[node name="Recover" type="Button" parent="Margin/Root/Actions"]
+layout_mode = 2
+focus_mode = 2
+text = "Recover Latest"
+
+[node name="Audit" type="Button" parent="Margin/Root/Actions"]
+layout_mode = 2
+focus_mode = 2
+text = "Run Quality Audit"
+
+[node name="Preferences" type="HBoxContainer" parent="Margin/Root"]
+layout_mode = 2
+
+[node name="ReducedMotion" type="CheckBox" parent="Margin/Root/Preferences"]
+layout_mode = 2
+focus_mode = 2
+text = "Reduced motion"
+
+[node name="HighContrast" type="CheckBox" parent="Margin/Root/Preferences"]
+layout_mode = 2
+focus_mode = 2
+text = "High contrast"
+
+[node name="Output" type="RichTextLabel" parent="Margin/Root"]
+layout_mode = 2
+size_flags_vertical = 3
+bbcode_enabled = false
+
+[node name="Status" type="Label" parent="Margin/Root"]
+layout_mode = 2
+autowrap_mode = 2

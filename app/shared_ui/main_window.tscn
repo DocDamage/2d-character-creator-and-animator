@@ -1,0 +1,137 @@
+[gd_scene load_steps=5 format=3 uid="uid://main_window_app_shell_002"]
+
+[ext_resource type="Script" path="res://app/shared_ui/main_window.gd" id="1_main_win"]
+[ext_resource type="Script" path="res://app/shared_ui/dock_layout_manager.gd" id="2_layout_mgr"]
+[ext_resource type="PackedScene" path="res://app/commands/command_palette.tscn" id="3_cmdpal"]
+[ext_resource type="PackedScene" path="res://app/application_state/unsaved_changes_dialog.tscn" id="4_unsaved"]
+
+[node name="MainWindow" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_main_win")
+
+[node name="DockLayoutManager" type="Node" parent="."]
+script = ExtResource("2_layout_mgr")
+
+[node name="RootVBox" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="TopHeaderBar" type="HBoxContainer" parent="RootVBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 36)
+
+[node name="TopMenuBar" type="MenuBar" parent="RootVBox/TopHeaderBar"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="FileMenu" type="PopupMenu" parent="RootVBox/TopHeaderBar/TopMenuBar"]
+title = "File"
+
+[node name="EditMenu" type="PopupMenu" parent="RootVBox/TopHeaderBar/TopMenuBar"]
+title = "Edit"
+
+[node name="ViewMenu" type="PopupMenu" parent="RootVBox/TopHeaderBar/TopMenuBar"]
+title = "View"
+
+[node name="CommandPaletteButton" type="Button" parent="RootVBox/TopHeaderBar"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Command Palette (Ctrl+Shift+P)"
+
+[node name="WorkspaceLabel" type="Label" parent="RootVBox/TopHeaderBar"]
+layout_mode = 2
+text = "Workspace:"
+
+[node name="WorkspaceOptionButton" type="OptionButton" parent="RootVBox/TopHeaderBar"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(180, 28)
+
+[node name="PresetLabel" type="Label" parent="RootVBox/TopHeaderBar"]
+layout_mode = 2
+text = "Layout Preset:"
+
+[node name="PresetOptionButton" type="OptionButton" parent="RootVBox/TopHeaderBar"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(160, 28)
+
+[node name="MainHSplit" type="HSplitContainer" parent="RootVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="LeftDockRegion" type="TabContainer" parent="RootVBox/MainHSplit"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(250, 0)
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.25
+
+[node name="CenterVSplit" type="VSplitContainer" parent="RootVBox/MainHSplit"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.75
+
+[node name="InnerHSplit" type="HSplitContainer" parent="RootVBox/MainHSplit/CenterVSplit"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.75
+
+[node name="CenterDockRegion" type="TabContainer" parent="RootVBox/MainHSplit/CenterVSplit/InnerHSplit"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.7
+
+[node name="RightDockRegion" type="TabContainer" parent="RootVBox/MainHSplit/CenterVSplit/InnerHSplit"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(250, 0)
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.3
+
+[node name="BottomDockRegion" type="TabContainer" parent="RootVBox/MainHSplit/CenterVSplit"]
+unique_name_in_owner = true
+layout_mode = 2
+custom_minimum_size = Vector2(0, 180)
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.25
+
+[node name="StatusBar" type="PanelContainer" parent="RootVBox"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 28)
+
+[node name="StatusHBox" type="HBoxContainer" parent="RootVBox/StatusBar"]
+layout_mode = 2
+
+[node name="StatusMessageLabel" type="Label" parent="RootVBox/StatusBar/StatusHBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Ready"
+
+[node name="StatusInfoLabel" type="Label" parent="RootVBox/StatusBar/StatusHBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Modular 2D Character Studio v0.1.0-dev | Godot 4.7.1"
+
+[node name="CommandPalette" parent="." instance=ExtResource("3_cmdpal")]
+unique_name_in_owner = true
+visible = false
+
+[node name="UnsavedChangesDialog" parent="." instance=ExtResource("4_unsaved")]
+unique_name_in_owner = true
+visible = false

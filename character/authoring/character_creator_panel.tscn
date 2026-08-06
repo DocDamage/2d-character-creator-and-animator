@@ -1,0 +1,70 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://character/authoring/character_creator_panel.gd" id="1_script"]
+
+[node name="CharacterCreatorPanel" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_script")
+
+[node name="Margin" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 8
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 8
+
+[node name="Root" type="VBoxContainer" parent="Margin"]
+layout_mode = 2
+
+[node name="Hint" type="Label" parent="Margin/Root"]
+layout_mode = 2
+text = "Browse a part and activate it to equip"
+
+[node name="Search" type="LineEdit" parent="Margin/Root"]
+layout_mode = 2
+focus_mode = 2
+placeholder_text = "Search compatible parts"
+
+[node name="PartList" type="ItemList" parent="Margin/Root"]
+layout_mode = 2
+size_flags_vertical = 3
+focus_mode = 2
+
+[node name="Actions" type="HBoxContainer" parent="Margin/Root"]
+layout_mode = 2
+
+[node name="Seed" type="SpinBox" parent="Margin/Root/Actions"]
+layout_mode = 2
+focus_mode = 2
+min_value = 0.0
+max_value = 2147483647.0
+value = 1.0
+
+[node name="Randomize" type="Button" parent="Margin/Root/Actions"]
+layout_mode = 2
+focus_mode = 2
+text = "Randomize"
+
+[node name="Undo" type="Button" parent="Margin/Root/Actions"]
+layout_mode = 2
+focus_mode = 2
+text = "Undo"
+
+[node name="Redo" type="Button" parent="Margin/Root/Actions"]
+layout_mode = 2
+focus_mode = 2
+text = "Redo"
+
+[node name="Status" type="Label" parent="Margin/Root"]
+layout_mode = 2
+autowrap_mode = 2

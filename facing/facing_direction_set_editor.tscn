@@ -1,0 +1,155 @@
+[gd_scene load_steps=9 format=3]
+
+[ext_resource type="Script" path="res://facing/facing_direction_set_editor.gd" id="1_editor"]
+[ext_resource type="PackedScene" path="res://facing/facing_filename_placement_dialog.tscn" id="2_dialog"]
+[ext_resource type="PackedScene" path="res://facing/facing_mirror_dialog.tscn" id="3_mirror"]
+[ext_resource type="PackedScene" path="res://facing/facing_blend_mode_controls.tscn" id="4_blend"]
+[ext_resource type="PackedScene" path="res://facing/facing_mesh_blend_controls.tscn" id="5_mesh_blend"]
+[ext_resource type="PackedScene" path="res://facing/facing_direction_scrub_preview.tscn" id="6_preview"]
+[ext_resource type="PackedScene" path="res://facing/facing_missing_cell_diagnostics.tscn" id="7_missing"]
+[ext_resource type="PackedScene" path="res://facing/facing_pixel_mode_controls.tscn" id="8_pixel"]
+
+[node name="FacingDirectionSetEditor" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_editor")
+
+[node name="Margin" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = -8.0
+offset_bottom = -8.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="RootVBox" type="VBoxContainer" parent="Margin"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="TitleLabel" type="Label" parent="Margin/RootVBox"]
+layout_mode = 2
+text = "Direction Set"
+
+[node name="DirectionSetRow" type="HBoxContainer" parent="Margin/RootVBox"]
+layout_mode = 2
+
+[node name="DirectionSetLabel" type="Label" parent="Margin/RootVBox/DirectionSetRow"]
+layout_mode = 2
+text = "Directions"
+
+[node name="DirectionSetOption" type="OptionButton" parent="Margin/RootVBox/DirectionSetRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+tooltip_text = "Choose the number of directional cells this grid provides."
+
+[node name="CustomDirectionsInput" type="LineEdit" parent="Margin/RootVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+placeholder_text = "forward, right, back, left"
+tooltip_text = "Enter at least two unique custom direction names, separated by commas."
+
+[node name="ApplyCustomButton" type="Button" parent="Margin/RootVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Apply Custom Directions"
+
+[node name="DirectionSummaryLabel" type="Label" parent="Margin/RootVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "0 directions"
+
+[node name="Separator" type="HSeparator" parent="Margin/RootVBox"]
+layout_mode = 2
+
+[node name="DirectionGrid" type="GridContainer" parent="Margin/RootVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+columns = 2
+
+[node name="AssetSeparator" type="HSeparator" parent="Margin/RootVBox"]
+layout_mode = 2
+
+[node name="SelectedDirectionLabel" type="Label" parent="Margin/RootVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Selected direction: None"
+
+[node name="AssetRow" type="HBoxContainer" parent="Margin/RootVBox"]
+layout_mode = 2
+
+[node name="AssetIdInput" type="LineEdit" parent="Margin/RootVBox/AssetRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "Asset ID"
+tooltip_text = "Assign this asset ID to the selected directional cell."
+
+[node name="AssignAssetButton" type="Button" parent="Margin/RootVBox/AssetRow"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Assign"
+
+[node name="ClearAssetButton" type="Button" parent="Margin/RootVBox/AssetRow"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Clear"
+
+[node name="SwapSlotsButton" type="Button" parent="Margin/RootVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Swap Left/Right Slots"
+tooltip_text = "Exchange _left and _right slot mappings in the selected cell."
+
+[node name="MirrorDirectionButton" type="Button" parent="Margin/RootVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Mirror Direction Cell"
+tooltip_text = "Mirror a source cell into another direction with explicit overwrite control."
+
+[node name="HardSwitchButton" type="Button" parent="Margin/RootVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Use Hard Direction Switching"
+tooltip_text = "Use only the nearest directional cell; no sprite or mesh blending."
+
+[node name="BlendModeControls" parent="Margin/RootVBox" instance=ExtResource("4_blend")]
+unique_name_in_owner = true
+
+[node name="MeshBlendControls" parent="Margin/RootVBox" instance=ExtResource("5_mesh_blend")]
+unique_name_in_owner = true
+
+[node name="DirectionScrubPreview" parent="Margin/RootVBox" instance=ExtResource("6_preview")]
+unique_name_in_owner = true
+
+[node name="MissingCellDiagnostics" parent="Margin/RootVBox" instance=ExtResource("7_missing")]
+unique_name_in_owner = true
+
+[node name="PixelModeControls" parent="Margin/RootVBox" instance=ExtResource("8_pixel")]
+unique_name_in_owner = true
+
+[node name="FilenameBatchButton" type="Button" parent="Margin/RootVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+text = "Batch Place from Filenames"
+tooltip_text = "Preview and atomically assign multiple directional cells from filename conventions."
+
+[node name="FeedbackLabel" type="Label" parent="Margin/RootVBox"]
+unique_name_in_owner = true
+layout_mode = 2
+autowrap_mode = 2
+
+[node name="FilenamePlacementDialog" parent="." instance=ExtResource("2_dialog")]
+unique_name_in_owner = true
+
+[node name="FacingMirrorDialog" parent="." instance=ExtResource("3_mirror")]
+unique_name_in_owner = true

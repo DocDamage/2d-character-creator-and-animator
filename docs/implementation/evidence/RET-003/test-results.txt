@@ -1,0 +1,2 @@
+Full Godot suite: 460 PASS, 0 FAIL. Factors 15/10=1.5 and 10/20=.5 passed;
+zero source length was rejected.

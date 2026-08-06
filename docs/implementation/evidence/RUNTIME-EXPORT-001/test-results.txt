@@ -1,0 +1,11 @@
+Command: godot --headless --path . --scene tests/test_runner.tscn
+Result: 493 PASS, 0 FAIL
+
+Focused checks:
+- EXP-009 through EXP-012 batch character/weapon packages, progress callbacks,
+  cancellation, artifact validation, and output-open verification.
+- GDT-001 through GDT-011 runtime mappings, AnimationPlayer/AnimationTree,
+  weighted meshes, sprites, markers, collision nodes, tracks/curves, appearance,
+  grip targets, rules, fallback metadata, and debug snapshots.
+- GDT-012 through GDT-014 appearance persistence, clean-consumer loading,
+  importer reports, and `docs/architecture/RUNTIME_PLUGIN_API.md`.

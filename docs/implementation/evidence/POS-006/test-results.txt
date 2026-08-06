@@ -1,0 +1,5 @@
+Godot 4.7.1 full suite: 459 PASS, 0 FAIL.
+Focused acceptance: thumbnail rendering returned a 128×96 image/texture and
+the exact saved bone-transform count; the Saved Poses panel returned a valid
+thumbnail for a selected saved pose.
+Policy scans and evidence validation are recorded after this bundle completes.

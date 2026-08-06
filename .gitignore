@@ -1,0 +1,50 @@
+# Godot
+.godot/
+*.import
+*.godot
+export_presets.cfg
+.mono/
+*.translation
+
+# Build artifacts
+*.pyc
+__pycache__/
+*.o
+*.obj
+*.exe
+*.pck
+*.dll
+*.so
+*.dylib
+
+# IDE
+.idea/
+*.sublime-*
+.vs/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Project
+*.tmp
+*.log
+*.journal
+autosave/
+backups/
+user/
+exported/
+
+# Evidence artifacts (keep structure, ignore large binary outputs)
+docs/implementation/evidence/*/screenshots/*.png
+docs/implementation/evidence/*/exports/*
+!docs/implementation/evidence/*/exports/.gitkeep
+
+# Sample outputs
+samples/*/export/*
+!samples/*/export/.gitkeep

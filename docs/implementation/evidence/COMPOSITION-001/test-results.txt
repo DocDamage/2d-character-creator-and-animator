@@ -1,0 +1,8 @@
+Command: godot --headless --path . --scene tests/test_runner.tscn
+Result: 490 PASS, 0 FAIL
+
+Focused checks:
+- BLD-001 through BLD-005 blend masks, additive layers, sync groups, and weapon overlays.
+- STM-001 through STM-004 preserve visual graph layout, nested machines, preview, and runtime export.
+- RUL-001 through RUL-005 cover timeline windows, events, action cascades, diagnostics, and cycle prevention.
+- LNK-001 through LNK-008 cover linked rigs/characters/accessories, local overrides, conflicts, recovery, packages, and previews.

@@ -1,0 +1,9 @@
+Command: godot --headless --path . --scene tests/test_runner.tscn
+Result: 481 PASS, 0 FAIL
+
+Character-specific checks:
+- CHR-001/CHR-002 part, body, and slot schemas validate and browse.
+- CHR-003/CHR-004 assemblies reject conflicts with actionable explanations.
+- CHR-005 through CHR-016 cover browse, palettes, maps, outfits, locks, presets,
+  compatible weapons, undo/redo, session round trip, and creator docking.
+- QA-CHR-001 acceptance scenario produces 100 distinct reproducible characters.
