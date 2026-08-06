@@ -110,9 +110,11 @@ func _refresh_labels(coverage: Dictionary, validation: Dictionary) -> void:
 	else:
 		summary_label.text = "%d / %d body-direction poses covered." % [int(coverage.get("covered_count", 0)), int(coverage.get("total_count", 0))]
 	var messages: Array = validation.get("errors", []).duplicate()
-	if messages.is_empty():
-		messages.append("Workflow is valid.")
-	diagnostics_label.text = "\n".join(messages)
+	var valid := messages.is_empty()
+	if valid: messages.append("Workflow is valid.")
+	diagnostics_label.text = ("✓ " if valid else "× ") + "\n".join(messages)
+	if ThemeService != null:
+		diagnostics_label.add_theme_color_override("font_color", ThemeService.get_color_token("success" if valid else "error"))
 
 
 func _on_workflow_selected(index: int) -> void:

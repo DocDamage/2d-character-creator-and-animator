@@ -63,15 +63,15 @@ func test_clean_undo_index_tracking() -> void:
 func test_document_title_formatting() -> void:
 	AppState.close_project()
 	var title_unloaded := AppState.get_formatted_title()
-	_assert_bool(title_unloaded == "Modular 2D Character Studio", "Unloaded title matches default application name.")
+	_assert_bool(title_unloaded == "Paper Quest Character Studio", "Unloaded title matches Paper Quest application name.")
 
 	AppState.open_project("c:/projects/my_hero.json")
 	var title_clean := AppState.get_formatted_title()
-	_assert_bool(title_clean == "my_hero.json - Modular 2D Character Studio", "Clean project title includes file name.")
+	_assert_bool(title_clean == "my_hero.json - Paper Quest Character Studio", "Clean project title includes file name.")
 
 	AppState.mark_dirty()
 	var title_dirty := AppState.get_formatted_title()
-	_assert_bool(title_dirty == "my_hero.json - Modular 2D Character Studio *", "Dirty project title appends dirty indicator '*'.")
+	_assert_bool(title_dirty == "my_hero.json - Paper Quest Character Studio *", "Dirty project title appends dirty indicator '*'.")
 
 	AppState.clear_dirty()
 

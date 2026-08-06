@@ -63,4 +63,7 @@ func _add_node(node_id: String, title: String, position: Array, detail: String) 
 
 
 func _refresh(message: String) -> void:
-	if status_label != null: status_label.text = message
+	if status_label == null: return
+	var ready := "ready" in message.to_lower()
+	status_label.text = ("✓ " if ready else "i ") + message
+	if ThemeService != null: status_label.add_theme_color_override("font_color", ThemeService.get_color_token("success" if ready else "blue"))

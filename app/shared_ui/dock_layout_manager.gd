@@ -152,7 +152,7 @@ func _on_panel_region_changed(panel_id: String, new_region: String) -> void:
 func _apply_default_preset() -> void:
 	for pid in _panels:
 		set_panel_visible(pid, true)
-	activate_panel("panel_viewport")
+	activate_panel("panel_project_hub")
 
 func _apply_character_creator_preset() -> void:
 	for pid in _panels:

@@ -38,8 +38,7 @@ theme_override_constants/separation = 2
 
 [node name="Eyebrow" type="Label" parent="Margin/Root/Header/TitleGroup"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.560784, 0.611765, 0.698039, 1)
-theme_override_font_sizes/font_size = 11
+theme_type_variation = &"SectionLabel"
 text = "CHARACTER"
 
 [node name="Title" type="Label" parent="Margin/Root/Header/TitleGroup"]
@@ -49,8 +48,7 @@ text = "Character Creator"
 
 [node name="Hint" type="Label" parent="Margin/Root/Header/TitleGroup"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.560784, 0.611765, 0.698039, 1)
-theme_override_font_sizes/font_size = 12
+theme_type_variation = &"MutedLabel"
 text = "Choose compatible modular parts and validate the live character."
 
 [node name="Apply" type="Button" parent="Margin/Root/Header"]
@@ -82,8 +80,7 @@ theme_override_constants/separation = 8
 
 [node name="PickerTitle" type="Label" parent="Margin/Root/Content/Picker/PickerMargin/PickerVBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.560784, 0.611765, 0.698039, 1)
-theme_override_font_sizes/font_size = 11
+theme_type_variation = &"SectionLabel"
 text = "ASSETS"
 
 [node name="Search" type="LineEdit" parent="Margin/Root/Content/Picker/PickerMargin/PickerVBox"]
@@ -194,8 +191,7 @@ surface_mode = "viewport"
 
 [node name="DirectionLabel" type="Label" parent="Margin/Root/Content/PreviewCard/PreviewMargin/PreviewVBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.560784, 0.611765, 0.698039, 1)
-theme_override_font_sizes/font_size = 11
+theme_type_variation = &"SectionLabel"
 text = "DIRECTION PREVIEW"
 
 [node name="Directions" type="HBoxContainer" parent="Margin/Root/Content/PreviewCard/PreviewMargin/PreviewVBox"]
@@ -245,6 +241,5 @@ text = "NW"
 
 [node name="Status" type="Label" parent="Margin/Root"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.321569, 0.8, 0.501961, 1)
 theme_override_font_sizes/font_size = 12
 autowrap_mode = 2

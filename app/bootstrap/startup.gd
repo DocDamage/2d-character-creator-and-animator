@@ -12,7 +12,7 @@ signal workspace_transition_requested(path: String)
 
 ## === Constants ==============================================================
 
-const APP_NAME := "Modular 2D Character Studio"
+const APP_NAME := "Paper Quest Character Studio"
 const APP_VERSION := "0.1.0-dev"
 const APP_BUILD_DATE := "2026-08-05"
 const SAMPLE_PROJECT_PATH := "res://tests/fixtures/baseline/sample_project.json"
@@ -53,6 +53,7 @@ var _search_filter: String = ""
 ## === Lifecycle ==============================================================
 
 func _ready() -> void:
+	if ThemeService != null: ThemeService.apply_to_window(get_window())
 	if _version_label != null:
 		_version_label.text = "Project dashboard · v%s" % APP_VERSION
 	_connect_ui_signals()
@@ -142,6 +143,7 @@ func refresh_recent_list() -> void:
 
 	if _empty_label != null:
 		_empty_label.visible = (visible_count == 0)
+	_recent_list.visible = visible_count > 0
 
 	if _btn_continue_last != null:
 		_btn_continue_last.disabled = projects.is_empty() or not projects[0].get("exists", false)

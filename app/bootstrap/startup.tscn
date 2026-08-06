@@ -1,7 +1,14 @@
-[gd_scene load_steps=3 format=3 uid="uid://startup000000000001"]
+[gd_scene load_steps=11 format=3 uid="uid://startup000000000001"]
 
 [ext_resource type="Script" path="res://app/bootstrap/startup.gd" id="1_startup"]
 [ext_resource type="Script" path="res://app/bootstrap/new_project_dialog.gd" id="2_new_proj_dlg"]
+[ext_resource type="Texture2D" path="res://app/shared_ui/paper_quest/textures/kraft_base.png" id="3_kraft"]
+[ext_resource type="Script" path="res://app/shared_ui/paper_quest/paper_header_bar.gd" id="4_header"]
+[ext_resource type="Script" path="res://app/shared_ui/paper_quest/paper_section.gd" id="5_section"]
+[ext_resource type="Script" path="res://app/shared_ui/paper_quest/paper_diorama.gd" id="6_diorama"]
+[ext_resource type="PackedScene" path="res://app/shared_ui/paper_quest/mascot_help_card.tscn" id="7_guide"]
+[ext_resource type="PackedScene" path="res://app/shared_ui/paper_quest/status_chip.tscn" id="8_chip"]
+[ext_resource type="Script" path="res://app/bootstrap/startup_paper_quest_presenter.gd" id="9_presenter"]
 
 [node name="Startup" type="Control"]
 layout_mode = 3
@@ -12,14 +19,32 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_startup")
 
-[node name="Background" type="ColorRect" parent="."]
+[node name="PaperQuestPresenter" type="Node" parent="."]
+script = ExtResource("9_presenter")
+
+[node name="Background" type="PanelContainer" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.0352941, 0.0431373, 0.0627451, 1)
+mouse_filter = 2
+theme_type_variation = &"CardboardPanel"
+
+[node name="BackgroundTexture" type="TextureRect" parent="." groups=["paper_quest_texture"]]
+modulate = Color(1, 1, 1, 0.46)
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+texture_repeat = 2
+texture = ExtResource("3_kraft")
+expand_mode = 1
+stretch_mode = 1
 
 [node name="MarginContainer" type="MarginContainer" parent="."]
 layout_mode = 1
@@ -28,79 +53,113 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/margin_left = 48
-theme_override_constants/margin_top = 32
-theme_override_constants/margin_right = 48
-theme_override_constants/margin_bottom = 32
+theme_override_constants/margin_left = 18
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 18
+theme_override_constants/margin_bottom = 14
 
 [node name="MainLayout" type="VBoxContainer" parent="MarginContainer"]
 layout_mode = 2
-theme_override_constants/separation = 16
+theme_override_constants/separation = 10
 
 [node name="Header" type="HBoxContainer" parent="MarginContainer/MainLayout"]
+custom_minimum_size = Vector2(0, 72)
 layout_mode = 2
-custom_minimum_size = Vector2(0, 64)
-theme_override_constants/separation = 12
+theme_override_constants/separation = 10
+script = ExtResource("4_header")
+
+[node name="Inset" type="Control" parent="MarginContainer/MainLayout/Header"]
+custom_minimum_size = Vector2(12, 0)
+layout_mode = 2
 
 [node name="BrandMark" type="Button" parent="MarginContainer/MainLayout/Header"]
-custom_minimum_size = Vector2(36, 36)
+custom_minimum_size = Vector2(48, 48)
 layout_mode = 2
 theme_type_variation = &"PrimaryButton"
-text = "CS"
+text = "PQ"
 
 [node name="HeaderLeft" type="VBoxContainer" parent="MarginContainer/MainLayout/Header"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_constants/separation = 4
+alignment = 1
+theme_override_constants/separation = 0
 
 [node name="TitleLabel" type="Label" parent="MarginContainer/MainLayout/Header/HeaderLeft"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 18
-text = "Character Studio"
+theme_type_variation = &"BrandTitle"
+text = "PAPER QUEST CHARACTER STUDIO"
 
 [node name="VersionLabel" type="Label" parent="MarginContainer/MainLayout/Header/HeaderLeft"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.560784, 0.611765, 0.698039, 1)
-theme_override_font_sizes/font_size = 14
-text = "Project dashboard"
+theme_type_variation = &"BrandSubtitle"
+text = "Project play hub"
 
 [node name="StatusLabel" type="Label" parent="MarginContainer/MainLayout/Header/HeaderLeft"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.321569, 0.8, 0.501961, 1)
-theme_override_font_sizes/font_size = 11
+theme_type_variation = &"CaptionLabel"
 text = "Checking studio services…"
 
 [node name="HeaderRight" type="HBoxContainer" parent="MarginContainer/MainLayout/Header"]
 layout_mode = 2
 alignment = 2
+theme_override_constants/separation = 8
+
+[node name="StartupStateChip" parent="MarginContainer/MainLayout/Header/HeaderRight" instance=ExtResource("8_chip")]
+unique_name_in_owner = true
+layout_mode = 2
+status = 3
+status_text = "Checking"
 
 [node name="BtnToggleLog" type="Button" parent="MarginContainer/MainLayout/Header/HeaderRight"]
+custom_minimum_size = Vector2(104, 40)
 layout_mode = 2
 text = "Diagnostics"
 
-[node name="Greeting" type="VBoxContainer" parent="MarginContainer/MainLayout"]
+[node name="EndInset" type="Control" parent="MarginContainer/MainLayout/Header"]
+custom_minimum_size = Vector2(8, 0)
 layout_mode = 2
-theme_override_constants/separation = 4
 
-[node name="Title" type="Label" parent="MarginContainer/MainLayout/Greeting"]
+[node name="Greeting" type="HBoxContainer" parent="MarginContainer/MainLayout"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 30
-text = "Good morning"
 
-[node name="Subtitle" type="Label" parent="MarginContainer/MainLayout/Greeting"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.560784, 0.611765, 0.698039, 1)
-theme_override_font_sizes/font_size = 14
-text = "Pick up where you left off or start a new character production."
-
-[node name="ContentSplit" type="HSplitContainer" parent="MarginContainer/MainLayout"]
-layout_mode = 2
-size_flags_vertical = 3
-
-[node name="RecentPanel" type="VBoxContainer" parent="MarginContainer/MainLayout/ContentSplit"]
+[node name="Copy" type="VBoxContainer" parent="MarginContainer/MainLayout/Greeting"]
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_constants/separation = 2
+
+[node name="Title" type="Label" parent="MarginContainer/MainLayout/Greeting/Copy"]
+layout_mode = 2
+theme_type_variation = &"DisplayLabel"
+text = "Welcome back, creator"
+
+[node name="Subtitle" type="Label" parent="MarginContainer/MainLayout/Greeting/Copy"]
+layout_mode = 2
+theme_type_variation = &"MutedLabel"
+text = "Continue your papercraft adventure or begin a new character production."
+
+[node name="StartupSummary" type="Label" parent="MarginContainer/MainLayout/Greeting"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"MutedLabel"
+text = "Preparing project services"
+
+[node name="ContentSplit" type="HBoxContainer" parent="MarginContainer/MainLayout"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 12
+
+[node name="RecentPanel" type="VBoxContainer" parent="MarginContainer/MainLayout/ContentSplit"]
+custom_minimum_size = Vector2(280, 0)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.25
 theme_override_constants/separation = 10
+script = ExtResource("5_section")
+accent = "blue"
+
+[node name="PanelInset" type="Control" parent="MarginContainer/MainLayout/ContentSplit/RecentPanel"]
+custom_minimum_size = Vector2(0, 4)
+layout_mode = 2
 
 [node name="HeaderBar" type="HBoxContainer" parent="MarginContainer/MainLayout/ContentSplit/RecentPanel"]
 layout_mode = 2
@@ -108,10 +167,11 @@ layout_mode = 2
 [node name="RecentTitle" type="Label" parent="MarginContainer/MainLayout/ContentSplit/RecentPanel/HeaderBar"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 18
-text = "Recent projects"
+theme_type_variation = &"SectionLabel"
+text = "RECENT QUESTS"
 
 [node name="BtnClearMissing" type="Button" parent="MarginContainer/MainLayout/ContentSplit/RecentPanel/HeaderBar"]
+custom_minimum_size = Vector2(84, 36)
 layout_mode = 2
 text = "Manage"
 
@@ -119,87 +179,203 @@ text = "Manage"
 layout_mode = 2
 
 [node name="SearchEdit" type="LineEdit" parent="MarginContainer/MainLayout/ContentSplit/RecentPanel/SearchBar"]
+custom_minimum_size = Vector2(0, 38)
 layout_mode = 2
 size_flags_horizontal = 3
-placeholder_text = "Search projects…"
+placeholder_text = "Search recent projects…"
 
 [node name="RecentList" type="ItemList" parent="MarginContainer/MainLayout/ContentSplit/RecentPanel"]
 layout_mode = 2
 size_flags_vertical = 3
+focus_mode = 2
 
 [node name="EmptyLabel" type="Label" parent="MarginContainer/MainLayout/ContentSplit/RecentPanel"]
 visible = false
 layout_mode = 2
-text = "No recent projects found."
+size_flags_vertical = 3
+theme_type_variation = &"MutedLabel"
+text = "No recent quests yet.\nOpen the starter sample to begin your first adventure."
 horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_mode = 2
+
+[node name="Guide" parent="MarginContainer/MainLayout/ContentSplit/RecentPanel" instance=ExtResource("7_guide")]
+custom_minimum_size = Vector2(0, 126)
+layout_mode = 2
+title = "Pip's route"
+message = "Create builds your hero. Rig adds structure. Animate brings the quest to life."
+
+[node name="CurrentProject" type="PanelContainer" parent="MarginContainer/MainLayout/ContentSplit"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.50
+theme_type_variation = &"PaperPanel"
+
+[node name="Margin" type="MarginContainer" parent="MarginContainer/MainLayout/ContentSplit/CurrentProject"]
+layout_mode = 2
+theme_override_constants/margin_left = 14
+theme_override_constants/margin_top = 14
+theme_override_constants/margin_right = 14
+theme_override_constants/margin_bottom = 14
+
+[node name="VBox" type="VBoxContainer" parent="MarginContainer/MainLayout/ContentSplit/CurrentProject/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Label" type="Label" parent="MarginContainer/MainLayout/ContentSplit/CurrentProject/Margin/VBox"]
+layout_mode = 2
+theme_type_variation = &"SectionLabel"
+text = "CURRENT PROJECT"
+
+[node name="Diorama" type="Control" parent="MarginContainer/MainLayout/ContentSplit/CurrentProject/Margin/VBox"]
+custom_minimum_size = Vector2(0, 330)
+layout_mode = 2
+size_flags_vertical = 3
+script = ExtResource("6_diorama")
+
+[node name="CurrentProjectTitle" type="Label" parent="MarginContainer/MainLayout/ContentSplit/CurrentProject/Margin/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"H1Label"
+text = "Choose your next quest"
+
+[node name="CurrentProjectPath" type="Label" parent="MarginContainer/MainLayout/ContentSplit/CurrentProject/Margin/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"MutedLabel"
+text = "Your most recent project will appear here."
+autowrap_mode = 2
+
+[node name="ProjectNote" type="Label" parent="MarginContainer/MainLayout/ContentSplit/CurrentProject/Margin/VBox"]
+layout_mode = 2
+text = "Every workspace edits the same production document, with undo, autosave, validation, and export preserved."
+autowrap_mode = 2
 
 [node name="QuickStartPanel" type="PanelContainer" parent="MarginContainer/MainLayout/ContentSplit"]
-custom_minimum_size = Vector2(330, 0)
+custom_minimum_size = Vector2(310, 0)
 layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.25
+theme_type_variation = &"PaperPanel"
 
 [node name="VBox" type="VBoxContainer" parent="MarginContainer/MainLayout/ContentSplit/QuickStartPanel"]
 layout_mode = 2
-theme_override_constants/separation = 12
+theme_override_constants/separation = 10
 
 [node name="QuickTitle" type="Label" parent="MarginContainer/MainLayout/ContentSplit/QuickStartPanel/VBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 18
-text = "Quick start"
+theme_type_variation = &"SectionLabel"
+text = "WHAT DO YOU WANT TO DO?"
 
 [node name="BtnNewProject" type="Button" parent="MarginContainer/MainLayout/ContentSplit/QuickStartPanel/VBox"]
+custom_minimum_size = Vector2(0, 46)
 layout_mode = 2
 theme_type_variation = &"PrimaryButton"
-text = "New character project"
+text = "Create new character project"
 
 [node name="BtnOpenProject" type="Button" parent="MarginContainer/MainLayout/ContentSplit/QuickStartPanel/VBox"]
+custom_minimum_size = Vector2(0, 42)
 layout_mode = 2
 text = "Open project"
 
 [node name="BtnOpenSample" type="Button" parent="MarginContainer/MainLayout/ContentSplit/QuickStartPanel/VBox"]
+custom_minimum_size = Vector2(0, 42)
 layout_mode = 2
-text = "Open starter sample"
+theme_type_variation = &"SecondaryButton"
+text = "Explore starter sample"
 
 [node name="BtnContinueLast" type="Button" parent="MarginContainer/MainLayout/ContentSplit/QuickStartPanel/VBox"]
+custom_minimum_size = Vector2(0, 42)
 layout_mode = 2
-text = "Continue last project"
+text = "Continue latest project"
+
+[node name="Divider" type="HSeparator" parent="MarginContainer/MainLayout/ContentSplit/QuickStartPanel/VBox"]
+layout_mode = 2
+
+[node name="HealthTitle" type="Label" parent="MarginContainer/MainLayout/ContentSplit/QuickStartPanel/VBox"]
+layout_mode = 2
+theme_type_variation = &"SectionLabel"
+text = "STUDIO HEALTH"
+
+[node name="HealthChip" parent="MarginContainer/MainLayout/ContentSplit/QuickStartPanel/VBox" instance=ExtResource("8_chip")]
+unique_name_in_owner = true
+layout_mode = 2
+status = 3
+status_text = "Checking services"
+
+[node name="HealthCopy" type="Label" parent="MarginContainer/MainLayout/ContentSplit/QuickStartPanel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"MutedLabel"
+text = "Startup diagnostics are still running."
+autowrap_mode = 2
+
+[node name="WorkflowDivider" type="HSeparator" parent="MarginContainer/MainLayout/ContentSplit/QuickStartPanel/VBox"]
+layout_mode = 2
+
+[node name="RouteTitle" type="Label" parent="MarginContainer/MainLayout/ContentSplit/QuickStartPanel/VBox"]
+layout_mode = 2
+theme_type_variation = &"SectionLabel"
+text = "YOUR ADVENTURE ROUTE"
+
+[node name="RouteCreate" type="Label" parent="MarginContainer/MainLayout/ContentSplit/QuickStartPanel/VBox"]
+layout_mode = 2
+text = "1  CREATE  ·  Assemble your hero"
+
+[node name="RouteRig" type="Label" parent="MarginContainer/MainLayout/ContentSplit/QuickStartPanel/VBox"]
+layout_mode = 2
+text = "2  RIG  ·  Add joints and controls"
+
+[node name="RouteAnimate" type="Label" parent="MarginContainer/MainLayout/ContentSplit/QuickStartPanel/VBox"]
+layout_mode = 2
+text = "3  ANIMATE  ·  Bring the quest to life"
+
+[node name="RouteExport" type="Label" parent="MarginContainer/MainLayout/ContentSplit/QuickStartPanel/VBox"]
+layout_mode = 2
+text = "4  EXPORT  ·  Pack your sprite sheets"
 
 [node name="Overview" type="PanelContainer" parent="MarginContainer/MainLayout"]
-custom_minimum_size = Vector2(0, 96)
+custom_minimum_size = Vector2(0, 78)
 layout_mode = 2
+theme_type_variation = &"StatusBar"
 
 [node name="OverviewVBox" type="VBoxContainer" parent="MarginContainer/MainLayout/Overview"]
 layout_mode = 2
-theme_override_constants/separation = 8
 
 [node name="Title" type="Label" parent="MarginContainer/MainLayout/Overview/OverviewVBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.560784, 0.611765, 0.698039, 1)
-theme_override_font_sizes/font_size = 11
-text = "PRODUCTION OVERVIEW"
+theme_type_variation = &"StatusBarLabel"
+text = "QUEST OVERVIEW"
 
 [node name="Metrics" type="HBoxContainer" parent="MarginContainer/MainLayout/Overview/OverviewVBox"]
 layout_mode = 2
-theme_override_constants/separation = 32
+theme_override_constants/separation = 36
 
 [node name="Characters" type="Label" parent="MarginContainer/MainLayout/Overview/OverviewVBox/Metrics"]
 layout_mode = 2
-text = "Characters\n0 active"
+theme_type_variation = &"StatusBarLabel"
+text = "CHARACTERS  ·  Ready to create"
 
 [node name="Clips" type="Label" parent="MarginContainer/MainLayout/Overview/OverviewVBox/Metrics"]
 layout_mode = 2
-text = "Animation clips\n0 ready"
+theme_type_variation = &"StatusBarLabel"
+text = "ANIMATION  ·  Production tools available"
 
 [node name="Validation" type="Label" parent="MarginContainer/MainLayout/Overview/OverviewVBox/Metrics"]
 layout_mode = 2
-text = "Validation\nNo conflicts"
+theme_type_variation = &"StatusBarLabel"
+text = "DIAGNOSTICS  ·  Pending"
 
 [node name="Autosave" type="Label" parent="MarginContainer/MainLayout/Overview/OverviewVBox/Metrics"]
 layout_mode = 2
-text = "Autosave\nEnabled"
+theme_type_variation = &"StatusBarLabel"
+text = "AUTOSAVE  ·  Enabled"
 
 [node name="LogDrawer" type="PanelContainer" parent="MarginContainer/MainLayout"]
-custom_minimum_size = Vector2(0, 120)
+visible = false
+custom_minimum_size = Vector2(0, 150)
 layout_mode = 2
+theme_type_variation = &"PaperPanel"
 
 [node name="LogText" type="TextEdit" parent="MarginContainer/MainLayout/LogDrawer"]
 layout_mode = 2
@@ -207,7 +383,7 @@ editable = false
 wrap_mode = 1
 
 [node name="NewProjectDialog" type="ConfirmationDialog" parent="."]
-title = "Create New Project"
+title = "Create New Paper Quest Project"
 initial_position = 2
 size = Vector2i(450, 260)
 script = ExtResource("2_new_proj_dlg")
@@ -257,7 +433,7 @@ size_flags_horizontal = 3
 
 [node name="ErrorLabel" type="Label" parent="NewProjectDialog/VBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.4, 0.4, 1)
+theme_override_colors/font_color = Color(0.784314, 0.305882, 0.227451, 1)
 
 [node name="MissingProjectDialog" type="ConfirmationDialog" parent="."]
 title = "Project Not Found"

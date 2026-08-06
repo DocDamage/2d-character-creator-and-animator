@@ -52,4 +52,10 @@ func _on_progress(done: int, total: int, _result: Dictionary) -> void:
 
 
 func _refresh(message: String) -> void:
-	if status_label != null: status_label.text = message
+	if status_label == null: return
+	var lower := message.to_lower()
+	var is_error := "stopped" in lower or "must" in lower or "failed" in lower
+	var is_success := "complete" in lower or "ready" in lower or "queued" in lower
+	status_label.text = ("× " if is_error else ("✓ " if is_success else "i ")) + message
+	if ThemeService != null:
+		status_label.add_theme_color_override("font_color", ThemeService.get_color_token("error" if is_error else ("success" if is_success else "blue")))

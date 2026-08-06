@@ -195,6 +195,7 @@ func _focus_workspace_primary_panel(workspace_id: String) -> void:
 		return
 	var primary_panel := "panel_viewport"
 	match workspace_id:
+		WORKSPACE_PROJECT_ASSETS: primary_panel = "panel_project_hub"
 		WORKSPACE_CHARACTER_CREATOR: primary_panel = "panel_character_creator"
 		WORKSPACE_ANIMATION_STUDIO: primary_panel = "panel_animation_composition"
 		WORKSPACE_WEAPON_EQUIPMENT: primary_panel = "panel_weapon_wizard"

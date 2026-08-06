@@ -2,6 +2,9 @@
 extends Node
 
 const MainWindowScene = preload("res://app/shared_ui/main_window.tscn")
+const PaperButtonScene = preload("res://app/shared_ui/paper_quest/paper_button.tscn")
+const StatusChipScene = preload("res://app/shared_ui/paper_quest/status_chip.tscn")
+const ProjectHubScene = preload("res://app/bootstrap/project_hub_panel.tscn")
 
 var _pass_count: int = 0
 var _fail_count: int = 0
@@ -18,6 +21,8 @@ func run_all_tests() -> bool:
 	test_dpi_scale_clamping()
 	test_dpi_scale_cycling()
 	test_theme_settings_export_import()
+	test_paper_quest_appearance_modes()
+	test_paper_quest_native_components()
 	test_command_palette_shortcuts()
 	test_main_window_theme_integration()
 	
@@ -151,6 +156,40 @@ func test_theme_settings_export_import() -> void:
 	_assert(success, "import_settings returns true.")
 	_assert(ThemeService.get_theme_mode() == ThemeService.ThemeMode.LIGHT, "Import restored LIGHT theme mode.")
 	_assert(absf(ThemeService.get_dpi_scale() - 1.75) < 0.001, "Import restored 1.75 DPI scale.")
+
+func test_paper_quest_appearance_modes() -> void:
+	if ThemeService == null:
+		return
+	ThemeService.set_high_contrast(false)
+	ThemeService.set_theme_mode(ThemeService.ThemeMode.LIGHT)
+	_assert(ThemeService.get_appearance_mode_name() == "Craft", "LIGHT migrates to the Paper Quest Craft appearance.")
+	ThemeService.set_theme_mode(ThemeService.ThemeMode.DARK)
+	_assert(ThemeService.get_appearance_mode_name() == "Dark Craft", "DARK migrates to the Paper Quest Dark Craft appearance.")
+	ThemeService.set_high_contrast(true)
+	_assert(ThemeService.get_appearance_mode_name() == "High Contrast", "High Contrast is exposed as a distinct Paper Quest appearance.")
+	_assert(ThemeService.get_color_token("bg_main") == Color.BLACK, "High Contrast uses a texture-free black shell token.")
+	var exported := ThemeService.export_settings()
+	_assert(exported.get("appearance_mode") == "High Contrast", "Appearance export records the semantic Paper Quest mode.")
+	ThemeService.import_settings({"theme_mode": "LIGHT", "dpi_scale": 1.0, "high_contrast": false, "reduced_motion": false})
+	_assert(ThemeService.get_appearance_mode_name() == "Craft", "Legacy LIGHT settings import into Craft without data loss.")
+
+func test_paper_quest_native_components() -> void:
+	var button := PaperButtonScene.instantiate() as Button
+	add_child(button)
+	_assert(button.custom_minimum_size.x >= 40.0 and button.custom_minimum_size.y >= 40.0, "Paper button preserves the 40 px interaction target.")
+	_assert(button.focus_mode == Control.FOCUS_ALL, "Paper button is keyboard and controller focusable.")
+	var chip := StatusChipScene.instantiate() as PanelContainer
+	add_child(chip)
+	chip.call("set_status", "Missing source", PaperQuestStatusChip.Status.ERROR)
+	var chip_text := chip.get_node("Margin/Row/Text") as Label
+	_assert(chip_text.text == "Missing source" and chip.tooltip_text.contains("Error"), "Status chip pairs real text with a semantic error description.")
+	var hub := ProjectHubScene.instantiate() as Control
+	add_child(hub)
+	var create_button := hub.get_node("Margin/Root/Content/Left/Actions/Margin/VBox/CreateButton") as Button
+	_assert(create_button.focus_mode == Control.FOCUS_ALL and create_button.custom_minimum_size.y >= 40.0, "Project hub quick actions remain native focusable controls.")
+	button.queue_free()
+	chip.queue_free()
+	hub.queue_free()
 
 func test_command_palette_shortcuts() -> void:
 	if ShortcutRegistry == null:

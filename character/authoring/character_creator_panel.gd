@@ -68,4 +68,10 @@ func _on_redo() -> void:
 
 
 func _refresh_status(message: String) -> void:
-	if status_label != null: status_label.text = message
+	if status_label == null: return
+	var lower := message.to_lower()
+	var is_error := "failed" in lower or "could not" in lower or "invalid" in lower or "conflict" in lower
+	var is_success := "ready" in lower or "equipped" in lower or "randomized" in lower
+	var token := "error" if is_error else ("success" if is_success else "blue")
+	status_label.text = ("× " if is_error else ("✓ " if is_success else "i ")) + message
+	if ThemeService != null: status_label.add_theme_color_override("font_color", ThemeService.get_color_token(token))

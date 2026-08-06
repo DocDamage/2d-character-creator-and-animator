@@ -11,6 +11,7 @@ const PoseLibraryPanelScene = preload("res://rigging/poses/pose_library_panel.ts
 const RetargetPreviewPanelScene = preload("res://rigging/retargeting/retarget_preview_panel.tscn")
 const WeaponAuthoringWizardScene = preload("res://weapons/authoring/weapon_authoring_wizard.tscn")
 const CharacterCreatorPanelScene = preload("res://character/authoring/character_creator_panel.tscn")
+const ProjectHubPanelScene = preload("res://app/bootstrap/project_hub_panel.tscn")
 const MediaAuthoringPanelScene = preload("res://media/media_authoring_panel.tscn"); const AnimationCompositionPanelScene = preload("res://animation/authoring/animation_composition_panel.tscn"); const BatchExportPanelScene = preload("res://export/batch/batch_export_panel.tscn"); const QualityDashboardPanelScene = preload("res://quality/dashboard/quality_dashboard_panel.tscn")
 @onready var dock_layout_manager: Node = $DockLayoutManager
 @onready var status_message_label: Label = %StatusMessageLabel
@@ -23,6 +24,7 @@ const MediaAuthoringPanelScene = preload("res://media/media_authoring_panel.tscn
 @onready var unsaved_changes_dialog: Control = get_node_or_null("%UnsavedChangesDialog") as Control
 var _current_status: String = "Ready"
 func _ready() -> void:
+	if ThemeService != null: ThemeService.apply_to_window(get_window())
 	_setup_dock_regions()
 	_setup_default_panels()
 	_setup_workspace_manager()
@@ -95,6 +97,7 @@ func _setup_default_panels() -> void:
 		["panel_assets", "Asset Browser", DockPanelScript.DockRegion.LEFT, "LEFT"],
 		["panel_hierarchy", "Hierarchy & Rig", DockPanelScript.DockRegion.LEFT, "LEFT"], ["panel_pose_library", "Saved Poses", DockPanelScript.DockRegion.LEFT, "LEFT"], ["panel_retarget_preview", "Retarget Preview", DockPanelScript.DockRegion.RIGHT, "RIGHT"],
 		["panel_viewport", "2D Canvas Viewport", DockPanelScript.DockRegion.CENTER, "CENTER"],
+		["panel_project_hub", "Project Play Hub", DockPanelScript.DockRegion.CENTER, "CENTER"],
 		["panel_facing_grid", "Facing Grid Directions", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_weapon_wizard", "Weapon Authoring Wizard", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_character_creator", "Character Creator", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_media_authoring", "Media Authoring", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_animation_composition", "Animation Composition", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_batch_export", "Batch Export", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_quality_dashboard", "Quality & Recovery", DockPanelScript.DockRegion.CENTER, "CENTER"],
 		["panel_inspector", "Inspector & Properties", DockPanelScript.DockRegion.RIGHT, "RIGHT"],
 		["panel_timeline", "Animation Timeline", DockPanelScript.DockRegion.BOTTOM, "BOTTOM"],
@@ -126,6 +129,7 @@ func _create_dock_panel(pid: String, title: String, region: int) -> Control:
 	elif pid == "panel_weapon_wizard" and WeaponAuthoringWizardScene != null:
 		p.call("add_content", WeaponAuthoringWizardScene.instantiate() as Control)
 	elif pid == "panel_character_creator" and CharacterCreatorPanelScene != null: p.call("add_content", CharacterCreatorPanelScene.instantiate() as Control)
+	elif pid == "panel_project_hub" and ProjectHubPanelScene != null: p.call("add_content", ProjectHubPanelScene.instantiate() as Control)
 	elif pid == "panel_media_authoring" and MediaAuthoringPanelScene != null: p.call("add_content", MediaAuthoringPanelScene.instantiate() as Control)
 	elif pid == "panel_animation_composition" and AnimationCompositionPanelScene != null: p.call("add_content", AnimationCompositionPanelScene.instantiate() as Control)
 	elif pid == "panel_batch_export" and BatchExportPanelScene != null: p.call("add_content", BatchExportPanelScene.instantiate() as Control)
@@ -134,6 +138,7 @@ func _create_dock_panel(pid: String, title: String, region: int) -> Control:
 func _setup_workspace_manager() -> void:
 	if WorkspaceManager != null:
 		WorkspaceManager.call("bind_dock_layout_manager", get_dock_layout_manager())
+		get_dock_layout_manager().call("activate_panel", "panel_project_hub")
 		if WorkspaceManager.has_signal("workspace_changed") and not WorkspaceManager.workspace_changed.is_connected(_on_workspace_changed):
 			WorkspaceManager.workspace_changed.connect(_on_workspace_changed)
 func _setup_menu_header() -> void:
@@ -176,7 +181,7 @@ func _setup_focus_framework() -> void:
 		return
 	if menu_bar != null:
 		FocusService.register_focus_group("menu_bar", menu_bar)
-	for pid in ["panel_assets", "panel_hierarchy", "panel_viewport", "panel_facing_grid", "panel_weapon_wizard", "panel_character_creator", "panel_media_authoring", "panel_animation_composition", "panel_batch_export", "panel_quality_dashboard", "panel_inspector", "panel_timeline", "panel_diagnostics"]:
+	for pid in ["panel_assets", "panel_hierarchy", "panel_viewport", "panel_project_hub", "panel_facing_grid", "panel_weapon_wizard", "panel_character_creator", "panel_media_authoring", "panel_animation_composition", "panel_batch_export", "panel_quality_dashboard", "panel_inspector", "panel_timeline", "panel_diagnostics"]:
 		var p := get_panel(pid)
 		if p != null:
 			FocusService.register_focus_group(pid, p)
@@ -204,14 +209,12 @@ func _on_dirty_state_changed(_is_dirty: bool) -> void:
 	if get_window() != null and AppState != null:
 		get_window().title = AppState.get_formatted_title()
 	set_status_message(_current_status)
-
 func _handle_close_request() -> void:
 	if AppState != null and AppState.is_dirty() and unsaved_changes_dialog != null:
 		get_tree().set_auto_accept_quit(false)
 		unsaved_changes_dialog.call("prompt", "You have unsaved changes in your current project.\nDo you want to save before closing?", Callable(self, "_on_close_dialog_choice"))
 	else:
 		get_tree().quit()
-
 func _on_close_dialog_choice(choice: int) -> void:
 	if choice == UnsavedDialogScript.Choice.SAVE:
 		_on_cmd_save_project()
@@ -220,17 +223,14 @@ func _on_close_dialog_choice(choice: int) -> void:
 		if AppState != null:
 			AppState.clear_dirty()
 		get_tree().quit()
-
 func _on_cmd_save_project() -> void:
 	if AppState != null:
 		AppState.mark_clean()
 	set_status_message("Project saved successfully.")
-
 func _on_cmd_save_project_as() -> void:
 	if AppState != null:
 		AppState.mark_clean()
 	set_status_message("Project saved as new file.")
-
 func _on_cmd_close_project() -> void:
 	if AppState != null and AppState.is_dirty() and unsaved_changes_dialog != null:
 		unsaved_changes_dialog.call("prompt", "Close current project?", Callable(self, "_on_close_project_choice"))
@@ -238,7 +238,6 @@ func _on_cmd_close_project() -> void:
 		if AppState != null:
 			AppState.close_project()
 		set_status_message("Project closed.")
-
 func _on_close_project_choice(choice: int) -> void:
 	if choice == UnsavedDialogScript.Choice.SAVE:
 		_on_cmd_save_project()

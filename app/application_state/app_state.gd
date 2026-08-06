@@ -100,7 +100,7 @@ func is_redo_available() -> bool:
 
 
 func get_formatted_title() -> String:
-	var base_title := "Modular 2D Character Studio"
+	var base_title := "Paper Quest Character Studio"
 	if _project_loaded and not _project_path.is_empty():
 		var fname := _project_path.get_file()
 		if fname.is_empty():

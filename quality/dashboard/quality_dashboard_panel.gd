@@ -19,6 +19,9 @@ var candidates: Array = []
 
 
 func _ready() -> void:
+	if ThemeService != null:
+		reduced_motion.set_pressed_no_signal(ThemeService.is_reduced_motion())
+		high_contrast.set_pressed_no_signal(ThemeService.is_high_contrast())
 	$Margin/Root/Actions/Scan.pressed.connect(_on_scan)
 	$Margin/Root/Actions/Recover.pressed.connect(_on_recover)
 	$Margin/Root/Actions/Audit.pressed.connect(_on_audit)
@@ -58,4 +61,10 @@ func _on_preferences_changed(_value: bool) -> void:
 
 
 func _refresh(message: String) -> void:
-	if status_label != null: status_label.text = message
+	if status_label == null: return
+	var lower := message.to_lower()
+	var is_error := "did not" in lower or "first" in lower or "failed" in lower
+	var is_success := "completed" in lower or "scanned" in lower or "restored" in lower
+	status_label.text = ("× " if is_error else ("✓ " if is_success else "i ")) + message
+	if ThemeService != null:
+		status_label.add_theme_color_override("font_color", ThemeService.get_color_token("error" if is_error else ("success" if is_success else "blue")))

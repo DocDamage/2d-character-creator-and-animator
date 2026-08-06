@@ -38,8 +38,7 @@ theme_override_constants/separation = 2
 
 [node name="Eyebrow" type="Label" parent="Margin/Root/Header/TitleGroup"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.560784, 0.611765, 0.698039, 1)
-theme_override_font_sizes/font_size = 11
+theme_type_variation = &"SectionLabel"
 text = "ANIMATION STUDIO"
 
 [node name="Title" type="Label" parent="Margin/Root/Header/TitleGroup"]
@@ -49,13 +48,12 @@ text = "Walk_8dir Composition"
 
 [node name="Hint" type="Label" parent="Margin/Root/Header/TitleGroup"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.560784, 0.611765, 0.698039, 1)
-theme_override_font_sizes/font_size = 12
+theme_type_variation = &"MutedLabel"
 text = "Layered blends, state transitions, and rule graph"
 
 [node name="FrameLabel" type="Label" parent="Margin/Root/Header"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.560784, 0.611765, 0.698039, 1)
+theme_type_variation = &"MutedLabel"
 text = "Frame 12 / 24"
 
 [node name="ToolRow" type="HBoxContainer" parent="Margin/Root"]
@@ -101,8 +99,7 @@ surface_mode = "animation"
 
 [node name="GraphLabel" type="Label" parent="Margin/Root"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.560784, 0.611765, 0.698039, 1)
-theme_override_font_sizes/font_size = 11
+theme_type_variation = &"SectionLabel"
 text = "COMPOSITION GRAPH"
 
 [node name="Graph" type="GraphEdit" parent="Margin/Root"]
@@ -135,6 +132,5 @@ bbcode_enabled = false
 
 [node name="Status" type="Label" parent="Margin/Root"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.321569, 0.8, 0.501961, 1)
 theme_override_font_sizes/font_size = 12
 autowrap_mode = 2

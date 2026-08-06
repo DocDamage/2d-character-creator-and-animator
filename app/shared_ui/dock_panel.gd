@@ -99,27 +99,35 @@ func _build_layout_if_needed() -> void:
 
 	var main_box := VBoxContainer.new()
 	main_box.name = "MainVBox"
+	main_box.add_theme_constant_override("separation", 8)
 	add_child(main_box)
 
 	_header_bar = HBoxContainer.new()
 	_header_bar.name = "HeaderBar"
+	_header_bar.custom_minimum_size.y = 40
 	main_box.add_child(_header_bar)
 
 	_title_label = Label.new()
 	_title_label.name = "TitleLabel"
 	_title_label.text = panel_title
+	_title_label.theme_type_variation = &"SectionLabel"
 	_title_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_header_bar.add_child(_title_label)
 
 	_collapse_button = Button.new()
 	_collapse_button.name = "CollapseButton"
 	_collapse_button.text = "-"
-	_collapse_button.custom_minimum_size = Vector2(24, 24)
+	_collapse_button.custom_minimum_size = Vector2(40, 40)
+	_collapse_button.theme_type_variation = &"GhostButton"
 	_collapse_button.pressed.connect(toggle_collapse)
 	_header_bar.add_child(_collapse_button)
 
 	_content_container = MarginContainer.new()
 	_content_container.name = "ContentContainer"
+	_content_container.add_theme_constant_override("margin_left", 6)
+	_content_container.add_theme_constant_override("margin_top", 6)
+	_content_container.add_theme_constant_override("margin_right", 6)
+	_content_container.add_theme_constant_override("margin_bottom", 6)
 	_content_container.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_content_container.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	main_box.add_child(_content_container)
