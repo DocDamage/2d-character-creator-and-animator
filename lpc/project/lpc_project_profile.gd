@@ -2,7 +2,7 @@
 class_name LpcProjectProfile
 extends RefCounted
 
-const PROFILE_SCHEMA_VERSION := "1.2.0"
+const PROFILE_SCHEMA_VERSION := "1.3.0"
 const METADATA_KEY := "lpc_profile"
 const NameSequenceScript = preload("res://lpc/project/lpc_name_sequence.gd")
 
@@ -26,7 +26,7 @@ static func create(options: Dictionary) -> Dictionary:
 		"body_family_id": str(options.get("body_family_id", "")),
 		"direction_set": {"id": "lpc_cardinal_4", "directions": ["up", "left", "down", "right"]},
 		"selections": [], "layer_groups": {}, "selected_license_options": {}, "palette_state": {},
-		"source_frame_references": [], "derivative_references": [], "cels": [], "cel_timeline": {"fps": 10.0, "onion_before": 1, "onion_after": 1}, "pixel_editor_state": {"zoom": 8, "active_tool": "pencil"}, "clips": [], "hybrid_animation_state": {"selected_clip_id": "", "active_direction": "down"}, "frame_meshes": [],
+		"source_frame_references": [], "derivative_references": [], "cels": [], "cel_timeline": {"fps": 10.0, "onion_before": 1, "onion_after": 1}, "pixel_editor_state": {"zoom": 8, "active_tool": "pencil"}, "clips": [], "hybrid_animation_state": {"selected_clip_id": "", "active_direction": "down"}, "frame_meshes": [], "deformation_workspace_state": {"active_mesh_id": "", "preview_mode": "interactive"},
 		"rig_adapters": [], "rig_overrides": {}, "bake_caches": [], "validation_reports": [],
 		"export_profiles": [], "acceptance_records": [], "credit_manifest_inputs": [],
 		"workspace_state": {"workspace_id": "creator", "playhead": 0.0},
@@ -52,6 +52,7 @@ static func validate(profile: Dictionary) -> Array[String]:
 	if not profile.get("cel_timeline", {}) is Dictionary: errors.append("LPC profile cel_timeline must be an object.")
 	if not profile.get("pixel_editor_state", {}) is Dictionary: errors.append("LPC profile pixel_editor_state must be an object.")
 	if not profile.get("hybrid_animation_state", {}) is Dictionary: errors.append("LPC profile hybrid_animation_state must be an object.")
+	if not profile.get("deformation_workspace_state", {}) is Dictionary: errors.append("LPC profile deformation_workspace_state must be an object.")
 	return errors
 
 
@@ -92,6 +93,9 @@ static func migrate(profile: Dictionary) -> Dictionary:
 		from_version = "1.1.0"; changed = true
 	if from_version == "1.1.0":
 		if not result.has("hybrid_animation_state"): result["hybrid_animation_state"] = {"selected_clip_id": "", "active_direction": "down"}
+		from_version = "1.2.0"; changed = true
+	if from_version == "1.2.0":
+		if not result.has("deformation_workspace_state"): result["deformation_workspace_state"] = {"active_mesh_id": "", "preview_mode": "interactive"}
 		result["profile_schema_version"] = PROFILE_SCHEMA_VERSION; changed = true
 		return {"success": true, "changed": changed, "profile": result, "errors": []}
 	return {"success": false, "changed": false, "profile": result, "errors": ["Unsupported LPC profile schema %s." % from_version]}

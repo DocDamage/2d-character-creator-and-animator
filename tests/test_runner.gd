@@ -43,6 +43,7 @@ const TestLpcPhase01Script = preload("res://tests/integration/test_lpc_phase_0_1
 const TestLpcPhase2Script = preload("res://tests/integration/test_lpc_phase_2.gd")
 const TestLpcPhase3Script = preload("res://tests/integration/test_lpc_phase_3.gd")
 const TestLpcPhase4Script = preload("res://tests/integration/test_lpc_phase_4.gd")
+const TestLpcPhase5Script = preload("res://tests/integration/test_lpc_phase_5.gd")
 func _ready() -> void:
 	print("=== Running Automated Test Suite ===")
 	print("")
@@ -314,6 +315,9 @@ func _ready() -> void:
 	# 47. Exercise typed LPC hybrid tracks, persistence, diagnostics, and frame export.
 	var r47 := _exec_sub(TestLpcPhase4Script.new(), pass_count, fail_count)
 	pass_count = r47[0]; fail_count = r47[1]
+	# 48. Exercise strict frame-bound LPC deformation, deterministic bake, persistence, and export parity.
+	var r48 := _exec_sub(TestLpcPhase5Script.new(), pass_count, fail_count)
+	pass_count = r48[0]; fail_count = r48[1]
 	print("")
 	print("=== Test Suite Finished: %d PASS, %d FAIL ===" % [pass_count, fail_count])
 	get_tree().quit(0 if fail_count == 0 else 1)

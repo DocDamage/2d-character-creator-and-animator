@@ -12,6 +12,7 @@ const TransformRendererScript = preload("res://lpc/render/lpc_layer_transform_re
 const ReferenceRendererScript = preload("res://lpc/render/lpc_reference_renderer.gd")
 const SnapshotScript = preload("res://lpc/render/lpc_render_snapshot.gd")
 const LicenseResolverScript = preload("res://lpc/licensing/lpc_license_resolver.gd")
+const StrictFrameBakerScript = preload("res://lpc/deformation/lpc_strict_frame_baker.gd")
 
 
 static func evaluate(catalog: Dictionary, profile: Dictionary, clip: Dictionary, time: float, previous_time: float = -1.0) -> Dictionary:
@@ -30,7 +31,7 @@ static func evaluate(catalog: Dictionary, profile: Dictionary, clip: Dictionary,
 	for instance_id in state.layers:
 		var layer_state: Dictionary = state.layers[instance_id]
 		if not bool(layer_state.get("visible", true)): continue
-		var rendered := _render_layer(catalog, profile, str(instance_id), layer_state, playhead, str(state.get("direction_id", "down")))
+		var rendered := _render_layer(catalog, profile, str(instance_id), layer_state, playhead, str(state.get("direction_id", "down")), state.get("mesh_state", {}))
 		if not bool(rendered.get("success", false)):
 			warnings.append_array(rendered.get("warnings", [])); continue
 		var record: Dictionary = rendered.record; records.append(record); credit_assets.append(rendered.asset)
@@ -91,7 +92,7 @@ static func _apply_track(state: Dictionary, track: Dictionary, time: float, prev
 	state.layers[target_id] = layer
 
 
-static func _render_layer(catalog: Dictionary, profile: Dictionary, instance_id: String, state: Dictionary, time: float, direction_id: String) -> Dictionary:
+static func _render_layer(catalog: Dictionary, profile: Dictionary, instance_id: String, state: Dictionary, time: float, direction_id: String, mesh_state: Dictionary = {}) -> Dictionary:
 	var asset: Dictionary = (catalog.get("assets", {}) as Dictionary).get(str(state.get("asset_id", "")), {})
 	if asset.is_empty(): return {"success": false, "warnings": ["Layer '%s' references an unavailable asset." % instance_id]}
 	var frame: Image = null; var frame_record: Dictionary = {}; var derivative_id := str(state.get("cel_derivative_id", ""))
@@ -106,9 +107,50 @@ static func _render_layer(catalog: Dictionary, profile: Dictionary, instance_id:
 		if not bool(native.get("success", false)): return {"success": false, "warnings": native.get("errors", [])}
 		frame = native.image; frame_record = native.record
 	if not (state.get("palette_map", {}) as Dictionary).is_empty(): frame = PaletteMapperScript.apply(frame, state.get("palette_map", {}))
+	var warped := _apply_frame_warp(profile, asset, frame, mesh_state)
+	var layer_warnings: Array = warped.get("warnings", [])
+	if warped.has("image") and warped.image != null:
+		frame = warped.image
+		frame_record["mesh_id"] = warped.get("mesh_id", "")
+		frame_record["mesh_snapshot_hash"] = warped.get("snapshot_hash", "")
 	frame = TransformRendererScript.render(frame, Vector2i(int(_canvas(profile).width), int(_canvas(profile).height)), state.get("transform", {}))
 	frame_record["instance_id"] = instance_id; frame_record["asset_id"] = asset.get("asset_id", ""); frame_record["z"] = state.get("z", 0); frame_record["transform"] = state.get("transform", {}); frame_record["cel_derivative_id"] = derivative_id
-	return {"success": true, "warnings": [], "image": frame, "record": frame_record, "asset": asset}
+	return {"success": true, "warnings": layer_warnings, "image": frame, "record": frame_record, "asset": asset}
+
+
+static func _apply_frame_warp(profile: Dictionary, asset: Dictionary, frame: Image, mesh_state: Dictionary) -> Dictionary:
+	if mesh_state.is_empty(): return {"success": true}
+	var meshes: Array = profile.get("frame_meshes", [])
+	var selected_mesh: Dictionary = {}
+	var control_override: Dictionary = {}
+	for mesh_id in mesh_state:
+		for raw_mesh in meshes:
+			if not raw_mesh is Dictionary or str((raw_mesh as Dictionary).get("mesh_id", "")) != str(mesh_id): continue
+			var mesh: Dictionary = raw_mesh
+			if str(mesh.get("source_asset_id", "")) != str(asset.get("asset_id", "")): continue
+			selected_mesh = mesh.duplicate(true)
+			if mesh_state[mesh_id] is Dictionary: control_override = (mesh_state[mesh_id] as Dictionary).duplicate(true)
+			break
+		if not selected_mesh.is_empty(): break
+	if selected_mesh.is_empty(): return {"success": true}
+	if str(selected_mesh.get("source_frame_hash", "")) != _frame_hash(frame):
+		return {"success": true, "warnings": ["Frame mesh '%s' is bound to a different source frame; hybrid playback left this layer native." % selected_mesh.get("mesh_id", "")]}
+	var baked := StrictFrameBakerScript.bake(selected_mesh, frame, {
+		"control_state": control_override,
+		"source_asset_id": asset.get("asset_id", ""),
+		"source_asset_sha256": asset.get("source_sha256", ""),
+		"profile": profile,
+	})
+	if not bool(baked.get("success", false)):
+		return {"success": true, "warnings": baked.get("errors", ["Strict frame warp failed; hybrid playback left this layer native."])}
+	return {"success": true, "image": baked.image, "mesh_id": selected_mesh.get("mesh_id", ""), "snapshot_hash": (baked.get("snapshot", {}) as Dictionary).get("snapshot_hash", "")}
+
+
+static func _frame_hash(image: Image) -> String:
+	var hashing := HashingContext.new()
+	hashing.start(HashingContext.HASH_SHA256)
+	hashing.update(image.get_data())
+	return hashing.finish().hex_encode()
 
 
 static func _canvas(profile: Dictionary) -> Dictionary:

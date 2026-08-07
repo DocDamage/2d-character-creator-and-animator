@@ -99,7 +99,7 @@ for CLI examples, review packages, asset packs, and runtime export contracts.
 
 ## Direct-start LPC creation
 
-Phases 0–4 of the dedicated **direct-start LPC creator** are implemented.
+Phases 0–5 of the dedicated **direct-start LPC creator** are implemented.
 On a normal desktop launch, the LPC chooser lets a creator locate a locked
 local source library, rebuild its deterministic catalog, choose a license
 policy and compatible body family, create a project, or resume the latest
@@ -131,6 +131,13 @@ native source frames, custom cels, transforms, visibility, z-order, palettes,
 rig/IK and mesh-control state, events, and facing. Its shared evaluator powers
 verified preview and hybrid PNG exports, reporting missing stable references
 instead of silently retargeting them.
+The **Deform · Strict Frame Warp** workspace binds each mesh to one exact
+source frame, offers rectangular, alpha-aware, and manual topology paths plus
+direct/pin/lattice/soft controls, and keeps rest geometry immutable. Its
+authoritative CPU raster baker writes deterministic nearest-sampled PNGs with
+render snapshots, source/palette/alpha/geometry audits, and replayable export
+manifests; a mesh is rejected rather than silently reused when its source frame
+or topology no longer matches.
 
 Read the complete
 [Direct-Start LPC Creator plan](DIRECT_START_LPC_CREATOR_PLAN.md) for scope,
@@ -144,6 +151,7 @@ godot --headless --path . --scene tests/lpc_phase01_runner.tscn
 godot --headless --path . --scene tests/lpc_phase2_runner.tscn
 godot --headless --path . --scene tests/lpc_phase3_runner.tscn
 godot --headless --path . --scene tests/lpc_phase4_runner.tscn
+godot --headless --path . --scene tests/lpc_phase5_runner.tscn
 ```
 
 ## Documentation
