@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3 uid="uid://main_window_app_shell_002"]
+[gd_scene load_steps=11 format=3 uid="uid://main_window_app_shell_002"]
 
 [ext_resource type="Script" path="res://app/shared_ui/main_window.gd" id="1_main_win"]
 [ext_resource type="Script" path="res://app/shared_ui/dock_layout_manager.gd" id="2_layout_mgr"]
@@ -9,6 +9,7 @@
 [ext_resource type="Script" path="res://app/shared_ui/paper_quest/paper_header_bar.gd" id="7_header"]
 [ext_resource type="PackedScene" path="res://app/shared_ui/paper_quest/status_chip.tscn" id="8_chip"]
 [ext_resource type="Script" path="res://app/shared_ui/paper_quest/paper_quest_shell_presenter.gd" id="9_presenter"]
+[ext_resource type="Script" path="res://app/shared_ui/project_persistence_controller.gd" id="10_persistence"]
 
 [node name="MainWindow" type="Control"]
 layout_mode = 3
@@ -21,6 +22,10 @@ script = ExtResource("1_main_win")
 
 [node name="DockLayoutManager" type="Node" parent="."]
 script = ExtResource("2_layout_mgr")
+
+[node name="ProjectPersistenceController" type="Node" parent="."]
+unique_name_in_owner = true
+script = ExtResource("10_persistence")
 
 [node name="PaperQuestShellPresenter" type="Node" parent="."]
 script = ExtResource("9_presenter")
@@ -36,6 +41,7 @@ mouse_filter = 2
 theme_type_variation = &"CardboardPanel"
 
 [node name="RootTexture" type="TextureRect" parent="." groups=["paper_quest_texture"]]
+visible = false
 modulate = Color(1, 1, 1, 0.46)
 layout_mode = 1
 anchors_preset = 15
@@ -164,12 +170,11 @@ focus_mode = 2
 text = "Find tools"
 tooltip_text = "Open the command palette (Ctrl+Shift+P)"
 
-[node name="MoreButton" type="Button" parent="RootVBox/TopHeaderBar"]
-custom_minimum_size = Vector2(40, 40)
+[node name="MoreButton" type="OptionButton" parent="RootVBox/TopHeaderBar"]
+custom_minimum_size = Vector2(240, 40)
 layout_mode = 2
 focus_mode = 2
-text = "⚙"
-tooltip_text = "Appearance and workspace settings"
+tooltip_text = "Choose the studio appearance"
 
 [node name="HelpButton" type="Button" parent="RootVBox/TopHeaderBar"]
 custom_minimum_size = Vector2(40, 40)
@@ -286,7 +291,7 @@ text = "MODE: Project"
 unique_name_in_owner = true
 layout_mode = 2
 theme_type_variation = &"StatusBarLabel"
-text = "Craft · 100%"
+text = "Obsidian Studio · 100%"
 
 [node name="CommandPalette" parent="." instance=ExtResource("3_cmdpal")]
 unique_name_in_owner = true

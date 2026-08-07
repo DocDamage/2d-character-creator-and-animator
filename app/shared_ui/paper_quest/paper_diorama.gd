@@ -15,11 +15,11 @@ func _ready() -> void:
 func _draw() -> void:
 	var dark := ThemeService != null and ThemeService.get_theme_mode() == ThemeService.ThemeMode.DARK
 	var contrast := ThemeService != null and ThemeService.is_high_contrast()
-	var edge := Tokens.color("cardboard_edge", dark, contrast)
-	var paper := Tokens.color("paper_top", dark, contrast)
-	var sky := Tokens.color("blue", dark, contrast).lightened(0.64 if not dark else 0.18)
-	var ground := Tokens.color("green", dark, contrast).darkened(0.02)
-	var distant := Tokens.color("green_dark", dark, contrast)
+	var edge := _token("cardboard_edge")
+	var paper := _token("paper_top")
+	var sky := _token("blue").lightened(0.64 if not dark else 0.18)
+	var ground := _token("green").darkened(0.02)
+	var distant := _token("green_dark")
 	draw_style_box(Styles.box(sky, edge, 10, 2 if contrast else 1, 0.0), Rect2(Vector2.ZERO, size))
 	_draw_cloud(Vector2(size.x * 0.16, size.y * 0.20), paper, 0.8)
 	_draw_cloud(Vector2(size.x * 0.72, size.y * 0.16), paper, 1.0)
@@ -67,13 +67,13 @@ func _draw_castle(base: Vector2, stone: Color, edge: Color) -> void:
 	draw_rect(Rect2(base + Vector2(-12, -94), Vector2(24, 40)), stone, true)
 	for x in [-24.0, 0.0, 24.0]:
 		draw_rect(Rect2(base + Vector2(x - 6, -70), Vector2(12, 12)), edge, true)
-	draw_colored_polygon(PackedVector2Array([base + Vector2(-18, -94), base + Vector2(0, -118), base + Vector2(18, -94)]), Tokens.color("red"))
+	draw_colored_polygon(PackedVector2Array([base + Vector2(-18, -94), base + Vector2(0, -118), base + Vector2(18, -94)]), _token("red"))
 
 func _draw_hero(center: Vector2, edge: Color, paper: Color, dark: bool, contrast: bool) -> void:
 	var skin := Color("#C88A5A") if not contrast else paper
-	var green := Tokens.color("green", dark, contrast)
-	var red := Tokens.color("red", dark, contrast)
-	var ink := Tokens.color("ink_primary", dark, contrast)
+	var green := _token("green")
+	var red := _token("red")
+	var ink := _token("ink_primary")
 	var scale_factor := clampf(minf(size.x / 700.0, size.y / 330.0), 0.72, 1.34)
 	draw_circle(center + Vector2(0, -80) * scale_factor, 46.0 * scale_factor, edge)
 	draw_circle(center + Vector2(0, -76) * scale_factor, 38.0 * scale_factor, skin)
@@ -103,3 +103,6 @@ func _draw_hero(center: Vector2, edge: Color, paper: Color, dark: bool, contrast
 
 func _on_theme_changed(_mode: String, _theme: Theme) -> void:
 	queue_redraw()
+
+func _token(name: String) -> Color:
+	return ThemeService.get_color_token(name) if ThemeService != null else Tokens.color(name)

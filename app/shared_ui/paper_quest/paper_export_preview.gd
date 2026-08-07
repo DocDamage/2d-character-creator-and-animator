@@ -12,13 +12,12 @@ func _ready() -> void:
 	queue_redraw()
 
 func _draw() -> void:
-	var dark := ThemeService != null and ThemeService.get_theme_mode() == ThemeService.ThemeMode.DARK
 	var contrast := ThemeService != null and ThemeService.is_high_contrast()
-	var top := Tokens.color("paper_top", dark, contrast)
-	var edge := Tokens.color("cardboard_edge", dark, contrast)
-	var grid := Tokens.color("paper_dark", dark, contrast)
-	var blue := Tokens.color("blue", dark, contrast)
-	var green := Tokens.color("green", dark, contrast)
+	var top := _token("paper_top")
+	var edge := _token("cardboard_edge")
+	var grid := _token("paper_dark")
+	var blue := _token("blue")
+	var green := _token("green")
 	draw_style_box(Styles.box(top, edge, 8, 2 if contrast else 1, 0.0), Rect2(Vector2.ZERO, size))
 	var columns := 8
 	var rows := 4
@@ -42,3 +41,6 @@ func _draw_frame(center: Vector2, unit: float, clothing: Color, edge: Color, fra
 
 func _on_theme_changed(_mode: String, _theme: Theme) -> void:
 	queue_redraw()
+
+func _token(name: String) -> Color:
+	return ThemeService.get_color_token(name) if ThemeService != null else Tokens.color(name)

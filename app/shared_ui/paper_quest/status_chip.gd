@@ -37,7 +37,7 @@ func _sync_status() -> void:
 	var contrast := ThemeService != null and ThemeService.is_high_contrast()
 	var token: String = ["success", "warning", "error", "blue"][status]
 	var icons := ["✓", "!", "×", "i"]
-	var color := Tokens.color(token, dark, contrast)
+	var color := _token(token)
 	var fill := color.darkened(0.10) if dark or contrast else color.lightened(0.76)
 	add_theme_stylebox_override("panel", Styles.box(fill, color, 999, 1 if not contrast else 2, 6.0))
 	if _icon != null:
@@ -45,8 +45,11 @@ func _sync_status() -> void:
 		_icon.add_theme_color_override("font_color", color if not dark else Color.WHITE)
 	if _label != null:
 		_label.text = status_text
-		_label.add_theme_color_override("font_color", Tokens.color("ink_primary", dark, contrast))
+		_label.add_theme_color_override("font_color", _token("ink_primary"))
 	tooltip_text = "%s status: %s" % [["Ready", "Warning", "Error", "Information"][status], status_text]
 
 func _on_theme_changed(_mode: String, _theme: Theme) -> void:
 	_sync_status()
+
+func _token(name: String) -> Color:
+	return ThemeService.get_color_token(name) if ThemeService != null else Tokens.color(name)

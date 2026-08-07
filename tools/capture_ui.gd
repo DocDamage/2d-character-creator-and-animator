@@ -5,11 +5,15 @@ var _scene_path := "res://app/bootstrap/startup.tscn"
 var _output_path := "res://docs/implementation/evidence/PQ-UI/screenshots/paper-quest-ui.png"
 var _project_path := ""
 var _workspace_id := ""
+var _appearance_id := ""
+var _window_size := Vector2i(1440, 960)
 
 func _ready() -> void:
 	_parse_arguments()
 	get_window().mode = Window.MODE_WINDOWED
-	get_window().size = Vector2i(1440, 960)
+	get_window().size = _window_size
+	if ThemeService != null and not _appearance_id.is_empty():
+		ThemeService.import_settings({"appearance_id": _appearance_id, "high_contrast": _appearance_id == "high_contrast"})
 	if AppState != null and not _project_path.is_empty():
 		AppState.open_project(_project_path)
 	var packed := load(_scene_path) as PackedScene
@@ -46,3 +50,12 @@ func _parse_arguments() -> void:
 			_project_path = args[index + 1]
 		elif args[index] == "--workspace" and index + 1 < args.size():
 			_workspace_id = args[index + 1]
+		elif args[index] == "--appearance" and index + 1 < args.size():
+			_appearance_id = args[index + 1]
+		elif args[index] == "--size" and index + 1 < args.size():
+			var dimensions := str(args[index + 1]).to_lower().split("x", false)
+			if dimensions.size() == 2:
+				var width := int(dimensions[0])
+				var height := int(dimensions[1])
+				if width >= 320 and height >= 240:
+					_window_size = Vector2i(width, height)

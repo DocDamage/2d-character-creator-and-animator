@@ -3,8 +3,6 @@
 class_name DockPanel
 extends PanelContainer
 
-const StudioSurfaceScript = preload("res://app/shared_ui/studio_surface.gd")
-
 signal dock_region_changed(panel_id: String, new_region: String)
 signal collapse_toggled(panel_id: String, is_collapsed: bool)
 signal closed(panel_id: String)
@@ -79,12 +77,15 @@ func add_content(node: Control) -> void:
 		container.add_child(node)
 
 func serialize_state() -> Dictionary:
+	var panel_visible := visible
+	if get_parent() is TabContainer:
+		panel_visible = not (get_parent() as TabContainer).is_tab_hidden(get_index())
 	return {
 		"panel_id": panel_id,
 		"panel_title": panel_title,
 		"region": _region_to_string(current_region),
 		"collapsed": _is_collapsed,
-		"visible": visible
+		"visible": panel_visible
 	}
 
 func deserialize_state(data: Dictionary) -> void:
@@ -97,7 +98,15 @@ func deserialize_state(data: Dictionary) -> void:
 		if should_collapse != _is_collapsed:
 			toggle_collapse()
 	if data.has("visible"):
-		visible = data["visible"] as bool
+		if get_parent() is TabContainer:
+			var tabs := get_parent() as TabContainer
+			tabs.set_tab_hidden(get_index(), not (data["visible"] as bool))
+			var has_visible_tab := false
+			for index in tabs.get_tab_count():
+				if not tabs.is_tab_hidden(index): has_visible_tab = true; break
+			tabs.visible = has_visible_tab
+		else:
+			visible = data["visible"] as bool
 
 func _build_layout_if_needed() -> void:
 	if get_child_count() > 0 and _content_container != null:
@@ -138,24 +147,28 @@ func _build_layout_if_needed() -> void:
 	_content_container.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_content_container.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	main_box.add_child(_content_container)
-	_add_default_surface_if_needed()
+	_add_context_state_if_needed()
 
 
-func _add_default_surface_if_needed() -> void:
-	var modes := {
-		"panel_assets": "assets",
-		"panel_hierarchy": "hierarchy",
-		"panel_viewport": "viewport",
-		"panel_inspector": "inspector",
-		"panel_timeline": "timeline",
+func _add_context_state_if_needed() -> void:
+	var messages := {
+		"panel_hierarchy": "No rig selected\nChoose a character rig to inspect its hierarchy.",
+		"panel_viewport": "No canvas document selected\nOpen a rig or animation to edit it here.",
+		"panel_inspector": "Nothing selected\nSelect an authored object to inspect its properties.",
+		"panel_timeline": "No animation selected\nOpen or create an animation to edit its timeline.",
 	}
-	if not modes.has(panel_id):
-		return
-	var surface := StudioSurfaceScript.new() as Control
-	surface.set("surface_mode", modes[panel_id])
-	surface.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	surface.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	_content_container.add_child(surface)
+	if not messages.has(panel_id): return
+	var state := CenterContainer.new()
+	state.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	state.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	var label := Label.new()
+	label.text = messages[panel_id]
+	label.custom_minimum_size.x = 150.0
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	label.theme_type_variation = &"MutedLabel"
+	state.add_child(label)
+	_content_container.add_child(state)
 
 
 func _sync_tab_title() -> void:

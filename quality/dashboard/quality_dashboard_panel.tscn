@@ -70,6 +70,12 @@ focus_mode = 2
 theme_type_variation = &"SecondaryButton"
 text = "Run Quality Audit"
 
+[node name="RecoveryList" type="ItemList" parent="Margin/Root"]
+custom_minimum_size = Vector2(0, 126)
+layout_mode = 2
+focus_mode = 2
+tooltip_text = "Recovery files with timestamp and project preview"
+
 [node name="Preferences" type="HBoxContainer" parent="Margin/Root"]
 layout_mode = 2
 

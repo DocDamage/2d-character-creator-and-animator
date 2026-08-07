@@ -5,36 +5,42 @@ const Tokens = preload("res://app/shared_ui/paper_quest/paper_quest_tokens.gd")
 const Styles = preload("res://app/shared_ui/paper_quest/paper_quest_style_factory.gd")
 
 static func build(dark_craft: bool, high_contrast: bool) -> Theme:
-	var theme := Theme.new()
-	var paper := Tokens.color("paper_base", dark_craft, high_contrast)
-	var top := Tokens.color("paper_top", dark_craft, high_contrast)
-	var muted_paper := Tokens.color("paper_muted", dark_craft, high_contrast)
-	var dark_paper := Tokens.color("paper_dark", dark_craft, high_contrast)
-	var cardboard := Tokens.color("cardboard_base", dark_craft, high_contrast)
-	var cardboard_light := Tokens.color("cardboard_light", dark_craft, high_contrast)
-	var cardboard_dark := Tokens.color("cardboard_dark", dark_craft, high_contrast)
-	var edge := Tokens.color("cardboard_edge", dark_craft, high_contrast)
-	var ink := Tokens.color("ink_primary", dark_craft, high_contrast)
-	var muted := Tokens.color("ink_muted", dark_craft, high_contrast)
-	var blue := Tokens.color("blue", dark_craft, high_contrast)
-	var focus := Tokens.color("focus", dark_craft, high_contrast)
+	var palette := Tokens.Palette.HIGH_CONTRAST if high_contrast else (Tokens.Palette.DARK_CRAFT if dark_craft else Tokens.Palette.PAPER_QUEST)
+	return build_for_palette(palette)
 
-	_setup_fonts(theme, ink, muted)
-	_setup_panels(theme, paper, top, muted_paper, cardboard, cardboard_light, cardboard_dark, edge, high_contrast)
-	_setup_buttons(theme, paper, top, muted_paper, dark_paper, edge, ink, muted, focus, dark_craft, high_contrast)
+static func build_for_palette(palette: int) -> Theme:
+	var theme := Theme.new()
+	var high_contrast := palette == Tokens.Palette.HIGH_CONTRAST
+	var studio := palette == Tokens.Palette.OBSIDIAN
+	var paper := Tokens.color_for_palette("paper_base", palette)
+	var top := Tokens.color_for_palette("paper_top", palette)
+	var muted_paper := Tokens.color_for_palette("paper_muted", palette)
+	var dark_paper := Tokens.color_for_palette("paper_dark", palette)
+	var cardboard := Tokens.color_for_palette("cardboard_base", palette)
+	var cardboard_light := Tokens.color_for_palette("cardboard_light", palette)
+	var cardboard_dark := Tokens.color_for_palette("cardboard_dark", palette)
+	var edge := Tokens.color_for_palette("cardboard_edge", palette)
+	var ink := Tokens.color_for_palette("ink_primary", palette)
+	var muted := Tokens.color_for_palette("ink_muted", palette)
+	var blue := Tokens.color_for_palette("blue", palette)
+	var focus := Tokens.color_for_palette("focus", palette)
+
+	_setup_fonts(theme, ink, muted, studio)
+	_setup_panels(theme, paper, top, muted_paper, cardboard, cardboard_light, cardboard_dark, edge, palette, high_contrast)
+	_setup_buttons(theme, paper, top, muted_paper, dark_paper, edge, ink, muted, focus, palette, high_contrast)
 	_setup_fields(theme, top, muted_paper, edge, ink, muted, focus)
 	_setup_lists_and_tabs(theme, paper, top, muted_paper, edge, ink, muted, blue, focus, high_contrast)
 	_setup_misc(theme, paper, top, muted_paper, dark_paper, edge, ink, muted, blue, focus)
 	return theme
 
-static func _setup_fonts(theme: Theme, ink: Color, muted: Color) -> void:
+static func _setup_fonts(theme: Theme, ink: Color, muted: Color, studio: bool) -> void:
 	var body_font := SystemFont.new()
-	body_font.font_names = PackedStringArray(["Nunito Sans", "Nunito", "Segoe UI"])
+	body_font.font_names = PackedStringArray(["Inter", "Segoe UI", "Arial"] if studio else ["Nunito Sans", "Nunito", "Segoe UI"])
 	var heading_font := SystemFont.new()
-	heading_font.font_names = PackedStringArray(["Nunito Sans", "Nunito", "Segoe UI Semibold"])
+	heading_font.font_names = PackedStringArray(["Space Grotesk", "Segoe UI Semibold", "Segoe UI"] if studio else ["Nunito Sans", "Nunito", "Segoe UI Semibold"])
 	heading_font.font_weight = 700
 	var display_font := SystemFont.new()
-	display_font.font_names = PackedStringArray(["Baloo 2", "Fredoka", "Nunito Sans", "Segoe UI Semibold"])
+	display_font.font_names = PackedStringArray(["Space Grotesk", "Segoe UI Semibold", "Segoe UI"] if studio else ["Baloo 2", "Fredoka", "Nunito Sans", "Segoe UI Semibold"])
 	display_font.font_weight = 700
 	theme.default_font = body_font
 	theme.default_font_size = 13
@@ -52,7 +58,7 @@ static func _setup_fonts(theme: Theme, ink: Color, muted: Color) -> void:
 	_register_label(theme, "CaptionLabel", body_font, 11, muted)
 	_register_label(theme, "BrandTitle", display_font, 18, ink)
 	_register_label(theme, "BrandSubtitle", heading_font, 10, muted)
-	_register_label(theme, "StatusBarLabel", body_font, 11, Color("#FFF4DC"))
+	_register_label(theme, "StatusBarLabel", body_font, 11, ink if studio else Color("#FFF4DC"))
 
 static func _register_label(theme: Theme, variation: StringName, font: Font, size: int, color: Color) -> void:
 	theme.set_type_variation(variation, &"Label")
@@ -60,7 +66,7 @@ static func _register_label(theme: Theme, variation: StringName, font: Font, siz
 	theme.set_font_size("font_size", variation, size)
 	theme.set_color("font_color", variation, color)
 
-static func _setup_panels(theme: Theme, paper: Color, top: Color, muted_paper: Color, cardboard: Color, cardboard_light: Color, cardboard_dark: Color, edge: Color, high_contrast: bool) -> void:
+static func _setup_panels(theme: Theme, paper: Color, top: Color, muted_paper: Color, cardboard: Color, cardboard_light: Color, cardboard_dark: Color, edge: Color, palette: int, high_contrast: bool) -> void:
 	theme.set_stylebox("panel", "Panel", Styles.paper(paper, edge, high_contrast, false))
 	theme.set_stylebox("panel", "PanelContainer", Styles.paper(paper, edge, high_contrast, true))
 	_register_panel(theme, "PaperPanel", top, edge, high_contrast, true)
@@ -69,19 +75,19 @@ static func _setup_panels(theme: Theme, paper: Color, top: Color, muted_paper: C
 	_register_panel(theme, "CardboardPanel", cardboard, edge, high_contrast, true)
 	_register_panel(theme, "TopNavigation", cardboard_light, edge, high_contrast, true)
 	_register_panel(theme, "StatusBar", cardboard_dark, edge, high_contrast, false)
-	_register_panel(theme, "GuidePanel", top, Tokens.color("green", false, high_contrast), high_contrast, true)
+	_register_panel(theme, "GuidePanel", top, Tokens.color_for_palette("green", palette), high_contrast, true)
 
 static func _register_panel(theme: Theme, variation: StringName, background: Color, border: Color, high_contrast: bool, raised: bool) -> void:
 	theme.set_type_variation(variation, &"PanelContainer")
 	theme.set_stylebox("panel", variation, Styles.paper(background, border, high_contrast, raised))
 
-static func _setup_buttons(theme: Theme, paper: Color, top: Color, muted_paper: Color, dark_paper: Color, edge: Color, ink: Color, muted: Color, focus: Color, dark_craft: bool, high_contrast: bool) -> void:
+static func _setup_buttons(theme: Theme, paper: Color, top: Color, muted_paper: Color, dark_paper: Color, edge: Color, ink: Color, muted: Color, focus: Color, palette: int, high_contrast: bool) -> void:
 	_register_button(theme, "Button", top, muted_paper, dark_paper, edge, ink, muted, focus, high_contrast)
-	_register_button(theme, "PrimaryButton", Tokens.color("blue", dark_craft, high_contrast), Tokens.color("blue", dark_craft, high_contrast).lightened(0.09), Tokens.color("blue_dark", dark_craft, high_contrast), Tokens.color("blue_dark", dark_craft, high_contrast), Color.WHITE, muted, focus, high_contrast)
-	_register_button(theme, "SecondaryButton", Tokens.color("green", dark_craft, high_contrast), Tokens.color("green", dark_craft, high_contrast).lightened(0.08), Tokens.color("green_dark", dark_craft, high_contrast), Tokens.color("green_dark", dark_craft, high_contrast), Color.WHITE, muted, focus, high_contrast)
-	_register_button(theme, "DestructiveButton", Tokens.color("red", dark_craft, high_contrast), Tokens.color("red", dark_craft, high_contrast).lightened(0.08), Tokens.color("red_dark", dark_craft, high_contrast), Tokens.color("red_dark", dark_craft, high_contrast), Color.WHITE, muted, focus, high_contrast)
+	_register_button(theme, "PrimaryButton", Tokens.color_for_palette("blue", palette), Tokens.color_for_palette("blue", palette).lightened(0.09), Tokens.color_for_palette("blue_dark", palette), Tokens.color_for_palette("blue_dark", palette), Color.WHITE, muted, focus, high_contrast)
+	_register_button(theme, "SecondaryButton", Tokens.color_for_palette("green", palette), Tokens.color_for_palette("green", palette).lightened(0.08), Tokens.color_for_palette("green_dark", palette), Tokens.color_for_palette("green_dark", palette), Color.WHITE, muted, focus, high_contrast)
+	_register_button(theme, "DestructiveButton", Tokens.color_for_palette("red", palette), Tokens.color_for_palette("red", palette).lightened(0.08), Tokens.color_for_palette("red_dark", palette), Tokens.color_for_palette("red_dark", palette), Color.WHITE, muted, focus, high_contrast)
 	_register_button(theme, "GhostButton", Color.TRANSPARENT, paper, muted_paper, Color.TRANSPARENT, ink, muted, focus, high_contrast)
-	_register_workspace_tabs(theme, top, muted_paper, dark_paper, edge, ink, muted, focus, dark_craft, high_contrast)
+	_register_workspace_tabs(theme, top, muted_paper, dark_paper, edge, ink, muted, focus, palette, high_contrast)
 	for type_name in ["Button", "OptionButton", "CheckBox", "CheckButton"]:
 		theme.set_constant("outline_size", type_name, 0)
 
@@ -101,7 +107,7 @@ static func _register_button(theme: Theme, variation: StringName, normal: Color,
 	theme.set_color("font_disabled_color", variation, disabled_text)
 	theme.set_font_size("font_size", variation, 13)
 
-static func _register_workspace_tabs(theme: Theme, top: Color, hover: Color, pressed: Color, edge: Color, ink: Color, muted: Color, focus: Color, dark_craft: bool, high_contrast: bool) -> void:
+static func _register_workspace_tabs(theme: Theme, top: Color, hover: Color, pressed: Color, edge: Color, ink: Color, muted: Color, focus: Color, palette: int, high_contrast: bool) -> void:
 	_register_button(theme, "WorkspaceTab", top, hover, pressed, edge, ink, muted, focus, high_contrast)
 	var variants := {
 		"WorkspaceTabProject": "red",
@@ -112,7 +118,7 @@ static func _register_workspace_tabs(theme: Theme, top: Color, hover: Color, pre
 		"WorkspaceTabExport": "purple",
 	}
 	for variation in variants:
-		var active := Tokens.color(variants[variation], dark_craft, high_contrast)
+		var active := Tokens.color_for_palette(variants[variation], palette)
 		_register_button(theme, variation, active, active.lightened(0.08), active.darkened(0.12), active.darkened(0.22), Color.WHITE, muted, focus, high_contrast)
 
 static func _setup_fields(theme: Theme, top: Color, read_only: Color, edge: Color, ink: Color, muted: Color, focus: Color) -> void:

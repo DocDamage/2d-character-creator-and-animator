@@ -16,6 +16,13 @@ func get_part(part_id: String):
 	return _parts.get(part_id, null)
 
 
+func unregister_part(part_id: String) -> bool:
+	if not _parts.has(part_id):
+		return false
+	_parts.erase(part_id)
+	return true
+
+
 func list_parts(filters: Dictionary = {}) -> Array:
 	var body_type_id := str(filters.get("body_type_id", ""))
 	var slot_id := str(filters.get("slot_id", ""))

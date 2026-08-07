@@ -14,6 +14,7 @@ text = "Saved Poses"
 theme_override_font_sizes/font_size = 18
 
 [node name="Hint" type="Label" parent="."]
+custom_minimum_size = Vector2(240, 0)
 layout_mode = 2
 autowrap_mode = 2
 text = "Capture the current rig transform into a named absolute pose, then select it to restore that pose."
@@ -137,6 +138,7 @@ stretch_mode = 5
 
 [node name="ThumbnailLabel" type="Label" parent="."]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(240, 0)
 layout_mode = 2
 autowrap_mode = 2
 text = "Select a saved pose to preview its thumbnail."
@@ -147,6 +149,7 @@ text = "Sketch-to-Pose Suggestion"
 theme_override_font_sizes/font_size = 16
 
 [node name="SketchHint" type="Label" parent="."]
+custom_minimum_size = Vector2(240, 0)
 layout_mode = 2
 autowrap_mode = 2
 text = "Draw a simple gesture, name the new pose above, then generate a reviewable suggestion."
@@ -172,6 +175,7 @@ text = "Clear Sketch"
 
 [node name="PoseStatusLabel" type="Label" parent="."]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(240, 0)
 layout_mode = 2
 autowrap_mode = 2
 text = "Bind a rig to capture or apply poses."

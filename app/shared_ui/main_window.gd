@@ -12,7 +12,7 @@ const RetargetPreviewPanelScene = preload("res://rigging/retargeting/retarget_pr
 const WeaponAuthoringWizardScene = preload("res://weapons/authoring/weapon_authoring_wizard.tscn")
 const CharacterCreatorPanelScene = preload("res://character/authoring/character_creator_panel.tscn")
 const ProjectHubPanelScene = preload("res://app/bootstrap/project_hub_panel.tscn")
-const MediaAuthoringPanelScene = preload("res://media/media_authoring_panel.tscn"); const AnimationCompositionPanelScene = preload("res://animation/authoring/animation_composition_panel.tscn"); const BatchExportPanelScene = preload("res://export/batch/batch_export_panel.tscn"); const QualityDashboardPanelScene = preload("res://quality/dashboard/quality_dashboard_panel.tscn")
+const MediaAuthoringPanelScene = preload("res://media/media_authoring_panel.tscn"); const AnimationCompositionPanelScene = preload("res://animation/authoring/animation_composition_panel.tscn"); const BatchExportPanelScene = preload("res://export/batch/batch_export_panel.tscn"); const QualityDashboardPanelScene = preload("res://quality/dashboard/quality_dashboard_panel.tscn"); const AssetBrowserScene = preload("res://app/workspaces/asset_browser.tscn")
 @onready var dock_layout_manager: Node = $DockLayoutManager
 @onready var status_message_label: Label = %StatusMessageLabel
 @onready var status_info_label: Label = %StatusInfoLabel
@@ -22,7 +22,17 @@ const MediaAuthoringPanelScene = preload("res://media/media_authoring_panel.tscn
 @onready var command_palette_button: Button = get_node_or_null("%CommandPaletteButton") as Button
 @onready var command_palette: Control = get_node_or_null("%CommandPalette") as Control
 @onready var unsaved_changes_dialog: Control = get_node_or_null("%UnsavedChangesDialog") as Control
+@onready var project_actions: Node = get_node_or_null("%ProjectPersistenceController")
+@onready var top_header: HBoxContainer = $RootVBox/TopHeaderBar
+@onready var left_dock_region: Control = %LeftDockRegion
+@onready var right_dock_region: Control = %RightDockRegion
+@onready var bottom_dock_region: Control = %BottomDockRegion
+@onready var appearance_picker: OptionButton = $RootVBox/TopHeaderBar/MoreButton
+@onready var help_button: Button = $RootVBox/TopHeaderBar/HelpButton
+@onready var status_project_label: Label = %StatusProjectLabel
+@onready var status_workspace_label: Label = %StatusWorkspaceLabel
 var _current_status: String = "Ready"
+var _responsive_state: Dictionary = {}
 func _ready() -> void:
 	if ThemeService != null: ThemeService.apply_to_window(get_window())
 	_setup_dock_regions()
@@ -32,6 +42,10 @@ func _ready() -> void:
 	_setup_shortcut_commands()
 	_setup_app_state_listeners()
 	_setup_focus_framework()
+	get_viewport().size_changed.connect(_apply_responsive_layout)
+	if ThemeService != null and not ThemeService.dpi_scale_changed.is_connected(_on_dpi_scale_changed):
+		ThemeService.dpi_scale_changed.connect(_on_dpi_scale_changed)
+	call_deferred("_apply_responsive_layout")
 	set_status_message("Ready. Application main window initialized.")
 func _notification(what: int) -> void:
 	if what == NOTIFICATION_WM_CLOSE_REQUEST:
@@ -48,6 +62,54 @@ func set_status_message(message: String) -> void:
 	if DiagnosticsService != null:
 		DiagnosticsService.info("MainWindow status: " + message, "MainWindow")
 func get_status_message() -> String: return _current_status
+func get_responsive_layout_state() -> Dictionary: return _responsive_state.duplicate(true)
+
+func _on_dpi_scale_changed(_scale: float) -> void:
+	_apply_responsive_layout()
+
+func _apply_responsive_layout() -> void:
+	apply_responsive_layout_for_size(get_viewport_rect().size)
+
+
+func apply_responsive_layout_for_size(viewport: Vector2, dpi_scale: float = -1.0) -> Dictionary:
+	var scale := dpi_scale if dpi_scale > 0.0 else (ThemeService.get_dpi_scale() if ThemeService != null else 1.0)
+	var width := viewport.x / maxf(1.0, scale)
+	var height := viewport.y / maxf(1.0, scale)
+	var mode := "wide"
+	if width <= 1320.0 or height <= 760.0:
+		mode = "compact"
+		command_palette_button.visible = false
+		help_button.visible = false
+		appearance_picker.custom_minimum_size = Vector2(138, 40)
+		left_dock_region.custom_minimum_size = Vector2(210, 0)
+		right_dock_region.custom_minimum_size = Vector2(238, 0)
+		bottom_dock_region.custom_minimum_size = Vector2(0, 164)
+		status_workspace_label.visible = false
+		status_info_label.visible = false
+		top_header.custom_minimum_size.y = 58.0
+	elif width <= 1510.0:
+		mode = "medium"
+		command_palette_button.visible = false
+		help_button.visible = true
+		appearance_picker.custom_minimum_size = Vector2(168, 40)
+		left_dock_region.custom_minimum_size = Vector2(235, 0)
+		right_dock_region.custom_minimum_size = Vector2(270, 0)
+		bottom_dock_region.custom_minimum_size = Vector2(0, 190)
+		status_workspace_label.visible = true
+		status_info_label.visible = false
+		top_header.custom_minimum_size.y = 64.0
+	else:
+		command_palette_button.visible = true
+		help_button.visible = true
+		appearance_picker.custom_minimum_size = Vector2(240, 40)
+		left_dock_region.custom_minimum_size = Vector2(270, 0)
+		right_dock_region.custom_minimum_size = Vector2(320, 0)
+		bottom_dock_region.custom_minimum_size = Vector2(0, 220)
+		status_workspace_label.visible = true
+		status_info_label.visible = true
+		top_header.custom_minimum_size.y = 72.0
+	_responsive_state = {"mode": mode, "width": width, "height": height, "dpi_scale": scale, "command_palette_visible": command_palette_button.visible, "overflow_expected": mode != "wide", "left_min_width": left_dock_region.custom_minimum_size.x, "right_min_width": right_dock_region.custom_minimum_size.x, "header_height": top_header.custom_minimum_size.y}
+	return get_responsive_layout_state()
 func get_panel(panel_id: String) -> Control:
 	var mgr := get_dock_layout_manager(); return mgr.call("get_panel", panel_id) as Control if mgr != null else null
 func bind_pose_rig(rig: Dictionary) -> void:
@@ -126,6 +188,7 @@ func _create_dock_panel(pid: String, title: String, region: int) -> Control:
 		p.call("add_content", PoseLibraryPanelScene.instantiate() as Control)
 	elif pid == "panel_retarget_preview" and RetargetPreviewPanelScene != null:
 		p.call("add_content", RetargetPreviewPanelScene.instantiate() as Control)
+	elif pid == "panel_assets" and AssetBrowserScene != null: p.call("add_content", AssetBrowserScene.instantiate() as Control)
 	elif pid == "panel_weapon_wizard" and WeaponAuthoringWizardScene != null:
 		p.call("add_content", WeaponAuthoringWizardScene.instantiate() as Control)
 	elif pid == "panel_character_creator" and CharacterCreatorPanelScene != null: p.call("add_content", CharacterCreatorPanelScene.instantiate() as Control)
@@ -161,16 +224,16 @@ func _setup_shortcut_commands() -> void:
 	if ShortcutRegistry == null:
 		return
 	ShortcutRegistry.register_command("app.open_command_palette", "Command Palette: Open", "General", "Ctrl+Shift+P", open_command_palette, ["palette", "search", "shortcut"])
-	ShortcutRegistry.register_command("file.save", "File: Save Project", "File", "Ctrl+S", _on_cmd_save_project, ["save", "file"])
-	ShortcutRegistry.register_command("file.save_as", "File: Save Project As", "File", "Ctrl+Shift+S", _on_cmd_save_project_as, ["save", "as", "file"])
+	ShortcutRegistry.register_command("file.save", "File: Save Project", "File", "Ctrl+S", Callable(project_actions, "save_current"), ["save", "file"])
+	ShortcutRegistry.register_command("file.save_as", "File: Save Project As", "File", "Ctrl+Shift+S", Callable(project_actions, "open_save_as"), ["save", "as", "file"])
 	ShortcutRegistry.register_command("file.close", "File: Close Project", "File", "Ctrl+W", _on_cmd_close_project, ["close", "file"])
-	ShortcutRegistry.register_command("edit.undo", "Edit: Undo", "Edit", "Ctrl+Z", _on_cmd_undo, ["undo", "revert"])
-	ShortcutRegistry.register_command("edit.redo", "Edit: Redo", "Edit", "Ctrl+Y", _on_cmd_redo, ["redo", "repeat"])
+	ShortcutRegistry.register_command("edit.undo", "Edit: Undo", "Edit", "Ctrl+Z", Callable(project_actions, "undo_current"), ["undo", "revert"])
+	ShortcutRegistry.register_command("edit.redo", "Edit: Redo", "Edit", "Ctrl+Y", Callable(project_actions, "redo_current"), ["redo", "repeat"])
 	ShortcutRegistry.register_command("workspace.switch_assets", "Workspace: Switch to Project Assets", "Workspace", "", Callable(self, "_switch_ws").bind("project_assets"), ["workspace", "assets"])
 	ShortcutRegistry.register_command("workspace.switch_character", "Workspace: Switch to Character Creator", "Workspace", "", Callable(self, "_switch_ws").bind("character_creator"), ["workspace", "character"])
 	ShortcutRegistry.register_command("workspace.switch_animation", "Workspace: Switch to Animation Studio", "Workspace", "", Callable(self, "_switch_ws").bind("animation_studio"), ["workspace", "animation"])
 	ShortcutRegistry.register_command("view.toggle_diagnostics", "View: Toggle Diagnostics Drawer", "View", "Ctrl+Shift+D", _toggle_diagnostics_drawer, ["diagnostics", "drawer", "logs"])
-	ShortcutRegistry.register_command("view.toggle_theme", "View: Toggle Light/Dark Theme", "View", "Ctrl+Shift+T", _cmd_toggle_theme, ["theme", "dark", "light", "appearance"])
+	ShortcutRegistry.register_command("view.toggle_theme", "View: Toggle Studio/Classic Appearance", "View", "Ctrl+Shift+T", _cmd_toggle_theme, ["theme", "obsidian", "classic", "appearance"])
 	ShortcutRegistry.register_command("view.set_dpi_scale", "View: Cycle DPI Scale", "View", "Ctrl+Shift+U", _cmd_cycle_dpi_scale, ["dpi", "scale", "ui", "display"])
 	ShortcutRegistry.register_command("focus.next_panel", "Focus: Next Panel", "View", "F6", func(): if FocusService != null: FocusService.cycle_panel_focus(true), ["focus", "panel", "next"])
 	ShortcutRegistry.register_command("focus.prev_panel", "Focus: Previous Panel", "View", "Shift+F6", func(): if FocusService != null: FocusService.cycle_panel_focus(false), ["focus", "panel", "prev"])
@@ -186,14 +249,16 @@ func _setup_focus_framework() -> void:
 		if p != null:
 			FocusService.register_focus_group(pid, p)
 func _toggle_diagnostics_drawer() -> void:
-	var p := get_panel("panel_diagnostics")
-	if p != null:
-		p.visible = not p.visible
-		set_status_message("Diagnostics drawer " + ("shown" if p.visible else "hidden"))
+	var mgr := get_dock_layout_manager()
+	if mgr != null:
+		var show: bool = not mgr.call("is_panel_visible", "panel_diagnostics")
+		mgr.call("set_panel_visible", "panel_diagnostics", show)
+		if show: mgr.call("activate_panel", "panel_diagnostics")
+		set_status_message("Diagnostics drawer " + ("shown" if show else "hidden"))
 func _cmd_toggle_theme() -> void:
 	if ThemeService != null:
 		ThemeService.toggle_theme_mode()
-		set_status_message("Switched theme mode to: " + ThemeService.get_theme_mode_name())
+		set_status_message("Appearance: " + ThemeService.get_appearance_mode_name())
 func _cmd_cycle_dpi_scale() -> void:
 	if ThemeService != null:
 		var scale := ThemeService.cycle_dpi_scale()
@@ -217,20 +282,12 @@ func _handle_close_request() -> void:
 		get_tree().quit()
 func _on_close_dialog_choice(choice: int) -> void:
 	if choice == UnsavedDialogScript.Choice.SAVE:
-		_on_cmd_save_project()
-		get_tree().quit()
+		var report: Dictionary = project_actions.call("save_current") as Dictionary if project_actions != null else {}
+		if report.get("success", false): get_tree().quit()
 	elif choice == UnsavedDialogScript.Choice.DISCARD:
 		if AppState != null:
 			AppState.clear_dirty()
 		get_tree().quit()
-func _on_cmd_save_project() -> void:
-	if AppState != null:
-		AppState.mark_clean()
-	set_status_message("Project saved successfully.")
-func _on_cmd_save_project_as() -> void:
-	if AppState != null:
-		AppState.mark_clean()
-	set_status_message("Project saved as new file.")
 func _on_cmd_close_project() -> void:
 	if AppState != null and AppState.is_dirty() and unsaved_changes_dialog != null:
 		unsaved_changes_dialog.call("prompt", "Close current project?", Callable(self, "_on_close_project_choice"))
@@ -240,28 +297,14 @@ func _on_cmd_close_project() -> void:
 		set_status_message("Project closed.")
 func _on_close_project_choice(choice: int) -> void:
 	if choice == UnsavedDialogScript.Choice.SAVE:
-		_on_cmd_save_project()
-		if AppState != null:
+		var report: Dictionary = project_actions.call("save_current") as Dictionary if project_actions != null else {}
+		if report.get("success", false) and AppState != null:
 			AppState.close_project()
-		set_status_message("Project saved and closed.")
+			set_status_message("Project saved and closed.")
 	elif choice == UnsavedDialogScript.Choice.DISCARD:
 		if AppState != null:
 			AppState.close_project()
 		set_status_message("Project closed without saving.")
-
-func _on_cmd_undo() -> void:
-	if CommandService != null and CommandService.can_undo():
-		CommandService.undo()
-		if AppState != null:
-			AppState.update_undo_dirty_state(CommandService.get_undo_count())
-		set_status_message("Executed Undo")
-
-func _on_cmd_redo() -> void:
-	if CommandService != null and CommandService.can_redo():
-		CommandService.redo()
-		if AppState != null:
-			AppState.update_undo_dirty_state(CommandService.get_undo_count())
-		set_status_message("Executed Redo")
 
 func _switch_ws(ws_id: String) -> void:
 	if WorkspaceManager != null:

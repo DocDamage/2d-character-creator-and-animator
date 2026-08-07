@@ -2,12 +2,14 @@
 class_name AssetBrowser
 extends Control
 
+const AssetReportsScript = preload("res://core/assets/asset_reports.gd")
+
 signal asset_selected(asset_id: String, asset_data: Dictionary)
 signal asset_double_clicked(asset_id: String)
 
 @onready var search_input: LineEdit = $VBox/Header/SearchInput
-@onready var category_select: OptionButton = $VBox/Header/CategorySelect
-@onready var favorites_toggle: CheckBox = $VBox/Header/FavoritesToggle
+@onready var category_select: OptionButton = $VBox/Header/FilterRow/CategorySelect
+@onready var favorites_toggle: CheckBox = $VBox/Header/FilterRow/FavoritesToggle
 @onready var item_grid: ItemList = $VBox/Content/ItemGrid
 @onready var details_label: Label = $VBox/Footer/DetailsLabel
 
@@ -18,17 +20,28 @@ var _selected_asset_id: String = ""
 
 
 func setup(p_registry: AssetRegistry, p_thumbnail_cache: ThumbnailCache) -> void:
+	_disconnect_registry()
 	_registry = p_registry
 	_thumbnail_cache = p_thumbnail_cache
-	
+	_selected_asset_id = ""
 	if _registry != null:
-		if not _registry.asset_registered.is_connected(_on_registry_changed):
-			_registry.asset_registered.connect(_on_registry_changed)
-			_registry.asset_unregistered.connect(_on_registry_changed)
-			_registry.asset_updated.connect(_on_registry_changed)
-	
+		_registry.asset_registered.connect(_on_registry_changed)
+		_registry.asset_unregistered.connect(_on_registry_changed)
+		_registry.asset_updated.connect(_on_registry_changed)
 	_populate_category_options()
-	refresh()
+	if _registry != null:
+		refresh()
+	else:
+		_displayed_assets.clear()
+		if item_grid != null: item_grid.clear()
+		if details_label != null: details_label.text = "No project assets loaded"
+
+
+func _disconnect_registry() -> void:
+	if _registry == null: return
+	for signal_name in [&"asset_registered", &"asset_unregistered", &"asset_updated"]:
+		var source_signal: Signal = _registry.get(signal_name)
+		if source_signal.is_connected(_on_registry_changed): source_signal.disconnect(_on_registry_changed)
 
 
 func _ready() -> void:
@@ -51,7 +64,7 @@ func refresh() -> void:
 	var all_assets := _registry.list_assets()
 	var query := search_input.text if search_input != null else ""
 	var cat_idx := category_select.selected if category_select != null else 0
-	var category := category_select.get_item_metadata(cat_idx) if category_select != null and cat_idx >= 0 else ""
+	var category: String = str(category_select.get_item_metadata(cat_idx)) if category_select != null and cat_idx >= 0 else ""
 	var fav_only := favorites_toggle.button_pressed if favorites_toggle != null else false
 	
 	_displayed_assets = AssetFilterService.filter_assets(all_assets, query, category, "", fav_only)
@@ -69,6 +82,14 @@ func refresh() -> void:
 		item_grid.set_item_metadata(i, asset_id)
 		if asset.get("favorite", false):
 			item_grid.set_item_custom_fg_color(i, Color.GOLD)
+	if details_label != null and _selected_asset_id.is_empty():
+		var report: Dictionary = AssetReportsScript.generate_report(_registry)
+		var warnings: Array[String] = []
+		if int(report.get("duplicate_groups", 0)) > 0:
+			warnings.append("%d duplicate group%s" % [int(report.get("duplicate_groups", 0)), "s" if int(report.get("duplicate_groups", 0)) != 1 else ""])
+		if int(report.get("missing_count", 0)) > 0:
+			warnings.append("%d missing file%s" % [int(report.get("missing_count", 0)), "s" if int(report.get("missing_count", 0)) != 1 else ""])
+		details_label.text = "%d project asset%s%s" % [int(report.get("total_assets", 0)), "s" if int(report.get("total_assets", 0)) != 1 else "", " · " + ", ".join(warnings) if not warnings.is_empty() else " · no duplicate or missing artwork"]
 
 
 func _populate_category_options() -> void:

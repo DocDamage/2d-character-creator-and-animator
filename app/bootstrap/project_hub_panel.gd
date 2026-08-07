@@ -2,6 +2,7 @@ class_name ProjectHubPanel
 extends Control
 
 const SAMPLE_PROJECT_PATH := "res://samples/humanoid_modular.chrproj"
+const STARTUP_SCENE_PATH := "res://app/bootstrap/startup.tscn"
 
 @onready var _project_name: Label = %ProjectName
 @onready var _project_path: Label = %ProjectPath
@@ -13,25 +14,53 @@ const SAMPLE_PROJECT_PATH := "res://samples/humanoid_modular.chrproj"
 @onready var _recent_list: ItemList = %RecentList
 @onready var _continue_button: Button = %ContinueButton
 @onready var _save_button: Button = %SaveButton
+@onready var _update_button: Button = %UpdateButton
+@onready var _update_copy: Label = %UpdateCopy
+@onready var _rename_button: Button = $Margin/Root/Content/Center/Recent/Margin/VBox/RecentActions/Rename
+@onready var _duplicate_button: Button = $Margin/Root/Content/Center/Recent/Margin/VBox/RecentActions/Duplicate
+@onready var _archive_button: Button = $Margin/Root/Content/Center/Recent/Margin/VBox/RecentActions/Archive
+@onready var _reveal_button: Button = $Margin/Root/Content/Center/Recent/Margin/VBox/RecentActions/Reveal
+@onready var _locate_button: Button = $Margin/Root/Content/Center/Recent/Margin/VBox/RecentActions/Locate
+
+var _rename_dialog: AcceptDialog
+var _rename_input: LineEdit
+var _locate_dialog: FileDialog
+var _pending_locate_path := ""
+var _update_download_available := false
+var _autosave_display_timer: Timer
 
 func _ready() -> void:
 	_connect_signals()
+	_start_autosave_display_timer()
 	_refresh()
 
 func _connect_signals() -> void:
-	%CreateButton.pressed.connect(_switch_workspace.bind("character_creator"))
+	%CreateButton.pressed.connect(_create_or_continue)
 	%OpenSampleButton.pressed.connect(_open_sample)
 	%RecoveryButton.pressed.connect(_open_quality)
+	_update_button.pressed.connect(_check_or_open_update)
 	_continue_button.pressed.connect(_switch_workspace.bind("character_creator"))
 	_save_button.pressed.connect(_save_project)
 	_recent_list.item_activated.connect(_open_recent)
+	_recent_list.item_selected.connect(func(_index): _refresh_recent_action_state())
+	_rename_button.pressed.connect(_open_rename_dialog)
+	_duplicate_button.pressed.connect(_duplicate_selected_project)
+	_archive_button.pressed.connect(_archive_selected_project)
+	_reveal_button.pressed.connect(_reveal_selected_project)
+	_locate_button.pressed.connect(_locate_selected_project)
+	_build_management_dialogs()
 	if AppState != null:
 		AppState.project_opened.connect(func(_path): _refresh())
 		AppState.project_closed.connect(_refresh)
 		AppState.dirty_state_changed.connect(func(_dirty): _refresh())
 		AppState.autosave_triggered.connect(_refresh)
+		AppState.autosave_completed.connect(func(_path, _timestamp): _refresh())
 	if RecentProjectsService != null:
 		RecentProjectsService.recent_projects_changed.connect(_refresh)
+	if UpdateService != null:
+		if not UpdateService.update_check_completed.is_connected(_on_update_check_completed):
+			UpdateService.update_check_completed.connect(_on_update_check_completed)
+		_apply_update_result(UpdateService.get_last_result())
 	if DiagnosticsService != null:
 		DiagnosticsService.count_changed.connect(func(_counts): _refresh_health())
 
@@ -39,11 +68,14 @@ func _refresh() -> void:
 	var loaded := AppState != null and AppState.is_project_loaded()
 	var path := AppState.get_project_path() if loaded else ""
 	_project_name.text = path.get_file().get_basename().capitalize() if loaded else "No quest open"
-	_project_path.text = path if loaded else "Open a recent project or start with the sample adventure."
+	_project_path.text = (path + " · Bundled sample is read-only — use Save As before editing.") if loaded and path.begins_with("res://") else (path if loaded else "Open a recent project or start with the sample adventure.")
+	%CreateButton.text = "Open Character Creator" if loaded else "Create a character"
 	_continue_button.disabled = not loaded
 	_save_button.disabled = not loaded or not AppState.is_dirty()
 	if not loaded:
 		_project_state.set_status("Choose a project", PaperQuestStatusChip.Status.INFO)
+	elif path.begins_with("res://"):
+		_project_state.set_status("Read-only sample", PaperQuestStatusChip.Status.WARNING)
 	elif AppState.is_dirty():
 		_project_state.set_status("Changes pending", PaperQuestStatusChip.Status.WARNING)
 	else:
@@ -51,6 +83,7 @@ func _refresh() -> void:
 	_refresh_recent_projects()
 	_refresh_health()
 	_refresh_autosave()
+	_refresh_recent_action_state()
 
 func _refresh_recent_projects() -> void:
 	_recent_list.clear()
@@ -65,6 +98,7 @@ func _refresh_recent_projects() -> void:
 		_recent_list.set_item_metadata(index, project.get("path", ""))
 		if not exists:
 			_recent_list.set_item_custom_fg_color(index, ThemeService.get_color_token("error"))
+	_refresh_recent_action_state()
 
 func _refresh_health() -> void:
 	if DiagnosticsService == null:
@@ -85,6 +119,10 @@ func _refresh_autosave() -> void:
 	if AppState == null or not AppState.is_autosave_enabled():
 		_autosave_state.set_status("Autosave off", PaperQuestStatusChip.Status.WARNING)
 		_autosave_copy.text = "Enable autosave in project settings."
+	elif AppState.get_autosave_age_seconds() >= 0:
+		var age := AppState.get_autosave_age_seconds()
+		_autosave_state.set_status("Autosaved", PaperQuestStatusChip.Status.READY)
+		_autosave_copy.text = "Autosaved %s ago" % _format_elapsed(age)
 	elif AppState.is_dirty():
 		_autosave_state.set_status("Waiting to autosave", PaperQuestStatusChip.Status.INFO)
 		_autosave_copy.text = "Interval: %.0f seconds" % AppState.get_autosave_interval()
@@ -92,11 +130,28 @@ func _refresh_autosave() -> void:
 		_autosave_state.set_status("Autosave on", PaperQuestStatusChip.Status.READY)
 		_autosave_copy.text = "No unsaved changes are waiting."
 
+
+func _start_autosave_display_timer() -> void:
+	_autosave_display_timer = Timer.new()
+	_autosave_display_timer.name = "AutosaveDisplayTimer"
+	_autosave_display_timer.wait_time = 5.0
+	_autosave_display_timer.timeout.connect(_refresh_autosave)
+	add_child(_autosave_display_timer)
+	_autosave_display_timer.start()
+
+
+func _format_elapsed(seconds: int) -> String:
+	if seconds < 5: return "just now"
+	if seconds < 60: return "%d seconds" % seconds
+	if seconds < 3600: return "%d minute%s" % [seconds / 60, "s" if seconds / 60 != 1 else ""]
+	return "%d hour%s" % [seconds / 3600, "s" if seconds / 3600 != 1 else ""]
+
 func _switch_workspace(workspace_id: String) -> void:
 	if WorkspaceManager != null:
 		WorkspaceManager.switch_workspace(workspace_id)
 
 func _open_sample() -> void:
+	if not _can_replace_project(): return
 	if AppState != null:
 		AppState.open_project(SAMPLE_PROJECT_PATH)
 	if RecentProjectsService != null:
@@ -104,15 +159,21 @@ func _open_sample() -> void:
 	_refresh()
 
 func _save_project() -> void:
-	if AppState != null:
-		AppState.mark_clean()
+	var controller := get_tree().get_first_node_in_group("project_persistence")
+	if controller != null: controller.call("save_current")
+	else: _project_state.set_status("Save service unavailable", PaperQuestStatusChip.Status.ERROR)
 	_refresh()
 
 func _open_recent(index: int) -> void:
 	var path := String(_recent_list.get_item_metadata(index))
 	if RecentProjectsService != null and not RecentProjectsService.check_path_exists(path):
-		_project_state.set_status("Recent project is missing", PaperQuestStatusChip.Status.ERROR)
+		var issue: Dictionary = RecentProjectsService.get_actionable_error(path)
+		_project_state.set_status(str(issue.get("message", "Recent project is missing")) + " Use Locate or Archive.", PaperQuestStatusChip.Status.ERROR)
 		return
+	if AppState != null and AppState.is_project_loaded() and AppState.get_project_path() == path:
+		_switch_workspace("character_creator")
+		return
+	if not _can_replace_project(): return
 	if AppState != null:
 		AppState.open_project(path)
 	_refresh()
@@ -123,3 +184,151 @@ func _open_quality() -> void:
 	if manager != null:
 		manager.call("set_panel_visible", "panel_quality_dashboard", true)
 		manager.call("activate_panel", "panel_quality_dashboard")
+
+
+func _check_or_open_update() -> void:
+	if UpdateService == null:
+		_update_copy.text = "Update service is unavailable in this build."
+		return
+	if _update_download_available:
+		if UpdateService.open_available_update():
+			_update_copy.text = "Opened the release page in your browser."
+		else:
+			_update_copy.text = "This update does not include a valid download link."
+		return
+	_apply_update_result(UpdateService.check_for_updates())
+
+
+func _on_update_check_completed(result: Dictionary) -> void:
+	_apply_update_result(result)
+
+
+func _apply_update_result(result: Dictionary) -> void:
+	if _update_button == null or _update_copy == null:
+		return
+	if result.is_empty():
+		_update_button.text = "Check for updates"
+		_update_copy.text = "Checks a configured release feed, or this build's bundled manifest."
+		_update_download_available = false
+		return
+	if bool(result.get("pending", false)):
+		_update_button.disabled = true
+		_update_button.text = "Checking for updates…"
+		_update_copy.text = str(result.get("message", "Checking for updates…"))
+		_update_download_available = false
+		return
+	_update_button.disabled = false
+	_update_download_available = bool(result.get("success", false)) and bool(result.get("update_available", false)) and not str(result.get("download_url", "")).is_empty()
+	_update_button.text = "Open update download" if _update_download_available else "Check for updates"
+	_update_copy.text = str(result.get("message", "Update status unavailable."))
+
+
+func _create_or_continue() -> void:
+	if AppState != null and AppState.is_project_loaded():
+		_switch_workspace("character_creator")
+		return
+	if AppState != null:
+		AppState.set_meta("open_new_project_dialog", true)
+	if get_tree().change_scene_to_file(STARTUP_SCENE_PATH) != OK:
+		if AppState != null:
+			AppState.remove_meta("open_new_project_dialog")
+		_project_state.set_status("Could not open project creation", PaperQuestStatusChip.Status.ERROR)
+
+
+func _can_replace_project() -> bool:
+	if AppState != null and AppState.is_dirty():
+		_project_state.set_status("Save or close current changes first", PaperQuestStatusChip.Status.WARNING)
+		return false
+	return true
+
+
+func _selected_recent_path() -> String:
+	var items := _recent_list.get_selected_items()
+	return str(_recent_list.get_item_metadata(items[0])) if not items.is_empty() else ""
+
+
+func _refresh_recent_action_state() -> void:
+	var path := _selected_recent_path()
+	var selected := not path.is_empty()
+	var exists := selected and (RecentProjectsService == null or RecentProjectsService.check_path_exists(path))
+	_rename_button.disabled = not exists or path.begins_with("res://")
+	_duplicate_button.disabled = not exists
+	_archive_button.disabled = not selected
+	_reveal_button.disabled = not exists
+	_locate_button.disabled = not selected or exists
+
+
+func _build_management_dialogs() -> void:
+	_rename_dialog = AcceptDialog.new()
+	_rename_dialog.title = "Rename Project"
+	_rename_dialog.ok_button_text = "Rename"
+	_rename_input = LineEdit.new()
+	_rename_input.placeholder_text = "Project title"
+	_rename_input.custom_minimum_size = Vector2(360, 40)
+	_rename_dialog.add_child(_rename_input)
+	_rename_dialog.confirmed.connect(_rename_selected_project)
+	add_child(_rename_dialog)
+	_locate_dialog = FileDialog.new()
+	_locate_dialog.title = "Locate Moved Project"
+	_locate_dialog.file_mode = FileDialog.FILE_MODE_OPEN_FILE
+	_locate_dialog.access = FileDialog.ACCESS_FILESYSTEM
+	_locate_dialog.filters = PackedStringArray(["*.chrproj ; Character Project"])
+	_locate_dialog.file_selected.connect(_on_located_project)
+	add_child(_locate_dialog)
+
+
+func _open_rename_dialog() -> void:
+	var path := _selected_recent_path()
+	if path.is_empty() or RecentProjectsService == null: return
+	var title := path.get_file().get_basename()
+	for entry in RecentProjectsService.get_recent_projects(true):
+		if str((entry as Dictionary).get("path", "")) == path: title = str((entry as Dictionary).get("title", title)); break
+	_rename_input.text = title
+	_rename_dialog.popup_centered()
+
+
+func _rename_selected_project() -> void:
+	var path := _selected_recent_path()
+	if path.is_empty() or RecentProjectsService == null: return
+	var result: Dictionary = RecentProjectsService.rename_project(path, _rename_input.text)
+	_project_state.set_status("Project renamed" if result.get("success", false) else str(result.get("errors", ["Rename failed"])[0]), PaperQuestStatusChip.Status.READY if result.get("success", false) else PaperQuestStatusChip.Status.ERROR)
+	_refresh()
+
+
+func _duplicate_selected_project() -> void:
+	var path := _selected_recent_path()
+	if path.is_empty() or RecentProjectsService == null: return
+	var result: Dictionary = RecentProjectsService.duplicate_project(path)
+	_project_state.set_status("Created project copy" if result.get("success", false) else str(result.get("errors", ["Duplicate failed"])[0]), PaperQuestStatusChip.Status.READY if result.get("success", false) else PaperQuestStatusChip.Status.ERROR)
+	_refresh()
+
+
+func _archive_selected_project() -> void:
+	var path := _selected_recent_path()
+	if path.is_empty() or RecentProjectsService == null: return
+	if RecentProjectsService.archive_project(path):
+		_project_state.set_status("Project archived from the recent list", PaperQuestStatusChip.Status.INFO)
+	else:
+		_project_state.set_status("Project could not be archived", PaperQuestStatusChip.Status.ERROR)
+	_refresh()
+
+
+func _reveal_selected_project() -> void:
+	var path := _selected_recent_path()
+	if path.is_empty() or RecentProjectsService == null: return
+	var result: Dictionary = RecentProjectsService.reveal_project(path)
+	_project_state.set_status("Opened project folder in Explorer" if result.get("success", false) else str(result.get("errors", ["Could not open project folder"])[0]), PaperQuestStatusChip.Status.READY if result.get("success", false) else PaperQuestStatusChip.Status.ERROR)
+
+
+func _locate_selected_project() -> void:
+	_pending_locate_path = _selected_recent_path()
+	if not _pending_locate_path.is_empty(): _locate_dialog.popup_centered_ratio(0.72)
+
+
+func _on_located_project(path: String) -> void:
+	if RecentProjectsService != null and RecentProjectsService.locate_project(_pending_locate_path, path):
+		_project_state.set_status("Recent project location repaired", PaperQuestStatusChip.Status.READY)
+	else:
+		_project_state.set_status("The selected file could not repair this recent project", PaperQuestStatusChip.Status.ERROR)
+	_pending_locate_path = ""
+	_refresh()

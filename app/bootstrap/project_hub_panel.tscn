@@ -110,6 +110,19 @@ custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
 text = "Recovery & quality"
 
+[node name="UpdateButton" type="Button" parent="Margin/Root/Content/Left/Actions/Margin/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 40)
+layout_mode = 2
+text = "Check for updates"
+
+[node name="UpdateCopy" type="Label" parent="Margin/Root/Content/Left/Actions/Margin/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"MutedLabel"
+text = "Checks a configured release feed, or this build's bundled manifest."
+autowrap_mode = 2
+
 [node name="Center" type="VBoxContainer" parent="Margin/Root/Content"]
 layout_mode = 2
 size_flags_horizontal = 3
@@ -196,6 +209,35 @@ unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 3
 focus_mode = 2
+
+[node name="RecentActions" type="HBoxContainer" parent="Margin/Root/Content/Center/Recent/Margin/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Rename" type="Button" parent="Margin/Root/Content/Center/Recent/Margin/VBox/RecentActions"]
+layout_mode = 2
+focus_mode = 2
+text = "Rename"
+
+[node name="Duplicate" type="Button" parent="Margin/Root/Content/Center/Recent/Margin/VBox/RecentActions"]
+layout_mode = 2
+focus_mode = 2
+text = "Duplicate"
+
+[node name="Archive" type="Button" parent="Margin/Root/Content/Center/Recent/Margin/VBox/RecentActions"]
+layout_mode = 2
+focus_mode = 2
+text = "Archive"
+
+[node name="Reveal" type="Button" parent="Margin/Root/Content/Center/Recent/Margin/VBox/RecentActions"]
+layout_mode = 2
+focus_mode = 2
+text = "Reveal"
+
+[node name="Locate" type="Button" parent="Margin/Root/Content/Center/Recent/Margin/VBox/RecentActions"]
+layout_mode = 2
+focus_mode = 2
+text = "Locate"
 
 [node name="Right" type="VBoxContainer" parent="Margin/Root/Content"]
 custom_minimum_size = Vector2(210, 0)

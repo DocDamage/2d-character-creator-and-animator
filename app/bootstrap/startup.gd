@@ -9,7 +9,6 @@ signal diagnostic_check_completed(check_name: String, success: bool)
 signal project_selected(path: String)
 signal project_created(path: String, title: String)
 signal workspace_transition_requested(path: String)
-
 ## === Constants ==============================================================
 
 const APP_NAME := "Paper Quest Character Studio"
@@ -21,7 +20,7 @@ const PACKAGED_ACCEPTANCE_SCENE_PATH := "res://tests/packaged_ui_acceptance.tscn
 const PACKAGED_ACCEPTANCE_ARG := "--packaged-ui-acceptance"
 const PACKAGED_ACCEPTANCE_META := &"paper_quest_packaged_acceptance_started"
 
-const StartupDiagnosticsScript = preload("res://app/bootstrap/startup_diagnostics.gd")
+const StartupDiagnosticsScript = preload("res://app/bootstrap/startup_diagnostics.gd"); const CharacterProjectFactoryScript = preload("res://character/authoring/character_project_factory.gd"); const RecoveryJournalScript = preload("res://core/documents/recovery_journal.gd")
 
 ## === Node References ========================================================
 
@@ -42,6 +41,7 @@ const StartupDiagnosticsScript = preload("res://app/bootstrap/startup_diagnostic
 @onready var _new_project_dialog: ConfirmationDialog = get_node_or_null("NewProjectDialog")
 @onready var _open_project_dialog: FileDialog = get_node_or_null("OpenProjectDialog")
 @onready var _missing_dialog: ConfirmationDialog = get_node_or_null("MissingProjectDialog")
+@onready var _locate_project_dialog: FileDialog = get_node_or_null("LocateProjectDialog")
 @onready var _log_drawer: PanelContainer = get_node_or_null("MarginContainer/MainLayout/LogDrawer")
 
 ## === State ==================================================================
@@ -51,6 +51,7 @@ var _startup_errors: Array[String] = []
 var _passed_checks: int = 0
 var _total_checks: int = 0
 var _pending_missing_path: String = ""
+var _pending_recovery_path: String = ""
 var _search_filter: String = ""
 @export var transition_to_workspace := true
 
@@ -62,10 +63,58 @@ func _ready() -> void:
 	if ThemeService != null: ThemeService.apply_to_window(get_window())
 	if _version_label != null:
 		_version_label.text = "Project dashboard · v%s" % APP_VERSION
+	var recovery_offered := _offer_pending_recovery()
+	RecoveryJournalScript.begin_session()
 	_connect_ui_signals()
+	if not recovery_offered:
+		_offer_first_run_welcome()
+	_open_requested_new_project_dialog()
 	_run_startup_sequence()
 	refresh_recent_list()
 
+func _open_requested_new_project_dialog() -> void:
+	if AppState == null or not bool(AppState.get_meta("open_new_project_dialog", false)):
+		return
+	AppState.remove_meta("open_new_project_dialog")
+	if _new_project_dialog != null:
+		_new_project_dialog.call_deferred("open_dialog")
+
+
+func _offer_pending_recovery() -> bool:
+	var candidates := RecoveryJournalScript.get_pending_recoveries()
+	if candidates.is_empty(): return false
+	var latest: Dictionary = candidates[0]
+	_pending_recovery_path = str(latest.get("file_path", ""))
+	if _pending_recovery_path.is_empty(): return false
+	var preview: Dictionary = latest.get("preview", {})
+	var dialog := ConfirmationDialog.new()
+	dialog.name = "CrashRecoveryDialog"
+	dialog.title = "Recover recent work"
+	dialog.dialog_text = "Paper Quest found %d autosave recovery file%s from the previous session.\n\nLatest: %s · %d imported layer%s\n%s\n\nOpen the latest recovery now? You can save it as a new project afterward." % [candidates.size(), "s" if candidates.size() != 1 else "", str(preview.get("name", "Recovered project")), int(preview.get("layers", 0)), "s" if int(preview.get("layers", 0)) != 1 else "", Time.get_datetime_string_from_unix_time(int(latest.get("timestamp", 0)), false)]
+	dialog.ok_button_text = "Open recovery"
+	dialog.confirmed.connect(func(): if not _pending_recovery_path.is_empty(): open_project_path(_pending_recovery_path))
+	add_child(dialog)
+	dialog.call_deferred("popup_centered")
+	return true
+
+
+func _offer_first_run_welcome() -> void:
+	if DisplayServer.get_name() == "headless":
+		return
+	if FirstRunService == null or not FirstRunService.is_first_run():
+		return
+	var dialog := AcceptDialog.new()
+	dialog.name = "FirstRunWelcomeDialog"
+	dialog.title = "Welcome to Paper Quest"
+	dialog.ok_button_text = "Start importing"
+	dialog.dialog_text = "Create a blank import-first project, choose a layer template, then drop your own artwork into Create.\n\nPaper Quest never generates a character for you; the character stays entirely built from your imported layers."
+	add_child(dialog)
+	dialog.call_deferred("popup_centered")
+
+
+func _complete_first_run() -> void:
+	if FirstRunService != null and FirstRunService.is_first_run():
+		FirstRunService.complete_onboarding()
 
 func _redirect_to_packaged_acceptance_if_requested() -> bool:
 	if not OS.has_feature("template"):
@@ -77,7 +126,6 @@ func _redirect_to_packaged_acceptance_if_requested() -> bool:
 	Engine.set_meta(PACKAGED_ACCEPTANCE_META, true)
 	call_deferred("_launch_packaged_acceptance")
 	return true
-
 
 func _launch_packaged_acceptance() -> void:
 	var error := get_tree().change_scene_to_file(PACKAGED_ACCEPTANCE_SCENE_PATH)
@@ -200,25 +248,25 @@ func open_project_path(path: String) -> void:
 		app_st.call("open_project", path)
 
 	project_selected.emit(path)
+	_complete_first_run()
 	refresh_recent_list()
 	_open_workspace(path)
 
 
 func create_new_project(path: String, title: String, template_id: String) -> void:
-	var dir_path := path.get_base_dir()
-	if not dir_path.is_empty() and not DirAccess.dir_exists_absolute(dir_path):
-		DirAccess.make_dir_recursive_absolute(dir_path)
-	if not FileAccess.file_exists(path):
-		var file := FileAccess.open(path, FileAccess.WRITE)
-		if file != null:
-			file.store_string(JSON.stringify({"name": title, "template": template_id, "version": APP_VERSION}, "\t"))
-			file.close()
+	if not CharacterProjectFactoryScript.save_new_project(path, title, template_id):
+		_append_log("ERROR: Could not create a valid project at " + path)
+		if DiagnosticsService != null: DiagnosticsService.error("Project creation failed: " + path, "Startup")
+		if _new_project_dialog != null and _new_project_dialog.has_method("show_creation_error"):
+			_new_project_dialog.call("show_creation_error", "A project could not be created at that path. Choose a new file name or writable folder.")
+		return
 	var srv := _get_recent_service()
 	if srv != null and srv.has_method("add_project"): srv.call("add_project", path, title)
 	var app_st := _get_app_state()
 	if app_st != null and app_st.has_method("open_project"): app_st.call("open_project", path)
 	project_created.emit(path, title)
 	project_selected.emit(path)
+	_complete_first_run()
 	refresh_recent_list()
 	_open_workspace(path)
 
@@ -264,16 +312,30 @@ func _connect_ui_signals() -> void:
 		_new_project_dialog.connect("project_created", Callable(self, "create_new_project"))
 	if _open_project_dialog != null: _open_project_dialog.file_selected.connect(open_project_path)
 	if _missing_dialog != null:
+		_missing_dialog.add_button("Locate project", true, "locate")
+		_missing_dialog.custom_action.connect(func(action: StringName): if action == &"locate" and _locate_project_dialog != null: _locate_project_dialog.popup_centered_ratio(0.72))
 		_missing_dialog.confirmed.connect(func():
 			if not _pending_missing_path.is_empty():
 				var srv := _get_recent_service()
 				if srv != null and srv.has_method("remove_project"): srv.call("remove_project", _pending_missing_path)
 				_pending_missing_path = ""; refresh_recent_list()
 		)
+	if _locate_project_dialog != null:
+		_locate_project_dialog.file_selected.connect(_on_located_project)
 
 
 func _on_recent_item_activated(index: int) -> void:
 	if _recent_list != null: open_project_path(_recent_list.get_item_metadata(index))
+
+
+func _on_located_project(path: String) -> void:
+	var srv := _get_recent_service()
+	if srv != null and srv.has_method("locate_project") and srv.call("locate_project", _pending_missing_path, path):
+		_pending_missing_path = ""
+		refresh_recent_list()
+		open_project_path(path)
+	else:
+		_append_log("ERROR: Selected file could not repair the missing recent project.")
 
 
 func _append_log(msg: String) -> void:

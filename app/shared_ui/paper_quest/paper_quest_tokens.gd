@@ -1,6 +1,8 @@
 class_name PaperQuestTokens
 extends RefCounted
 
+enum Palette { OBSIDIAN, PAPER_QUEST, DARK_CRAFT, HIGH_CONTRAST }
+
 const COLORS := {
 	"paper_base": Color("#F3E6D2"),
 	"paper_top": Color("#FAF1E2"),
@@ -28,7 +30,7 @@ const COLORS := {
 	"focus": Color("#3C8CD2"),
 }
 
-const DARK_COLORS := {
+const OBSIDIAN_COLORS := {
 	"paper_base": Color("#121319"),
 	"paper_top": Color("#1A1C24"),
 	"paper_muted": Color("#232633"),
@@ -41,8 +43,31 @@ const DARK_COLORS := {
 	"ink_muted": Color("#8B94A5"),
 	"blue": Color("#00E5FF"),
 	"blue_dark": Color("#00A3B8"),
+	"green": Color("#39D98A"),
+	"green_dark": Color("#219A63"),
+	"red": Color("#FF5C7A"),
+	"red_dark": Color("#C73552"),
+	"orange": Color("#FFB547"),
+	"orange_dark": Color("#C77D1D"),
 	"purple": Color("#FF007F"),
 	"purple_dark": Color("#C70063"),
+	"success": Color("#39D98A"),
+	"warning": Color("#FFB547"),
+	"error": Color("#FF5C7A"),
+	"focus": Color("#00E5FF"),
+}
+
+const DARK_COLORS := {
+	"paper_base": Color("#34291F"),
+	"paper_top": Color("#4B3B2B"),
+	"paper_muted": Color("#3E3025"),
+	"paper_dark": Color("#2A211A"),
+	"cardboard_base": Color("#201A15"),
+	"cardboard_light": Color("#4A3525"),
+	"cardboard_dark": Color("#120F0C"),
+	"cardboard_edge": Color("#6B4729"),
+	"ink_primary": Color("#FFF4DC"),
+	"ink_muted": Color("#D8C7A5"),
 }
 
 const HIGH_CONTRAST_COLORS := {
@@ -86,13 +111,29 @@ const DIMENSIONS := {
 }
 
 static func color(token: String, dark_craft: bool = false, high_contrast: bool = false) -> Color:
-	if high_contrast and HIGH_CONTRAST_COLORS.has(token):
-		return HIGH_CONTRAST_COLORS[token]
-	if dark_craft and DARK_COLORS.has(token):
-		return DARK_COLORS[token]
+	var palette := Palette.HIGH_CONTRAST if high_contrast else (Palette.DARK_CRAFT if dark_craft else Palette.PAPER_QUEST)
+	return color_for_palette(token, palette)
+
+static func color_for_palette(token: String, palette: int) -> Color:
+	var palette_colors: Dictionary
+	match palette:
+		Palette.OBSIDIAN:
+			palette_colors = OBSIDIAN_COLORS
+		Palette.DARK_CRAFT:
+			palette_colors = DARK_COLORS
+		Palette.HIGH_CONTRAST:
+			palette_colors = HIGH_CONTRAST_COLORS
+		_:
+			palette_colors = COLORS
+	if palette_colors.has(token):
+		return palette_colors[token]
 	return COLORS.get(token, Color.MAGENTA)
 
 static func workspace_color(workspace_id: String, dark_craft: bool = false, high_contrast: bool = false) -> Color:
+	var palette := Palette.HIGH_CONTRAST if high_contrast else (Palette.DARK_CRAFT if dark_craft else Palette.PAPER_QUEST)
+	return workspace_color_for_palette(workspace_id, palette)
+
+static func workspace_color_for_palette(workspace_id: String, palette: int) -> Color:
 	var token := {
 		"project_assets": "red",
 		"character_creator": "orange",
@@ -101,4 +142,4 @@ static func workspace_color(workspace_id: String, dark_craft: bool = false, high
 		"weapon_equipment": "orange_dark",
 		"preview_export": "purple",
 	}.get(workspace_id, "blue") as String
-	return color(token, dark_craft, high_contrast)
+	return color_for_palette(token, palette)

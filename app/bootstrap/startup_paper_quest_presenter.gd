@@ -11,10 +11,13 @@ extends Node
 @onready var _validation: Label = _startup.get_node("MarginContainer/MainLayout/Overview/OverviewVBox/Metrics/Validation")
 @onready var _autosave: Label = _startup.get_node("MarginContainer/MainLayout/Overview/OverviewVBox/Metrics/Autosave")
 @onready var _texture: TextureRect = _startup.get_node("BackgroundTexture")
+@onready var _appearance_picker: OptionButton = _startup.get_node("MarginContainer/MainLayout/Header/HeaderRight/AppearanceOption")
 
 func _ready() -> void:
 	if ThemeService != null:
 		_startup.theme = ThemeService.get_current_theme()
+	_setup_appearance_picker()
+	_appearance_picker.item_selected.connect(_select_appearance)
 	_startup.startup_completed.connect(_on_startup_completed)
 	if RecentProjectsService != null:
 		RecentProjectsService.recent_projects_changed.connect(_refresh_project)
@@ -62,8 +65,23 @@ func _refresh_autosave() -> void:
 
 func _refresh_appearance() -> void:
 	if ThemeService != null:
-		_texture.visible = not ThemeService.is_high_contrast()
-		_texture.modulate.a = 0.20 if ThemeService.get_theme_mode() == ThemeService.ThemeMode.DARK else 0.46
+		_texture.visible = ThemeService.uses_paper_texture()
+		_texture.modulate.a = ThemeService.get_paper_texture_opacity()
+		for index in range(_appearance_picker.item_count):
+			if _appearance_picker.get_item_id(index) == ThemeService.get_appearance_mode():
+				_appearance_picker.select(index)
+				break
+
+func _setup_appearance_picker() -> void:
+	_appearance_picker.clear()
+	if ThemeService == null:
+		return
+	for option in ThemeService.get_appearance_options():
+		_appearance_picker.add_item(String(option["label"]), int(option["id"]))
+
+func _select_appearance(index: int) -> void:
+	if ThemeService != null:
+		ThemeService.set_appearance_mode(_appearance_picker.get_item_id(index))
 
 func _on_theme_changed(_mode: String, new_theme: Theme) -> void:
 	_startup.theme = new_theme

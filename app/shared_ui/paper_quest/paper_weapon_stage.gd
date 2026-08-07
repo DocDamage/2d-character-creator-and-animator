@@ -3,13 +3,11 @@ extends "res://app/shared_ui/paper_quest/paper_diorama.gd"
 
 func _draw() -> void:
 	super._draw()
-	var dark := ThemeService != null and ThemeService.get_theme_mode() == ThemeService.ThemeMode.DARK
-	var contrast := ThemeService != null and ThemeService.is_high_contrast()
-	var blade := Tokens.color("paper_dark", dark, contrast)
-	var edge := Tokens.color("cardboard_dark", dark, contrast)
-	var orange := Tokens.color("orange", dark, contrast)
-	var blue := Tokens.color("blue", dark, contrast)
-	var green := Tokens.color("green", dark, contrast)
+	var blade := _token("paper_dark")
+	var edge := _token("cardboard_dark")
+	var orange := _token("orange")
+	var blue := _token("blue")
+	var green := _token("green")
 	var scale_factor := clampf(minf(size.x / 720.0, size.y / 350.0), 0.72, 1.30)
 	var grip := Vector2(size.x * 0.59, size.y * 0.61)
 	var tip := grip + Vector2(94, -116) * scale_factor

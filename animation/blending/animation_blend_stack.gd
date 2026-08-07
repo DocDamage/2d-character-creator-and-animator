@@ -7,15 +7,22 @@ const MODES := ["override", "additive"]
 
 var stack_id: String = ""
 var layers: Array = []
+var _history_recorder: Callable
 
 
 func _init(p_stack_id: String = "") -> void:
 	stack_id = p_stack_id.strip_edges()
 
 
+func set_history_recorder(recorder: Callable = Callable()) -> void:
+	_history_recorder = recorder
+
+
 func add_layer(layer_id: String, clip_id: String, mode: String = "override", weight: float = 1.0, bone_mask: Array = [], sync_group: String = "", weapon_overlay: bool = false) -> bool:
+	var before := to_dict()
 	if layer_id.strip_edges().is_empty() or clip_id.strip_edges().is_empty() or mode not in MODES or get_layer(layer_id).size() > 0: return false
 	layers.append({"layer_id": layer_id.strip_edges(), "clip_id": clip_id.strip_edges(), "mode": mode, "weight": clampf(weight, 0.0, 1.0), "bone_mask": bone_mask.duplicate(), "sync_group": sync_group.strip_edges(), "weapon_overlay": weapon_overlay, "enabled": true})
+	_record(before, "Added Animation Blend Layer " + layer_id.strip_edges())
 	return true
 
 
@@ -26,10 +33,13 @@ func get_layer(layer_id: String) -> Dictionary:
 
 
 func set_layer_property(layer_id: String, property: String, value: Variant) -> bool:
+	var before := to_dict()
 	for index in layers.size():
 		if str(layers[index].get("layer_id", "")) != layer_id: continue
 		if property == "weight": value = clampf(float(value), 0.0, 1.0)
+		if layers[index].get(property) == value: return false
 		layers[index][property] = value
+		_record(before, "Changed Animation Blend Layer " + layer_id)
 		return true
 	return false
 
@@ -72,6 +82,11 @@ func from_dict(data: Dictionary) -> AnimationBlendStack:
 	stack_id = str(data.get("stack_id", "")).strip_edges()
 	layers = (data.get("layers", []) as Array).duplicate(true)
 	return self
+
+
+func _record(before: Dictionary, description: String) -> void:
+	if _history_recorder.is_valid():
+		_history_recorder.call(before, to_dict(), description)
 
 
 func _sync_times(normalized_times: Dictionary) -> Dictionary:

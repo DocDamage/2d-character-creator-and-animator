@@ -14,12 +14,14 @@ func _ready() -> void:
 	queue_redraw()
 
 func _draw() -> void:
-	var dark := ThemeService != null and ThemeService.get_theme_mode() == ThemeService.ThemeMode.DARK
 	var contrast := ThemeService != null and ThemeService.is_high_contrast()
-	var background := Tokens.color("paper_top", dark, contrast)
-	var edge := Tokens.color("cardboard_edge", dark, contrast)
+	var background := _token("paper_top")
+	var edge := _token("cardboard_edge")
 	draw_style_box(Styles.paper(background, edge, contrast, raised), Rect2(Vector2.ZERO, size))
-	draw_rect(Rect2(0, 0, size.x, 5), Tokens.color(accent, dark, contrast), true)
+	draw_rect(Rect2(0, 0, size.x, 5), _token(accent), true)
 
 func _on_theme_changed(_mode: String, _theme: Theme) -> void:
 	queue_redraw()
+
+func _token(name: String) -> Color:
+	return ThemeService.get_color_token(name) if ThemeService != null else Tokens.color(name)

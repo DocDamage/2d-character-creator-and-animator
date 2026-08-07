@@ -33,6 +33,7 @@ mouse_filter = 2
 theme_type_variation = &"CardboardPanel"
 
 [node name="BackgroundTexture" type="TextureRect" parent="." groups=["paper_quest_texture"]]
+visible = false
 modulate = Color(1, 1, 1, 0.46)
 layout_mode = 1
 anchors_preset = 15
@@ -72,11 +73,13 @@ script = ExtResource("4_header")
 custom_minimum_size = Vector2(12, 0)
 layout_mode = 2
 
-[node name="BrandMark" type="Button" parent="MarginContainer/MainLayout/Header"]
+[node name="BrandMark" type="Label" parent="MarginContainer/MainLayout/Header"]
 custom_minimum_size = Vector2(48, 48)
 layout_mode = 2
-theme_type_variation = &"PrimaryButton"
+theme_type_variation = &"BrandTitle"
 text = "PQ"
+horizontal_alignment = 1
+vertical_alignment = 1
 
 [node name="HeaderLeft" type="VBoxContainer" parent="MarginContainer/MainLayout/Header"]
 layout_mode = 2
@@ -109,6 +112,12 @@ unique_name_in_owner = true
 layout_mode = 2
 status = 3
 status_text = "Checking"
+
+[node name="AppearanceOption" type="OptionButton" parent="MarginContainer/MainLayout/Header/HeaderRight"]
+custom_minimum_size = Vector2(240, 40)
+layout_mode = 2
+focus_mode = 2
+tooltip_text = "Choose the studio appearance"
 
 [node name="BtnToggleLog" type="Button" parent="MarginContainer/MainLayout/Header/HeaderRight"]
 custom_minimum_size = Vector2(104, 40)
@@ -448,3 +457,11 @@ title = "Project Not Found"
 initial_position = 2
 size = Vector2i(400, 180)
 dialog_text = "Project file not found."
+
+[node name="LocateProjectDialog" type="FileDialog" parent="."]
+title = "Locate Moved Project"
+initial_position = 2
+size = Vector2i(820, 560)
+file_mode = 0
+access = 2
+filters = PackedStringArray("*.chrproj ; Paper Quest projects", "*.json ; Legacy JSON projects")

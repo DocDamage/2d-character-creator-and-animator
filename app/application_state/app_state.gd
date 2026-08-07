@@ -12,6 +12,7 @@ signal workspace_changed(workspace_id: String)
 signal theme_changed(theme_id: String)
 signal diagnostic_posted(level: String, message: String, source: String)
 signal autosave_triggered
+signal autosave_completed(path: String, timestamp: int)
 signal close_requested(cancel: bool)
 
 ## === Constants ==============================================================
@@ -43,11 +44,17 @@ var _recent_projects: Array[String] = []
 var _autosave_enabled: bool = true
 var _autosave_interval_sec: float = 60.0
 var _autosave_timer: Timer = null
+var _last_autosave_path: String = ""
+var _last_autosave_unix: int = 0
 
 ## === Lifecycle ==============================================================
 
 func _ready() -> void:
 	_setup_autosave_timer()
+
+
+func _exit_tree() -> void:
+	RecoveryJournalService.complete_session()
 
 
 ## === Public API =============================================================
@@ -114,6 +121,8 @@ func get_formatted_title() -> String:
 func open_project(path: String) -> void:
 	if _project_loaded:
 		close_project()
+	if CommandService != null:
+		CommandService.clear_history()
 	_project_path = path
 	_project_loaded = true
 	_is_dirty = false
@@ -125,6 +134,8 @@ func open_project(path: String) -> void:
 
 
 func close_project() -> void:
+	if CommandService != null:
+		CommandService.clear_history()
 	_project_path = ""
 	_project_loaded = false
 	_is_dirty = false
@@ -213,6 +224,24 @@ func trigger_autosave() -> void:
 	if _is_dirty:
 		autosave_triggered.emit()
 		post_diagnostic("info", "Autosave triggered for project: " + _project_path, "AppState")
+
+
+func record_autosave(path: String, timestamp: int = 0) -> void:
+	_last_autosave_path = path
+	_last_autosave_unix = timestamp if timestamp > 0 else Time.get_unix_time_from_system()
+	autosave_completed.emit(_last_autosave_path, _last_autosave_unix)
+
+
+func get_last_autosave_path() -> String:
+	return _last_autosave_path
+
+
+func get_last_autosave_unix() -> int:
+	return _last_autosave_unix
+
+
+func get_autosave_age_seconds() -> int:
+	return max(0, Time.get_unix_time_from_system() - _last_autosave_unix) if _last_autosave_unix > 0 else -1
 
 
 ## === Internal ===============================================================

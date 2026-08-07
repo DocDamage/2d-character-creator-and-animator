@@ -9,6 +9,7 @@ const PoseMirrorModelScript = preload("res://rigging/poses/pose_mirror_model.gd"
 const PoseBlendModelScript = preload("res://rigging/poses/pose_blend_model.gd")
 const PoseThumbnailModelScript = preload("res://rigging/poses/pose_thumbnail_model.gd")
 const PoseSketchAssistModelScript = preload("res://rigging/poses/pose_sketch_assist_model.gd")
+const DocumentHistoryScript = preload("res://app/commands/document_history.gd")
 
 signal pose_saved(pose_id: String)
 signal pose_applied(pose_id: String)
@@ -85,11 +86,13 @@ func suggest_from_sketch() -> Dictionary:
 
 
 func save_pose(pose: Variant) -> Dictionary:
+	var before := _capture_document_snapshot()
 	var result: Dictionary = _library.save_pose(pose)
 	_refresh("Saved pose '%s'." % str(result.get("pose_id", "")) if result.get("success", false) else _errors_text(result))
 	if result.get("success", false):
 		pose_saved.emit(str(result.get("pose_id", "")))
-		_mark_dirty()
+		if not _record_document_change(before, "Saved Pose " + str(result.get("pose_id", ""))):
+			_mark_dirty()
 	return result
 
 
@@ -120,11 +123,13 @@ func apply_pose(pose_id: String) -> Dictionary:
 	var pose = _library.get_pose(pose_id)
 	if pose == null:
 		return _result_with_status({"success": false, "message": "Saved pose '%s' was not found." % pose_id})
+	var before := _capture_document_snapshot()
 	var result: Dictionary = PoseApplierScript.apply_to_rig(pose, _rig)
 	_refresh(str(result.get("message", "Pose application failed.")))
 	if result.get("success", false):
 		pose_applied.emit(pose_id)
-		_mark_dirty()
+		if not _record_document_change(before, "Applied Pose " + pose_id):
+			_mark_dirty()
 	return result
 
 
@@ -164,10 +169,12 @@ func preview_selected_blend() -> Dictionary:
 	var blended := _make_blend(pose_list.get_item_text(pose_list.selected), blend_target_list.get_item_text(blend_target_list.selected), "__blend_preview__", "Blend Preview", blend_weight.value)
 	if not blended.get("success", false):
 		return _result_with_status(blended)
+	var before := _capture_document_snapshot()
 	var applied: Dictionary = PoseApplierScript.apply_to_rig(blended.get("pose"), _rig)
 	_refresh(str(applied.get("message", "Blend preview failed.")))
 	if applied.get("success", false):
-		_mark_dirty()
+		if not _record_document_change(before, "Previewed Blended Pose"):
+			_mark_dirty()
 	return applied
 
 
@@ -270,3 +277,21 @@ func _errors_text(result: Dictionary) -> String:
 func _mark_dirty() -> void:
 	if AppState != null:
 		AppState.mark_dirty()
+
+
+func _capture_document_snapshot() -> Dictionary:
+	return {"library": _library.to_dict(), "rig": _rig.duplicate(true)}
+
+
+func _record_document_change(before: Dictionary, description: String) -> bool:
+	return DocumentHistoryScript.record_applied(self, before, _capture_document_snapshot(), description)
+
+
+func _apply_document_snapshot(snapshot: Dictionary, description: String = "") -> void:
+	if snapshot.is_empty():
+		return
+	_library.from_dict(snapshot.get("library", {}) as Dictionary)
+	var restored_rig: Dictionary = snapshot.get("rig", {})
+	_rig.clear()
+	_rig.merge(restored_rig.duplicate(true), true)
+	_refresh(description if not description.is_empty() else "Restored rig and pose library state.")

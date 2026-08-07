@@ -11,13 +11,11 @@ func _ready() -> void:
 	queue_redraw()
 
 func _draw() -> void:
-	var dark := ThemeService != null and ThemeService.get_theme_mode() == ThemeService.ThemeMode.DARK
-	var contrast := ThemeService != null and ThemeService.is_high_contrast()
-	var blue := Tokens.color("blue", dark, contrast)
-	var blue_dark := Tokens.color("blue_dark", dark, contrast)
-	var paper := Tokens.color("paper_top", dark, contrast)
-	var ink := Tokens.color("ink_primary", dark, contrast)
-	var red := Tokens.color("red", dark, contrast)
+	var blue := _token("blue")
+	var blue_dark := _token("blue_dark")
+	var paper := _token("paper_top")
+	var ink := _token("ink_primary")
+	var red := _token("red")
 	var scale_factor := minf(size.x, size.y) / 100.0
 	var center := Vector2(size.x * 0.5, size.y * 0.50)
 	var outline := 4.0 * scale_factor
@@ -49,3 +47,6 @@ func _draw() -> void:
 
 func _on_theme_changed(_mode: String, _theme: Theme) -> void:
 	queue_redraw()
+
+func _token(name: String) -> Color:
+	return ThemeService.get_color_token(name) if ThemeService != null else Tokens.color(name)

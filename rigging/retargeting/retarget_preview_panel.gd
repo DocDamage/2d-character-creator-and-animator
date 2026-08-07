@@ -5,6 +5,7 @@ extends VBoxContainer
 const RetargetPoseTransferScript = preload("res://rigging/retargeting/retarget_pose_transfer.gd")
 const PoseApplierScript = preload("res://rigging/poses/pose_applier.gd")
 const RetargetBatchProcessorScript = preload("res://rigging/retargeting/retarget_batch_processor.gd")
+const DocumentHistoryScript = preload("res://app/commands/document_history.gd")
 
 @onready var preview_button: Button = %PreviewButton
 @onready var status_label: Label = %RetargetStatusLabel
@@ -43,9 +44,13 @@ func preview_retarget() -> Dictionary:
 		var corrected: Dictionary = _correction_layer.apply_to_pose(transferred.get("pose"))
 		if not corrected.get("success", false):
 			return _result(corrected)
+	var before := _capture_document_snapshot()
 	var applied: Dictionary = PoseApplierScript.apply_to_rig(transferred.get("pose"), _target_rig)
 	applied["unmapped_source_bones"] = transferred.get("unmapped_source_bones", [])
-	return _result(applied)
+	var result := _result(applied, false)
+	if result.get("success", false) and not DocumentHistoryScript.record_applied(self, before, _capture_document_snapshot(), "Previewed Retargeted Pose"):
+		_mark_dirty()
+	return result
 
 
 func batch_retarget(source_poses: Array, target_library: Variant, id_prefix: String = "retargeted") -> Dictionary:
@@ -62,8 +67,25 @@ func _refresh(message: String = "") -> void:
 	status_label.text = message if not message.is_empty() else "Bind retarget context to preview a source pose on the target rig."
 
 
-func _result(result: Dictionary) -> Dictionary:
+func _result(result: Dictionary, mark_dirty: bool = true) -> Dictionary:
 	_refresh(str(result.get("message", "Retarget preview failed.")))
-	if result.get("success", false) and AppState != null:
-		AppState.mark_dirty()
+	if result.get("success", false) and mark_dirty:
+		_mark_dirty()
 	return result
+
+
+func _capture_document_snapshot() -> Dictionary:
+	return {"target_rig": _target_rig.duplicate(true)}
+
+
+func _apply_document_snapshot(snapshot: Dictionary, description: String = "") -> void:
+	if snapshot.is_empty():
+		return
+	_target_rig.clear()
+	_target_rig.merge((snapshot.get("target_rig", {}) as Dictionary).duplicate(true), true)
+	_refresh(description if not description.is_empty() else "Restored retarget preview state.")
+
+
+func _mark_dirty() -> void:
+	if AppState != null:
+		AppState.mark_dirty()
