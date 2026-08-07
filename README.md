@@ -97,25 +97,38 @@ for CLI examples, review packages, asset packs, and runtime export contracts.
 | [docs](docs) | User, build, architecture, delivery, licensing, and verification documentation. |
 | [design/character-studio](design/character-studio) | Tokens, component manifest, interactive prototype, and visual implementation handoff. |
 
-## Current product direction: direct-start LPC creation
+## Direct-start LPC creation
 
-The next product-facing overhaul is a dedicated **direct-start LPC creator**.
-It is planned work, not a claim that the local LPC library is already bundled
-in this repository. The goal is to make opening the app feel immediately useful:
+Phases 0–1 of the dedicated **direct-start LPC creator** are implemented.
+On a normal desktop launch, the LPC chooser lets a creator locate a locked
+local source library, rebuild its deterministic catalog, choose a license
+policy and compatible body family, create a project, or resume the latest
+editable LPC project. **Open Advanced Studio** remains available when the LPC
+library is absent or a non-LPC workflow is needed.
 
-- Resume the most recent editable LPC project directly into a focused,
-  three-column base-body editor.
-- Keep the full LPC sheets behind a simple front-facing creator, then move
-  advanced animation and deformation into a separate workspace.
-- Provide local, license-aware Personal Full and Commercial-safe content packs,
-  with project credits and acceptance records.
-- Preserve source art through copy-on-first-edit, custom cels, per-layer or
-  composite deformation, and non-destructive baking.
+The repository intentionally does not bundle upstream LPC art. A local source
+library needs its own `lpc_source.lock.json` and `lpc_catalog_source.json`;
+the app validates source hashes, image metadata, layouts, credits, aliases,
+and policy eligibility before a project can be created. The tracked
+[`lpc/lpc_source.lock.json`](lpc/lpc_source.lock.json) documents the pinned
+adapter contract, not a redistributed art pack.
+
+The implemented foundation also includes deterministic catalog caching and
+diffs, exact alternative-license selection and credit manifests, versioned
+sheet layouts/frame references, a strict CPU triangle raster reference path,
+LPC project migrations/backups/autosave/recovery, and staged virtualized
+catalog queries. Focused character assembly and native animation are phase 2.
 
 Read the complete
 [Direct-Start LPC Creator plan](DIRECT_START_LPC_CREATOR_PLAN.md) for scope,
 asset handling, licensing, animation, pixel editing, deformation, and export
 details.
+
+Run the focused phase-0/1 acceptance check with:
+
+```powershell
+godot --headless --path . --scene tests/lpc_phase01_runner.tscn
+```
 
 ## Documentation
 

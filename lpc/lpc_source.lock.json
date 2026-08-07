@@ -1,0 +1,19 @@
+{
+  "lock_schema_version": "1.0.0",
+  "upstream_repository_url": "https://github.com/Universal-LPC/lpc-spritesheet",
+  "upstream_commit_sha": "b2c85f98de52624b454dfdfac329bfee75795c2d",
+  "catalog_adapter_version": "1.0.0",
+  "accepted_source_tree_paths": [
+    "sheet_definitions",
+    "palette_definitions",
+    "sprites",
+    "CREDITS.csv"
+  ],
+  "expected_root_hashes": {},
+  "palette_policy_version": "1.0.0",
+  "layout_policy_version": "1.0.0",
+  "license_policy_version": "1.0.0",
+  "build_timestamp": "2026-08-07T00:00:00Z",
+  "build_tool_version": "paper-quest-lpc-catalog/1.0.0",
+  "catalog_signature": "built-from-local-locked-source"
+}

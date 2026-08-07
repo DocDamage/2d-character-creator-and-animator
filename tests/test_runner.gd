@@ -39,6 +39,7 @@ const TestRetargetingScript = preload("res://tests/integration/test_retargeting.
 const TestAuthoringCompletionScript = preload("res://tests/integration/test_authoring_completion.gd")
 const TestReleaseHardeningScript = preload("res://tests/integration/test_release_hardening.gd")
 const TestProductionDeliveryScript = preload("res://tests/integration/test_production_delivery.gd")
+const TestLpcPhase01Script = preload("res://tests/integration/test_lpc_phase_0_1.gd")
 func _ready() -> void:
 	print("=== Running Automated Test Suite ===")
 	print("")
@@ -298,6 +299,9 @@ func _ready() -> void:
 	# 43. Exercise runtime-contract preview/export, production automation, collaboration, and approval delivery.
 	var r43 := _exec_sub(TestProductionDeliveryScript.new(), pass_count, fail_count)
 	pass_count = r43[0]; fail_count = r43[1]
+	# 44. Exercise the locked LPC catalog, strict reference raster path, and direct-start project workflow.
+	var r44 := _exec_sub(TestLpcPhase01Script.new(), pass_count, fail_count)
+	pass_count = r44[0]; fail_count = r44[1]
 	print("")
 	print("=== Test Suite Finished: %d PASS, %d FAIL ===" % [pass_count, fail_count])
 	get_tree().quit(0 if fail_count == 0 else 1)

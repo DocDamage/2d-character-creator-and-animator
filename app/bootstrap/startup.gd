@@ -20,7 +20,7 @@ const PACKAGED_ACCEPTANCE_SCENE_PATH := "res://tests/packaged_ui_acceptance.tscn
 const PACKAGED_ACCEPTANCE_ARG := "--packaged-ui-acceptance"
 const PACKAGED_ACCEPTANCE_META := &"paper_quest_packaged_acceptance_started"
 
-const StartupDiagnosticsScript = preload("res://app/bootstrap/startup_diagnostics.gd"); const CharacterProjectFactoryScript = preload("res://character/authoring/character_project_factory.gd"); const RecoveryJournalScript = preload("res://core/documents/recovery_journal.gd")
+const StartupDiagnosticsScript = preload("res://app/bootstrap/startup_diagnostics.gd"); const CharacterProjectFactoryScript = preload("res://character/authoring/character_project_factory.gd"); const RecoveryJournalScript = preload("res://core/documents/recovery_journal.gd"); const LpcDirectStartPanelScript = preload("res://lpc/ui/lpc_direct_start_panel.gd")
 
 ## === Node References ========================================================
 
@@ -32,6 +32,7 @@ const StartupDiagnosticsScript = preload("res://app/bootstrap/startup_diagnostic
 @onready var _empty_label: Label = get_node_or_null("MarginContainer/MainLayout/ContentSplit/RecentPanel/EmptyLabel")
 
 @onready var _btn_new_project: Button = get_node_or_null("MarginContainer/MainLayout/ContentSplit/QuickStartPanel/VBox/BtnNewProject")
+@onready var _btn_lpc_creator: Button = get_node_or_null("MarginContainer/MainLayout/ContentSplit/QuickStartPanel/VBox/BtnLpcCreator")
 @onready var _btn_open_project: Button = get_node_or_null("MarginContainer/MainLayout/ContentSplit/QuickStartPanel/VBox/BtnOpenProject")
 @onready var _btn_open_sample: Button = get_node_or_null("MarginContainer/MainLayout/ContentSplit/QuickStartPanel/VBox/BtnOpenSample")
 @onready var _btn_continue_last: Button = get_node_or_null("MarginContainer/MainLayout/ContentSplit/QuickStartPanel/VBox/BtnContinueLast")
@@ -71,6 +72,8 @@ func _ready() -> void:
 	_open_requested_new_project_dialog()
 	_run_startup_sequence()
 	refresh_recent_list()
+	if DisplayServer.get_name() != "headless" and not recovery_offered:
+		call_deferred("_show_lpc_direct_start")
 
 func _open_requested_new_project_dialog() -> void:
 	if AppState == null or not bool(AppState.get_meta("open_new_project_dialog", false)):
@@ -281,6 +284,14 @@ func _change_to_main_workspace() -> void:
 		DiagnosticsService.error("Could not open main editor workspace.", "Startup")
 
 
+func _show_lpc_direct_start() -> void:
+	if get_node_or_null("LpcDirectStartPanel") != null:
+		return
+	var panel := LpcDirectStartPanelScript.new()
+	panel.name = "LpcDirectStartPanel"
+	add_child(panel)
+
+
 ## === Internal Signals & Connection =========================================
 
 func _connect_ui_signals() -> void:
@@ -289,6 +300,7 @@ func _connect_ui_signals() -> void:
 		_search_input.text_changed.connect(func(t): _search_filter = t.strip_edges(); refresh_recent_list())
 	if _btn_new_project != null:
 		_btn_new_project.pressed.connect(func(): if _new_project_dialog != null and _new_project_dialog.has_method("open_dialog"): _new_project_dialog.call("open_dialog"))
+	if _btn_lpc_creator != null: _btn_lpc_creator.pressed.connect(_show_lpc_direct_start)
 	if _btn_open_project != null:
 		_btn_open_project.pressed.connect(func(): if _open_project_dialog != null: _open_project_dialog.popup_centered_ratio(0.72))
 	if _btn_open_sample != null:
