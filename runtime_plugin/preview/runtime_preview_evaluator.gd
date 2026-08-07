@@ -7,6 +7,8 @@ const StateMachineEvaluatorScript = preload("res://animation/state_machine/state
 const RuleGraphScript = preload("res://animation/rules/rule_graph.gd")
 const TrackDefinitionScript = preload("res://animation/tracks/track_schema.gd")
 const SecondaryMotionEvaluatorScript = preload("res://animation/secondary/secondary_motion_evaluator.gd")
+const BezierEvaluatorScript = preload("res://animation/curves/bezier_evaluator.gd")
+const SmoothCubicEvaluatorScript = preload("res://animation/curves/smooth_cubic_evaluator.gd")
 
 var contract: Dictionary = {}
 var state_evaluator = StateMachineEvaluatorScript.new()
@@ -177,8 +179,13 @@ func _sample_track(track: Dictionary, time: float) -> Variant:
 	for index in range(1, keys.size()):
 		var next: Dictionary = keys[index] as Dictionary
 		if time < float(next.get("time", 0.0)):
-			if int(next.get("interpolation", 0)) == TrackDefinitionScript.Interpolation.STEPPED: return previous.get("value")
+			var mode := int(previous.get("interpolation", TrackDefinitionScript.Interpolation.LINEAR))
+			if mode == TrackDefinitionScript.Interpolation.STEPPED: return previous.get("value")
 			var factor := inverse_lerp(float(previous.get("time", 0.0)), float(next.get("time", 0.0)), time)
+			if mode == TrackDefinitionScript.Interpolation.SMOOTH:
+				factor = SmoothCubicEvaluatorScript.ease_factor(factor, clampf(float(previous.get("easing", 0.5)), 0.0, 1.0))
+			elif mode == TrackDefinitionScript.Interpolation.BEZIER:
+				factor = BezierEvaluatorScript.evaluate_bezier_1d(factor, _handle(previous.get("out_handle", [0.25, 0.0]), Vector2(0.25, 0.0)), _handle(next.get("in_handle", [-0.25, 0.0]), Vector2(-0.25, 0.0)))
 			return _interpolate(previous.get("value"), next.get("value"), factor)
 		previous = next
 	return previous.get("value")
@@ -192,8 +199,16 @@ func _interpolate(left: Variant, right: Variant, factor: float) -> Variant:
 		var result: Dictionary = (left as Dictionary).duplicate(true)
 		if result.get("local_position") is Array and (right as Dictionary).get("local_position") is Array: result["local_position"] = _interpolate(result["local_position"], (right as Dictionary)["local_position"], factor)
 		if result.has("local_rotation") and (right as Dictionary).has("local_rotation"): result["local_rotation"] = lerp_angle(float(result["local_rotation"]), float((right as Dictionary)["local_rotation"]), factor)
+		if result.get("local_scale") is Array and (right as Dictionary).get("local_scale") is Array: result["local_scale"] = _interpolate(result["local_scale"], (right as Dictionary)["local_scale"], factor)
 		return result
 	return left if factor < 1.0 else right
+
+
+func _handle(value: Variant, fallback: Vector2) -> Vector2:
+	if value is Vector2: return value as Vector2
+	if value is Array and (value as Array).size() >= 2:
+		return Vector2(float((value as Array)[0]), float((value as Array)[1]))
+	return fallback
 
 
 func _shapes(value: Variant, track: Dictionary, kind: String) -> Array:

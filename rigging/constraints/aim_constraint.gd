@@ -10,6 +10,8 @@ func _init() -> void:
 
 
 func evaluate(p_rig: Dictionary, _delta: float) -> void:
+	if not enabled or influence <= 0.0:
+		return
 	var bones: Dictionary = p_rig.get("bones", {})
 	if not bones.has(owner_bone_id) or not bones.has(target_bone_id):
 		return
@@ -27,5 +29,7 @@ func evaluate(p_rig: Dictionary, _delta: float) -> void:
 	var target_angle := dir.angle() + aim_offset_angle
 	var owner_bone: Dictionary = bones[owner_bone_id]
 	var current_rot: float = owner_bone.get("local_rotation", 0.0)
-	
-	owner_bone["local_rotation"] = lerp_angle(current_rot, target_angle, influence)
+	var target_local_rotation := bm.get_local_rotation_for_global(owner_bone_id, target_angle)
+	owner_bone["local_rotation"] = lerp_angle(current_rot, target_local_rotation, clampf(influence, 0.0, 1.0))
+	bones[owner_bone_id] = owner_bone
+	p_rig["bones"] = bones

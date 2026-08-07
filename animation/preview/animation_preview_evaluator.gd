@@ -6,6 +6,8 @@ extends RefCounted
 
 const TrackDefinitionScript = preload("res://animation/tracks/track_schema.gd")
 const BezierEvaluatorScript = preload("res://animation/curves/bezier_evaluator.gd")
+const AngleInterpolatorScript = preload("res://animation/curves/angle_interpolator.gd")
+const SmoothCubicEvaluatorScript = preload("res://animation/curves/smooth_cubic_evaluator.gd")
 
 
 func evaluate(session, clip: Dictionary, current_time: float, previous_time: float = -1.0, is_playing: bool = false, base_layers: Array = []) -> Dictionary:
@@ -162,6 +164,9 @@ func _evaluate_track_value(track: Dictionary, time: float, force_stepped: bool) 
 	var keys: Array = _sorted_keys(track.get("keys", []))
 	if keys.is_empty(): return null
 	var previous: Dictionary = keys[0]
+	var rotates := _is_rotation_track(track)
+	var angle_mode := _rotation_mode(track)
+	var degrees := _rotation_values_are_degrees(track)
 	if time <= float(previous.get("time", 0.0)): return previous.get("value")
 	for index in range(1, keys.size()):
 		var next: Dictionary = keys[index]
@@ -172,10 +177,10 @@ func _evaluate_track_value(track: Dictionary, time: float, force_stepped: bool) 
 			var span := float(next.get("time", 0.0)) - float(previous.get("time", 0.0))
 			var factor := clampf((time - float(previous.get("time", 0.0))) / span, 0.0, 1.0) if span > 0.0 else 1.0
 			if mode == TrackDefinition.Interpolation.SMOOTH:
-				factor = factor * factor * (3.0 - 2.0 * factor)
+				factor = SmoothCubicEvaluatorScript.ease_factor(factor, clampf(float(previous.get("easing", 0.5)), 0.0, 1.0))
 			elif mode == TrackDefinition.Interpolation.BEZIER:
 				factor = BezierEvaluatorScript.evaluate_bezier_1d(factor, _handle(previous.get("out_handle", [0.25, 0.0]), Vector2(0.25, 0.0)), _handle(next.get("in_handle", [-0.25, 0.0]), Vector2(-0.25, 0.0)))
-			return _interpolate_value(previous.get("value"), next.get("value"), factor)
+			return _interpolate_value(previous.get("value"), next.get("value"), factor, rotates, angle_mode, degrees)
 		previous = next
 	return previous.get("value")
 
@@ -212,6 +217,25 @@ func _values_crossed(track: Dictionary, clip: Dictionary, previous_time: float, 
 
 func _is_discrete_track(kind: int) -> bool:
 	return kind in [TrackDefinition.TrackType.IMAGE_SWAP, TrackDefinition.TrackType.VISIBILITY, TrackDefinition.TrackType.Z_ORDER, TrackDefinition.TrackType.EVENT, TrackDefinition.TrackType.HITBOX, TrackDefinition.TrackType.HURTBOX, TrackDefinition.TrackType.AUDIO_CUE, TrackDefinition.TrackType.VISEME, TrackDefinition.TrackType.SCRIPT_PARAMETER]
+
+
+func _is_rotation_track(track: Dictionary) -> bool:
+	return int(track.get("track_type", TrackDefinition.TrackType.ATTRIBUTE)) == TrackDefinition.TrackType.TRANSFORM_ROTATION
+
+
+func _rotation_values_are_degrees(track: Dictionary) -> bool:
+	return str(track.get("property_path", "")).contains("rotation_degrees")
+
+
+func _rotation_mode(track: Dictionary) -> int:
+	var raw = track.get("rotation_mode", track.get("angle_mode", "shortest"))
+	if raw is int:
+		return clampi(int(raw), AngleInterpolatorScript.Mode.SHORTEST_PATH, AngleInterpolatorScript.Mode.COUNTER_CLOCKWISE)
+	match str(raw).strip_edges().to_lower():
+		"continuous": return AngleInterpolatorScript.Mode.CONTINUOUS
+		"clockwise", "cw": return AngleInterpolatorScript.Mode.CLOCKWISE
+		"counter_clockwise", "counterclockwise", "ccw": return AngleInterpolatorScript.Mode.COUNTER_CLOCKWISE
+		_: return AngleInterpolatorScript.Mode.SHORTEST_PATH
 
 
 func _property_name(path: String, track_type: int) -> String:
@@ -282,10 +306,13 @@ func _as_vector2(value: Variant, fallback: Vector2 = Vector2.ZERO) -> Vector2:
 	return fallback
 
 
-func _interpolate_value(a: Variant, b: Variant, factor: float) -> Variant:
+func _interpolate_value(a: Variant, b: Variant, factor: float, interpolate_angles: bool = false, angle_mode: int = AngleInterpolatorScript.Mode.SHORTEST_PATH, values_are_degrees: bool = false) -> Variant:
 	if typeof(a) != typeof(b): return a if factor < 1.0 else b
 	match typeof(a):
-		TYPE_INT, TYPE_FLOAT: return lerpf(float(a), float(b), factor)
+		TYPE_INT, TYPE_FLOAT:
+			if interpolate_angles:
+				return AngleInterpolatorScript.interpolate_degrees(float(a), float(b), factor, angle_mode) if values_are_degrees else AngleInterpolatorScript.interpolate_radians(float(a), float(b), factor, angle_mode)
+			return lerpf(float(a), float(b), factor)
 		TYPE_VECTOR2: return (a as Vector2).lerp(b as Vector2, factor)
 		TYPE_COLOR: return (a as Color).lerp(b as Color, factor)
 		TYPE_ARRAY:
@@ -297,6 +324,9 @@ func _interpolate_value(a: Variant, b: Variant, factor: float) -> Variant:
 		TYPE_DICTIONARY:
 			var result: Dictionary = (a as Dictionary).duplicate(true)
 			for key in (b as Dictionary):
-				if result.has(key): result[key] = _interpolate_value(result[key], (b as Dictionary)[key], factor)
+				if result.has(key):
+					var property_name := str(key)
+					var nested_rotation := interpolate_angles and property_name in ["rotation", "rotation_degrees", "local_rotation"]
+					result[key] = _interpolate_value(result[key], (b as Dictionary)[key], factor, nested_rotation, angle_mode, property_name == "rotation_degrees")
 			return result
 		_: return a if factor < 1.0 else b

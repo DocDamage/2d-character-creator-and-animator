@@ -28,6 +28,7 @@ func run_tests() -> int:
 	var passes := 0
 	passes += test_facing_grid_selection_and_mesh_blending()
 	passes += test_state_machine_and_rule_actions()
+	passes += test_state_machine_speed_scale()
 	passes += test_baked_and_runtime_exports()
 	passes += test_importer_and_runtime_player()
 	passes += test_portable_addon_importer()
@@ -94,6 +95,24 @@ func test_state_machine_and_rule_actions() -> int:
 		print("  PASS: State conditions, triggers, cross-fades, and ordered rule actions evaluate")
 		return 1
 	printerr("  FAIL: State machine or rule graph evaluation failed")
+	return 0
+
+
+func test_state_machine_speed_scale() -> int:
+	var machine := StateMachineScript.new("speed_test", "Speed Test")
+	machine.add_state("idle", "idle")
+	machine.add_state("done", "done")
+	machine.set_state_property("idle", "loop", false)
+	machine.set_state_property("idle", "speed_scale", 2.0)
+	machine.add_transition("finished", "idle", "done", [{"type": "animation_complete"}])
+	var evaluator := StateEvaluatorScript.new()
+	var configured := evaluator.configure(machine, {"idle": 1.0})
+	var halfway := evaluator.update(0.25)
+	var completed := evaluator.update(0.3)
+	if configured and is_equal_approx(float(halfway.get("state_time", 0.0)), 0.5) and str(completed.get("state_id", "")) == "done":
+		print("  PASS: State speed scaling advances clip time and animation-complete transitions consistently")
+		return 1
+	printerr("  FAIL: State speed scale was ignored or completion did not transition")
 	return 0
 
 

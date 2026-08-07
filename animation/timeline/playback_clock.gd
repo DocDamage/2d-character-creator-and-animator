@@ -36,14 +36,13 @@ signal playback_stopped()
 
 
 func _init(p_duration: float = 1.0) -> void:
-	duration = p_duration
-	loop_end = p_duration
+	duration = maxf(0.0, p_duration)
+	loop_end = duration
 
 
 ## Start or resume playback.
 func play() -> void:
 	is_playing = true
-	_ping_pong_direction = 1
 
 
 ## Pause playback without resetting time.
@@ -61,7 +60,7 @@ func stop() -> void:
 
 ## Seek to a specific time. Clamps to [0, duration].
 func seek(t: float) -> void:
-	current_time = clampf(t, 0.0, duration)
+	current_time = clampf(t, 0.0, maxf(0.0, duration))
 	time_changed.emit(current_time)
 
 
@@ -69,29 +68,44 @@ func seek(t: float) -> void:
 func advance(delta_seconds: float) -> void:
 	if not is_playing:
 		return
-	var effective_end := loop_end if loop_end > 0.0 else duration
-	var effective_start := loop_start
-
-	current_time += delta_seconds * speed * float(_ping_pong_direction)
+	var range := _effective_range()
+	var effective_start: float = range.x
+	var effective_end: float = range.y
+	var span := effective_end - effective_start
+	if span <= 0.0:
+		current_time = effective_start
+		is_playing = false
+		playback_stopped.emit()
+		time_changed.emit(current_time)
+		return
+	var travel := delta_seconds * speed
 
 	match loop_mode:
 		LoopMode.NONE:
+			current_time += travel
 			if current_time >= effective_end:
 				current_time = effective_end
 				is_playing = false
 				playback_stopped.emit()
-		LoopMode.LOOP:
-			while current_time >= effective_end:
-				current_time -= (effective_end - effective_start)
-			while current_time < effective_start:
-				current_time += (effective_end - effective_start)
-		LoopMode.PING_PONG:
-			if current_time >= effective_end:
-				current_time = effective_end
-				_ping_pong_direction = -1
 			elif current_time <= effective_start:
 				current_time = effective_start
+				if travel < 0.0:
+					is_playing = false
+					playback_stopped.emit()
+		LoopMode.LOOP:
+			current_time = effective_start + fposmod(current_time + travel - effective_start, span)
+		LoopMode.PING_PONG:
+			# Work in an unfolded two-span interval so large frame hitches keep
+			# their remaining travel instead of sticking at a boundary.
+			var local_position := clampf(current_time, effective_start, effective_end) - effective_start
+			var unfolded := local_position if _ping_pong_direction >= 0 else 2.0 * span - local_position
+			unfolded = fposmod(unfolded + travel, 2.0 * span)
+			if unfolded < span:
+				current_time = effective_start + unfolded
 				_ping_pong_direction = 1
+			else:
+				current_time = effective_start + (2.0 * span - unfolded)
+				_ping_pong_direction = -1
 	time_changed.emit(current_time)
 
 
@@ -115,8 +129,22 @@ func to_dict() -> Dictionary:
 
 ## Populate settings from a dictionary.
 func from_dict(d: Dictionary) -> void:
-	duration = float(d.get("duration", 1.0))
+	duration = maxf(0.0, float(d.get("duration", 1.0)))
 	speed = float(d.get("speed", 1.0))
 	loop_mode = int(d.get("loop_mode", LoopMode.NONE)) as LoopMode
 	loop_start = float(d.get("loop_start", 0.0))
 	loop_end = float(d.get("loop_end", -1.0))
+	current_time = clampf(current_time, 0.0, duration)
+
+
+func _effective_range() -> Vector2:
+	var maximum := maxf(0.0, duration)
+	var end := clampf(loop_end if loop_end > 0.0 else maximum, 0.0, maximum)
+	var start := clampf(loop_start, 0.0, end)
+	# Invalid or degenerate loop regions must never enter a wrap loop.  A
+	# non-empty clip falls back to its full duration; a zero-duration clip is
+	# handled by advance() as a stopped clock.
+	if end - start <= 0.000001 and maximum > 0.000001:
+		start = 0.0
+		end = maximum
+	return Vector2(start, end)

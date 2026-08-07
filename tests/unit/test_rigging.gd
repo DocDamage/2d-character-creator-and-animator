@@ -114,8 +114,9 @@ func test_reparent_reorder() -> int:
 	var b2 := bm.add_bone("Child1", "", 30.0)
 	
 	var res := HierarchyOperationsScript.reparent_bone(rig, b2.get("id", ""), b1.get("id", ""), true)
-	if res and b2.get("parent_id", "") == b1.get("id", ""):
-		print("  PASS: HierarchyOperations reparented bone with world lock")
+	var self_reparent := HierarchyOperationsScript.reparent_bone(rig, b1.get("id", ""), b1.get("id", ""), true)
+	if res and b2.get("parent_id", "") == b1.get("id", "") and not self_reparent:
+		print("  PASS: HierarchyOperations reparented with world lock and rejected a self-parent cycle")
 		passes += 1
 		
 	return passes
@@ -196,8 +197,14 @@ func test_rig_validator() -> int:
 	var passes := 0
 	var rig := RigTemplatesScript.create_humanoid_template()
 	var diag := RigValidatorScript.validate(rig)
-	if diag.get("valid", false):
-		print("  PASS: RigValidator confirmed humanoid rig integrity")
+	var malformed := rig.duplicate(true)
+	var root_id := str(malformed.get("root_bone_id", ""))
+	var malformed_root: Dictionary = malformed["bones"][root_id]
+	malformed_root["children"] = ["missing_child"]
+	malformed["bones"][root_id] = malformed_root
+	var malformed_diag := RigValidatorScript.validate(malformed)
+	if diag.get("valid", false) and not malformed_diag.get("valid", true):
+		print("  PASS: RigValidator confirms healthy rigs and diagnoses hierarchy inconsistencies")
 		passes += 1
 	return passes
 
@@ -207,7 +214,15 @@ func test_rig_persistence() -> int:
 	var rig := RigTemplatesScript.create_humanoid_template()
 	var json_str := RigPersistenceScript.serialize_rig(rig)
 	var loaded := RigPersistenceScript.deserialize_rig(json_str)
-	if loaded.get("id") == rig.get("id"):
-		print("  PASS: RigPersistence serialized and deserialized rig roundtrip")
+	var loaded_diag := RigValidatorScript.validate(loaded)
+	var root_id := str(loaded.get("root_bone_id", ""))
+	var loaded_bones: Dictionary = loaded.get("bones", {})
+	var loaded_root: Dictionary = loaded_bones.get(root_id, {})
+	var rebuilt_children: Array = loaded_root.get("children", [])
+	var original_bones: Dictionary = rig.get("bones", {})
+	var original_root: Dictionary = original_bones.get(root_id, {})
+	var original_children: Array = original_root.get("children", [])
+	if loaded.get("id") == rig.get("id") and loaded_diag.get("valid", false) and rebuilt_children == original_children and not rebuilt_children.is_empty():
+		print("  PASS: RigPersistence serialized, restored ordered children, and validated the hierarchy")
 		passes += 1
 	return passes

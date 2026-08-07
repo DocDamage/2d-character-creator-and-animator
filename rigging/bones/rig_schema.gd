@@ -62,6 +62,18 @@ static func from_json_dict(p_dict: Dictionary) -> Dictionary:
 	var bones_raw: Dictionary = p_dict.get("bones", {})
 	for b_id in bones_raw:
 		bones[b_id] = BoneSchema.from_json_dict(bones_raw[b_id])
+	# Newer files preserve authored sibling order in children.  Older files did
+	# not store it, so reconcile parent_id links to restore any omitted child.
+	for raw_bone_id in bones:
+		var bone: Dictionary = bones[raw_bone_id]
+		var parent_id := str(bone.get("parent_id", ""))
+		if parent_id.is_empty() or not bones.has(parent_id): continue
+		var parent: Dictionary = bones[parent_id]
+		var children: Array = parent.get("children", []).duplicate()
+		if not children.has(str(raw_bone_id)):
+			children.append(str(raw_bone_id))
+		parent["children"] = children
+		bones[parent_id] = parent
 		
 	var slots := {}
 	var slots_raw: Dictionary = p_dict.get("slots", {})

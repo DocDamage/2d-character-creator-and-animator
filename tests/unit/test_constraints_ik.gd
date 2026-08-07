@@ -14,6 +14,7 @@ const CycleDetectorScript = preload("res://rigging/constraints/cycle_detector.gd
 const ConstraintDiagnosticsScript = preload("res://rigging/constraints/constraint_diagnostics.gd")
 const IKBakerScript = preload("res://rigging/ik/ik_baker.gd")
 const RigTemplatesScript = preload("res://rigging/bones/rig_templates.gd")
+const BoneManagerScript = preload("res://rigging/bones/bone_manager.gd")
 
 
 func run_tests() -> int:
@@ -25,6 +26,7 @@ func run_tests() -> int:
 	pass_count += test_aim_constraint()
 	pass_count += test_limit_constraint()
 	pass_count += test_two_bone_ik()
+	pass_count += test_world_space_constraint_conversion()
 	pass_count += test_pole_target_solver()
 	pass_count += test_ik_influence_manager()
 	pass_count += test_ground_contact_pin()
@@ -106,6 +108,44 @@ func test_two_bone_ik() -> int:
 	return passes
 
 
+func test_world_space_constraint_conversion() -> int:
+	var passes := 0
+	var rig := {
+		"bones": {
+			"parent": {"id": "parent", "parent_id": "", "local_position": Vector2.ZERO, "local_rotation": PI / 2.0, "local_scale": Vector2.ONE, "length": 10.0, "children": ["root", "target"]},
+			"root": {"id": "root", "parent_id": "parent", "local_position": Vector2.ZERO, "local_rotation": 0.0, "local_scale": Vector2.ONE, "length": 10.0, "children": ["mid"]},
+			"mid": {"id": "mid", "parent_id": "root", "local_position": Vector2(10.0, 0.0), "local_rotation": 0.0, "local_scale": Vector2.ONE, "length": 10.0, "children": ["tip"]},
+			"tip": {"id": "tip", "parent_id": "mid", "local_position": Vector2(10.0, 0.0), "local_rotation": 0.0, "local_scale": Vector2.ONE, "length": 2.0, "children": []},
+			"target": {"id": "target", "parent_id": "parent", "local_position": Vector2(10.0, 0.0), "local_rotation": 0.0, "local_scale": Vector2.ONE, "length": 2.0, "children": []}
+		}
+	}
+	var aim := AimConstraintScript.new()
+	aim.owner_bone_id = "root"
+	aim.target_bone_id = "target"
+	aim.evaluate(rig, 0.016)
+	var manager := BoneManagerScript.new()
+	manager.initialize(rig)
+	var aim_ok := is_equal_approx(float(rig["bones"]["root"].get("local_rotation", -1.0)), 0.0) and is_equal_approx(manager.get_global_transform("root").get_rotation(), PI / 2.0)
+	var ik := TwoBoneIKScript.new()
+	ik.owner_bone_id = "root"
+	ik.mid_bone_id = "mid"
+	ik.tip_bone_id = "tip"
+	ik.target_position = Vector2(0.0, sqrt(200.0))
+	ik.evaluate(rig, 0.016)
+	var ik_ok := is_equal_approx(float(rig["bones"]["root"].get("local_rotation", 0.0)), PI / 4.0) and is_equal_approx(float(rig["bones"]["mid"].get("local_rotation", 0.0)), PI / 2.0)
+	var pin := GroundContactPinScript.new()
+	pin.owner_bone_id = "tip"
+	pin.pin_at(Vector2(25.0, 15.0))
+	pin.evaluate(rig, 0.016)
+	var pin_ok := manager.get_global_transform("tip").origin.is_equal_approx(Vector2(25.0, 15.0))
+	if aim_ok and ik_ok and pin_ok:
+		print("  PASS: Aim, IK, and contact constraints correctly convert world targets through rotated parents")
+		passes += 1
+	else:
+		printerr("  FAIL: world/local constraint conversion (aim=%s ik=%s pin=%s)" % [str(aim_ok), str(ik_ok), str(pin_ok)])
+	return passes
+
+
 func test_pole_target_solver() -> int:
 	var passes := 0
 	var bend := PoleTargetSolverScript.solve_pole_direction(Vector2.ZERO, Vector2(0, 100), Vector2(50, 50))
@@ -117,12 +157,12 @@ func test_pole_target_solver() -> int:
 
 func test_ik_influence_manager() -> int:
 	var passes := 0
-	var fk := {"b1": {"position": Vector2.ZERO, "rotation": 0.0}}
-	var ik := {"b1": {"position": Vector2(100, 0), "rotation": PI}}
+	var fk := {"b1": {"position": Vector2.ZERO, "rotation": 0.0, "scale": Vector2.ONE}}
+	var ik := {"b1": {"position": Vector2(100, 0), "rotation": PI, "scale": Vector2(2.0, 0.5)}, "helper": {"position": Vector2(5, 5)}}
 	var blended := IKInfluenceManagerScript.blend_poses(fk, ik, 0.5)
 	
-	if blended.get("b1", {}).get("position") == Vector2(50, 0):
-		print("  PASS: IKInfluenceManager blended FK/IK poses smoothly")
+	if blended.get("b1", {}).get("position") == Vector2(50, 0) and (blended.get("b1", {}) as Dictionary).get("scale") == Vector2(1.5, 0.75) and blended.has("helper"):
+		print("  PASS: IKInfluenceManager blends transforms and retains driven helper bones")
 		passes += 1
 	return passes
 

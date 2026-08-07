@@ -53,7 +53,10 @@ static func to_json_dict(p_bone_data: Dictionary) -> Dictionary:
 		"visible": p_bone_data.get("visible", true),
 		"inherit_position": p_bone_data.get("inherit_position", true),
 		"inherit_rotation": p_bone_data.get("inherit_rotation", true),
-		"inherit_scale": p_bone_data.get("inherit_scale", true)
+		"inherit_scale": p_bone_data.get("inherit_scale", true),
+		# Store sibling order explicitly. Older rigs did not include this field;
+		# RigSchema.from_json_dict reconstructs those hierarchies on load.
+		"children": (p_bone_data.get("children", []) as Array).duplicate()
 	}
 
 
@@ -79,5 +82,5 @@ static func from_json_dict(p_dict: Dictionary) -> Dictionary:
 		"inherit_position": p_dict.get("inherit_position", true),
 		"inherit_rotation": p_dict.get("inherit_rotation", true),
 		"inherit_scale": p_dict.get("inherit_scale", true),
-		"children": []
+		"children": (p_dict.get("children", []) as Array).duplicate()
 	}

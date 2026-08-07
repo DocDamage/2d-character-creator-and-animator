@@ -865,8 +865,11 @@ func reparent_rig_bone(rig_id: String, bone_id: String, new_parent_id: String) -
 	if not bones.has(bone_id) or (not new_parent_id.is_empty() and not bones.has(new_parent_id)) or bone_id == new_parent_id:
 		return false
 	var ancestor := new_parent_id
+	var visited: Dictionary = {}
 	while not ancestor.is_empty():
 		if ancestor == bone_id: return false
+		if visited.has(ancestor): return false
+		visited[ancestor] = true
 		ancestor = str((bones.get(ancestor, {}) as Dictionary).get("parent_id", ""))
 	var bone: Dictionary = bones[bone_id]
 	if str(bone.get("parent_id", "")) == new_parent_id: return false
@@ -1164,6 +1167,31 @@ func delete_animation_track(clip_id: String, track_id: String) -> bool:
 			manifest.objects["animations"] = store
 			_commit_document_edit(before, "Deleted %s Track" % removed_name)
 			return true
+	return false
+
+
+func set_animation_track_rotation_mode(clip_id: String, track_id: String, mode: String) -> bool:
+	if is_read_only(): return false
+	var normalized := mode.strip_edges().to_lower()
+	if normalized not in ["shortest", "continuous", "clockwise", "counter_clockwise"]: return false
+	var store := _animation_store()
+	if not store.has(clip_id): return false
+	var clip: Dictionary = store[clip_id]
+	var tracks: Array = clip.get("tracks", []).duplicate(true)
+	for index in range(tracks.size()):
+		var track: Dictionary = tracks[index]
+		if str(track.get("track_id", "")) != track_id: continue
+		if int(track.get("track_type", TrackDefinitionScript.TrackType.ATTRIBUTE)) != TrackDefinitionScript.TrackType.TRANSFORM_ROTATION:
+			return false
+		if str(track.get("rotation_mode", "shortest")) == normalized: return false
+		var before := _capture_document_snapshot()
+		track["rotation_mode"] = normalized
+		tracks[index] = track
+		clip["tracks"] = tracks
+		store[clip_id] = clip
+		manifest.objects["animations"] = store
+		_commit_document_edit(before, "Changed Rotation Interpolation")
+		return true
 	return false
 
 

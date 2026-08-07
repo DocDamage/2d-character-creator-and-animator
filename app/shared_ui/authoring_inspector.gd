@@ -471,7 +471,22 @@ func _build_track_properties(track_id: String, context: Dictionary) -> void:
 	_add_readonly("Object", str(track.get("object_id", "")))
 	_add_readonly("Property", str(track.get("property_path", "")))
 	_add_readonly("Keys", str((track.get("keys", []) as Array).size()))
-	_set_status("Select a keyframe to edit its values.")
+	if int(track.get("track_type", TrackDefinitionScript.TrackType.ATTRIBUTE)) == TrackDefinitionScript.TrackType.TRANSFORM_ROTATION:
+		_add_section("Rotation Path")
+		var rotation_mode := OptionButton.new()
+		rotation_mode.name = "RotationPath"
+		var paths := [["Shortest path", "shortest"], ["Continuous turns", "continuous"], ["Clockwise only", "clockwise"], ["Counter-clockwise only", "counter_clockwise"]]
+		var selected := str(track.get("rotation_mode", "shortest"))
+		for entry in paths:
+			rotation_mode.add_item(str((entry as Array)[0]))
+			rotation_mode.set_item_metadata(rotation_mode.item_count - 1, str((entry as Array)[1]))
+			if str((entry as Array)[1]) == selected: rotation_mode.select(rotation_mode.item_count - 1)
+		rotation_mode.item_selected.connect(func(index):
+			if not _updating: _session.set_animation_track_rotation_mode(clip_id, track_id, str(rotation_mode.get_item_metadata(index))))
+		_add_row("Between keys", rotation_mode)
+		_set_status("Shortest path prevents accidental spins; choose Continuous turns for intentional full rotations.")
+	else:
+		_set_status("Select a keyframe to edit its values.")
 
 
 func _build_gameplay_overlay_properties(kind: String, overlay_id: String, context: Dictionary) -> void:

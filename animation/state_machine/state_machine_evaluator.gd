@@ -44,9 +44,14 @@ func trigger(parameter_id: String) -> bool:
 func update(delta: float, context: Dictionary = {}) -> Dictionary:
 	if machine == null or current_state_id.is_empty():
 		return snapshot()
-	state_time += maxf(delta, 0.0)
+	var elapsed := maxf(delta, 0.0)
+	var current: Dictionary = machine.get_state(current_state_id)
+	# state_time represents clip time, not wall-clock time.  Honour the
+	# per-state speed scale here so exit-time and completion transitions agree
+	# with the clip artists see during preview and runtime playback.
+	state_time += elapsed * maxf(0.0, float(current.get("speed_scale", 1.0)))
 	if not active_transition.is_empty():
-		active_transition["elapsed"] = float(active_transition.get("elapsed", 0.0)) + maxf(delta, 0.0)
+		active_transition["elapsed"] = float(active_transition.get("elapsed", 0.0)) + elapsed
 		if _transition_weight() >= 1.0:
 			active_transition.clear()
 	var transition := _select_transition(context)
