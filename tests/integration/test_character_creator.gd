@@ -20,7 +20,55 @@ func run_tests() -> int:
 	passes += test_seeded_npc_batch_has_one_hundred_unique_valid_assemblies()
 	passes += test_manual_panel_imports_real_art_and_persists_it()
 	passes += test_import_wizard_layer_controls_and_document_history()
+	passes += test_project_backed_rig_and_timeline_history()
 	return passes
+
+
+func test_project_backed_rig_and_timeline_history() -> int:
+	var test_id: String = IDService.generate_short("dock_data")
+	var project_path := "user://character_authoring_tests/%s.chrproj" % test_id
+	var created: bool = SerializationService.save_project(ProjectFactoryScript.create_manifest("Dock Data"), project_path)
+	AppState.open_project(project_path)
+	CommandService.clear_history()
+	var session = ProjectSessionScript.new()
+	var opened: Dictionary = session.open_project(project_path)
+	var rig_report: Dictionary = session.create_rig("Hero Rig")
+	var rig_id := str(rig_report.get("rig_id", ""))
+	var root_report: Dictionary = session.create_rig_bone(rig_id, "Root", "", 80.0)
+	var root_id := str(root_report.get("bone_id", ""))
+	var child_report: Dictionary = session.create_rig_bone(rig_id, "Head", root_id, 32.0)
+	var child_id := str(child_report.get("bone_id", ""))
+	var moved: bool = session.set_rig_bone_transform(rig_id, root_id, Vector2(10.0, 20.0), 15.0, Vector2.ONE, "Moved Root Bone")
+	var move_label := CommandService.get_undo_description()
+	var clip_report: Dictionary = session.create_animation_clip("Idle")
+	var clip_id := str(clip_report.get("clip_id", ""))
+	var track_report: Dictionary = session.add_animation_track(clip_id, root_id, "bone:%s.transform" % root_id, "Root Transform")
+	var track_id := str(track_report.get("track_id", ""))
+	var key_report: Dictionary = session.add_animation_key(clip_id, track_id, 0.25, {"position": Vector2(10.0, 20.0)})
+	var key_id := str(key_report.get("key_id", ""))
+	var key_label := CommandService.get_undo_description()
+	var moved_key: bool = session.move_animation_key(clip_id, track_id, key_id, 0.5)
+	var undo_key: bool = CommandService.undo()
+	var undo_track: Dictionary = session.get_animation_track(clip_id, track_id)
+	var redo_key: bool = CommandService.redo()
+	var saved: Dictionary = session.save_project()
+	var loaded: Dictionary = SerializationService.load_project(project_path)
+	var saved_rig: Dictionary = (loaded.get("objects", {}).get("rigs", {}) as Dictionary).get(rig_id, {}) as Dictionary
+	var saved_root: Dictionary = (saved_rig.get("bones", {}) as Dictionary).get(root_id, {}) as Dictionary
+	var saved_clip: Dictionary = (loaded.get("objects", {}).get("animations", {}) as Dictionary).get(clip_id, {}) as Dictionary
+	var saved_tracks: Array = saved_clip.get("tracks", []) as Array
+	var persisted: bool = saved_rig.get("name", "") == "Hero Rig" and (saved_root.get("local_position", []) as Array) == [10.0, 20.0] and saved_tracks.size() == 1 and ((saved_tracks[0] as Dictionary).get("keys", []) as Array).size() == 1
+	var history_ok: bool = moved and move_label == "Moved Root Bone" and key_report.get("success", false) and key_label.begins_with("Added Keyframe") and moved_key and undo_key and not (undo_track.get("keys", []) as Array).is_empty() and is_equal_approx(float((undo_track.get("keys", [])[0] as Dictionary).get("time", 0.0)), 0.25) and redo_key
+	session.asset_registry.free()
+	session.thumbnail_cache.free()
+	session.free()
+	AppState.close_project()
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(project_path))
+	if created and opened.get("success", false) and rig_report.get("success", false) and root_report.get("success", false) and child_report.get("success", false) and not child_id.is_empty() and clip_report.get("success", false) and track_report.get("success", false) and persisted and history_ok and saved.get("success", false):
+		print("  PASS: Project-backed rig and timeline edits persist and share document Undo/Redo")
+		return 1
+	printerr("  FAIL: Project-backed rig/timeline workflow failed: %s" % str([created, opened, rig_report, root_report, child_report, moved, move_label, clip_report, track_report, key_report, moved_key, history_ok, saved, persisted]))
+	return 0
 
 
 func test_import_wizard_layer_controls_and_document_history() -> int:

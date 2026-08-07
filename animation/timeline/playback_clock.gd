@@ -73,7 +73,6 @@ func advance(delta_seconds: float) -> void:
 	var effective_start := loop_start
 
 	current_time += delta_seconds * speed * float(_ping_pong_direction)
-	time_changed.emit(current_time)
 
 	match loop_mode:
 		LoopMode.NONE:
@@ -93,6 +92,7 @@ func advance(delta_seconds: float) -> void:
 			elif current_time <= effective_start:
 				current_time = effective_start
 				_ping_pong_direction = 1
+	time_changed.emit(current_time)
 
 
 ## Return the current playback percentage (0.0–1.0).

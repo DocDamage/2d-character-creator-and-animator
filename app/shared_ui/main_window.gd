@@ -13,6 +13,13 @@ const WeaponAuthoringWizardScene = preload("res://weapons/authoring/weapon_autho
 const CharacterCreatorPanelScene = preload("res://character/authoring/character_creator_panel.tscn")
 const ProjectHubPanelScene = preload("res://app/bootstrap/project_hub_panel.tscn")
 const MediaAuthoringPanelScene = preload("res://media/media_authoring_panel.tscn"); const AnimationCompositionPanelScene = preload("res://animation/authoring/animation_composition_panel.tscn"); const BatchExportPanelScene = preload("res://export/batch/batch_export_panel.tscn"); const QualityDashboardPanelScene = preload("res://quality/dashboard/quality_dashboard_panel.tscn"); const AssetBrowserScene = preload("res://app/workspaces/asset_browser.tscn")
+const DocumentSelectionScript = preload("res://app/shared_ui/document_selection.gd")
+const RigHierarchyEditorScript = preload("res://rigging/bones/rig_hierarchy_editor.gd")
+const AuthoringCanvasViewportScript = preload("res://app/shared_ui/authoring_canvas_viewport.gd")
+const AuthoringInspectorScript = preload("res://app/shared_ui/authoring_inspector.gd")
+const AnimationTimelineEditorScript = preload("res://animation/timeline/animation_timeline_editor.gd")
+const AnimationPreviewControllerScript = preload("res://animation/preview/animation_preview_controller.gd")
+const ReviewPackagePanelScript = preload("res://export/review/review_package_panel.gd")
 @onready var dock_layout_manager: Node = $DockLayoutManager
 @onready var status_message_label: Label = %StatusMessageLabel
 @onready var status_info_label: Label = %StatusInfoLabel
@@ -33,10 +40,15 @@ const MediaAuthoringPanelScene = preload("res://media/media_authoring_panel.tscn
 @onready var status_workspace_label: Label = %StatusWorkspaceLabel
 var _current_status: String = "Ready"
 var _responsive_state: Dictionary = {}
+var document_selection: Node = null
+var _authoring_session = null
+var animation_preview_controller: Node = null
 func _ready() -> void:
 	if ThemeService != null: ThemeService.apply_to_window(get_window())
+	_setup_document_selection()
 	_setup_dock_regions()
 	_setup_default_panels()
+	_setup_document_editor_bindings()
 	_setup_workspace_manager()
 	_setup_menu_header()
 	_setup_shortcut_commands()
@@ -63,6 +75,7 @@ func set_status_message(message: String) -> void:
 		DiagnosticsService.info("MainWindow status: " + message, "MainWindow")
 func get_status_message() -> String: return _current_status
 func get_responsive_layout_state() -> Dictionary: return _responsive_state.duplicate(true)
+func get_document_selection() -> Node: return document_selection
 
 func _on_dpi_scale_changed(_scale: float) -> void:
 	_apply_responsive_layout()
@@ -152,6 +165,97 @@ func _setup_dock_regions() -> void:
 	mgr.call("register_split_container", get_node_or_null("%MainHSplit") as SplitContainer)
 	mgr.call("register_split_container", get_node_or_null("%CenterVSplit") as SplitContainer)
 	mgr.call("register_split_container", get_node_or_null("%InnerHSplit") as SplitContainer)
+func _setup_document_selection() -> void:
+	if document_selection != null: return
+	document_selection = DocumentSelectionScript.new()
+	document_selection.name = "DocumentSelection"
+	add_child(document_selection)
+	animation_preview_controller = AnimationPreviewControllerScript.new()
+	animation_preview_controller.name = "AnimationPreviewController"
+	add_child(animation_preview_controller)
+
+func _setup_document_editor_bindings() -> void:
+	var creator := _get_character_creator()
+	if creator != null:
+		if creator.has_signal("project_session_ready") and not creator.project_session_ready.is_connected(_on_project_session_ready):
+			creator.project_session_ready.connect(_on_project_session_ready)
+		if creator.has_signal("layer_selected") and not creator.layer_selected.is_connected(_on_creator_layer_selected):
+			creator.layer_selected.connect(_on_creator_layer_selected)
+		var existing_session = creator.call("get_session")
+		if existing_session != null: _on_project_session_ready(existing_session)
+	if AppState != null and not AppState.project_closed.is_connected(_on_authoring_project_closed):
+		AppState.project_closed.connect(_on_authoring_project_closed)
+
+func _get_character_creator() -> Control:
+	var panel := get_panel("panel_character_creator")
+	return panel.get_node_or_null("MainVBox/ContentContainer/CharacterCreatorPanel") as Control if panel != null else null
+
+func _get_authoring_dock_content(panel_id: String, content_name: String) -> Control:
+	var panel := get_panel(panel_id)
+	return panel.get_node_or_null("MainVBox/ContentContainer/" + content_name) as Control if panel != null else null
+
+func _on_project_session_ready(session) -> void:
+	if _authoring_session != null and is_instance_valid(_authoring_session) and _authoring_session.session_changed.is_connected(_on_authoring_session_changed):
+		_authoring_session.session_changed.disconnect(_on_authoring_session_changed)
+	_authoring_session = session
+	if _authoring_session != null and is_instance_valid(_authoring_session) and not _authoring_session.session_changed.is_connected(_on_authoring_session_changed):
+		_authoring_session.session_changed.connect(_on_authoring_session_changed)
+	if animation_preview_controller != null: animation_preview_controller.call("bind_session", _authoring_session)
+	for info in [["panel_hierarchy", "RigHierarchyEditor"], ["panel_viewport", "AuthoringCanvasViewport"], ["panel_inspector", "AuthoringInspector"], ["panel_timeline", "AnimationTimelineEditor"]]:
+		var editor := _get_authoring_dock_content(str(info[0]), str(info[1]))
+		if editor != null:
+			editor.call("bind_session", _authoring_session)
+			if editor.has_method("bind_preview_controller"): editor.call("bind_preview_controller", animation_preview_controller)
+	var timeline_editor := _get_authoring_dock_content("panel_timeline", "AnimationTimelineEditor")
+	var viewport_editor := _get_authoring_dock_content("panel_viewport", "AuthoringCanvasViewport")
+	var onion_receiver := Callable(viewport_editor, "set_onion_layers") if viewport_editor != null else Callable()
+	if timeline_editor != null and viewport_editor != null and timeline_editor.has_signal("onion_frames_changed") and not timeline_editor.onion_frames_changed.is_connected(onion_receiver):
+		timeline_editor.onion_frames_changed.connect(onion_receiver)
+	var hub := _get_authoring_dock_content("panel_project_hub", "ProjectHubPanel")
+	if hub != null:
+		if hub.has_method("bind_session"): hub.call("bind_session", _authoring_session)
+		if hub.has_method("bind_preview_controller"): hub.call("bind_preview_controller", animation_preview_controller)
+	var review_panel := _get_authoring_dock_content("panel_review_package", "ReviewPackagePanel")
+	if review_panel != null and review_panel.has_method("bind_session"): review_panel.call("bind_session", _authoring_session)
+	if document_selection != null: document_selection.clear()
+	if _authoring_session != null:
+		bind_pose_rig(_authoring_session.get_active_rig())
+		bind_quality_project_path(str(_authoring_session.project_path))
+		call_deferred("_maybe_show_project_workflow")
+
+func _on_authoring_session_changed(_description: String) -> void:
+	if _authoring_session != null and is_instance_valid(_authoring_session):
+		bind_pose_rig(_authoring_session.get_active_rig())
+
+func _on_authoring_project_closed() -> void:
+	if _authoring_session != null and is_instance_valid(_authoring_session) and _authoring_session.session_changed.is_connected(_on_authoring_session_changed):
+		_authoring_session.session_changed.disconnect(_on_authoring_session_changed)
+	_authoring_session = null
+	if animation_preview_controller != null: animation_preview_controller.call("bind_session", null)
+	for info in [["panel_hierarchy", "RigHierarchyEditor"], ["panel_viewport", "AuthoringCanvasViewport"], ["panel_inspector", "AuthoringInspector"], ["panel_timeline", "AnimationTimelineEditor"]]:
+		var editor := _get_authoring_dock_content(str(info[0]), str(info[1]))
+		if editor != null: editor.call("bind_session", null)
+	var hub := _get_authoring_dock_content("panel_project_hub", "ProjectHubPanel")
+	if hub != null and hub.has_method("bind_session"): hub.call("bind_session", null)
+	var review_panel := _get_authoring_dock_content("panel_review_package", "ReviewPackagePanel")
+	if review_panel != null and review_panel.has_method("bind_session"): review_panel.call("bind_session", null)
+	if document_selection != null: document_selection.clear()
+
+
+func _maybe_show_project_workflow() -> void:
+	if _authoring_session == null or not is_instance_valid(_authoring_session): return
+	# Automated/headless runs can still bind a newly created project. They do not
+	# have a usable window position for a non-exclusive authoring dialog, while
+	# the persisted workflow state remains fully testable through its service.
+	var command_line: PackedStringArray = OS.get_cmdline_args()
+	if OS.has_feature("headless") or "--headless" in command_line or DisplayServer.get_name().to_lower().contains("headless"): return
+	var workflow: Dictionary = _authoring_session.get_workflow_state()
+	if not bool(workflow.get("new_project", false)) or bool(workflow.get("completed", true)) or bool(workflow.get("deferred", false)): return
+	var hub := _get_authoring_dock_content("panel_project_hub", "ProjectHubPanel")
+	if hub != null and hub.has_method("open_guided_setup"): hub.call("open_guided_setup")
+
+func _on_creator_layer_selected(part_id: String) -> void:
+	if document_selection != null and not part_id.is_empty(): document_selection.call("select", "layer", part_id, {"source": "character_creator"})
 func _setup_default_panels() -> void:
 	var mgr := get_dock_layout_manager()
 	if mgr == null: return
@@ -160,7 +264,7 @@ func _setup_default_panels() -> void:
 		["panel_hierarchy", "Hierarchy & Rig", DockPanelScript.DockRegion.LEFT, "LEFT"], ["panel_pose_library", "Saved Poses", DockPanelScript.DockRegion.LEFT, "LEFT"], ["panel_retarget_preview", "Retarget Preview", DockPanelScript.DockRegion.RIGHT, "RIGHT"],
 		["panel_viewport", "2D Canvas Viewport", DockPanelScript.DockRegion.CENTER, "CENTER"],
 		["panel_project_hub", "Project Play Hub", DockPanelScript.DockRegion.CENTER, "CENTER"],
-		["panel_facing_grid", "Facing Grid Directions", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_weapon_wizard", "Weapon Authoring Wizard", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_character_creator", "Character Creator", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_media_authoring", "Media Authoring", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_animation_composition", "Animation Composition", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_batch_export", "Batch Export", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_quality_dashboard", "Quality & Recovery", DockPanelScript.DockRegion.CENTER, "CENTER"],
+		["panel_facing_grid", "Facing Grid Directions", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_weapon_wizard", "Weapon Authoring Wizard", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_character_creator", "Character Creator", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_media_authoring", "Media Authoring", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_animation_composition", "Animation Composition", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_batch_export", "Batch Export", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_quality_dashboard", "Quality & Recovery", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_review_package", "Review Package", DockPanelScript.DockRegion.CENTER, "CENTER"],
 		["panel_inspector", "Inspector & Properties", DockPanelScript.DockRegion.RIGHT, "RIGHT"],
 		["panel_timeline", "Animation Timeline", DockPanelScript.DockRegion.BOTTOM, "BOTTOM"],
 		["panel_diagnostics", "Diagnostics & Logs", DockPanelScript.DockRegion.BOTTOM, "BOTTOM"]
@@ -189,6 +293,16 @@ func _create_dock_panel(pid: String, title: String, region: int) -> Control:
 	elif pid == "panel_retarget_preview" and RetargetPreviewPanelScene != null:
 		p.call("add_content", RetargetPreviewPanelScene.instantiate() as Control)
 	elif pid == "panel_assets" and AssetBrowserScene != null: p.call("add_content", AssetBrowserScene.instantiate() as Control)
+	elif pid == "panel_hierarchy":
+		var hierarchy := RigHierarchyEditorScript.new() as Control
+		hierarchy.name = "RigHierarchyEditor"
+		hierarchy.call("bind_selection", document_selection)
+		p.call("add_content", hierarchy)
+	elif pid == "panel_viewport":
+		var viewport := AuthoringCanvasViewportScript.new() as Control
+		viewport.name = "AuthoringCanvasViewport"
+		viewport.call("bind_selection", document_selection)
+		p.call("add_content", viewport)
 	elif pid == "panel_weapon_wizard" and WeaponAuthoringWizardScene != null:
 		p.call("add_content", WeaponAuthoringWizardScene.instantiate() as Control)
 	elif pid == "panel_character_creator" and CharacterCreatorPanelScene != null: p.call("add_content", CharacterCreatorPanelScene.instantiate() as Control)
@@ -197,6 +311,20 @@ func _create_dock_panel(pid: String, title: String, region: int) -> Control:
 	elif pid == "panel_animation_composition" and AnimationCompositionPanelScene != null: p.call("add_content", AnimationCompositionPanelScene.instantiate() as Control)
 	elif pid == "panel_batch_export" and BatchExportPanelScene != null: p.call("add_content", BatchExportPanelScene.instantiate() as Control)
 	elif pid == "panel_quality_dashboard" and QualityDashboardPanelScene != null: p.call("add_content", QualityDashboardPanelScene.instantiate() as Control)
+	elif pid == "panel_review_package":
+		var review := ReviewPackagePanelScript.new() as Control
+		review.name = "ReviewPackagePanel"
+		p.call("add_content", review)
+	elif pid == "panel_inspector":
+		var inspector := AuthoringInspectorScript.new() as Control
+		inspector.name = "AuthoringInspector"
+		inspector.call("bind_selection", document_selection)
+		p.call("add_content", inspector)
+	elif pid == "panel_timeline":
+		var timeline := AnimationTimelineEditorScript.new() as Control
+		timeline.name = "AnimationTimelineEditor"
+		timeline.call("bind_selection", document_selection)
+		p.call("add_content", timeline)
 	return p
 func _setup_workspace_manager() -> void:
 	if WorkspaceManager != null:
@@ -244,7 +372,7 @@ func _setup_focus_framework() -> void:
 		return
 	if menu_bar != null:
 		FocusService.register_focus_group("menu_bar", menu_bar)
-	for pid in ["panel_assets", "panel_hierarchy", "panel_viewport", "panel_project_hub", "panel_facing_grid", "panel_weapon_wizard", "panel_character_creator", "panel_media_authoring", "panel_animation_composition", "panel_batch_export", "panel_quality_dashboard", "panel_inspector", "panel_timeline", "panel_diagnostics"]:
+	for pid in ["panel_assets", "panel_hierarchy", "panel_viewport", "panel_project_hub", "panel_facing_grid", "panel_weapon_wizard", "panel_character_creator", "panel_media_authoring", "panel_animation_composition", "panel_batch_export", "panel_quality_dashboard", "panel_review_package", "panel_inspector", "panel_timeline", "panel_diagnostics"]:
 		var p := get_panel(pid)
 		if p != null:
 			FocusService.register_focus_group(pid, p)

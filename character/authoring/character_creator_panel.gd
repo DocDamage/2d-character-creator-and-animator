@@ -5,6 +5,7 @@ extends Control
 const ModelScript = preload("res://character/authoring/character_creator_model.gd")
 const SessionScript = preload("res://character/authoring/character_project_session.gd")
 signal project_session_ready(session)
+signal layer_selected(part_id: String)
 @onready var name_input: LineEdit = $Margin/Root/Content/Picker/PickerMargin/PickerVBox/NameGroup/Name
 @onready var apply_button: Button = $Margin/Root/Header/Apply
 @onready var slot_select: OptionButton = $Margin/Root/Content/Picker/PickerMargin/PickerVBox/Slot
@@ -400,6 +401,8 @@ func _on_unequip_pressed() -> void:
 func _on_layer_selected(_index: int) -> void:
 	_refresh_layer_editor()
 	_refresh_selection_state()
+	var part_id := _selected_layer_id()
+	if not part_id.is_empty(): layer_selected.emit(part_id)
 
 
 func _move_selected_layer(delta: int) -> void:

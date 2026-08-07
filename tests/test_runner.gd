@@ -36,6 +36,7 @@ const TestWeaponGameplayScript = preload("res://tests/unit/test_weapon_gameplay.
 const TestFacingExportRuntimeScript = preload("res://tests/unit/test_facing_export_runtime.gd")
 const TestPoseAuthoringScript = preload("res://tests/integration/test_pose_authoring.gd")
 const TestRetargetingScript = preload("res://tests/integration/test_retargeting.gd")
+const TestAuthoringCompletionScript = preload("res://tests/integration/test_authoring_completion.gd")
 func _ready() -> void:
 	print("=== Running Automated Test Suite ===")
 	print("")
@@ -286,6 +287,9 @@ func _ready() -> void:
 	# 40. Exercise semantic skeleton profiles used by retargeting.
 	var r40 := _exec_sub(TestRetargetingScript.new(), pass_count, fail_count)
 	pass_count = r40[0]; fail_count = r40[1]
+	# 41. Exercise the connected artist workflow added by the Authoring Completion milestone.
+	var r41 := _exec_sub(TestAuthoringCompletionScript.new(), pass_count, fail_count)
+	pass_count = r41[0]; fail_count = r41[1]
 	print("")
 	print("=== Test Suite Finished: %d PASS, %d FAIL ===" % [pass_count, fail_count])
 	get_tree().quit(0 if fail_count == 0 else 1)

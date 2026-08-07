@@ -60,6 +60,7 @@ static func create_manifest(project_name: String, template_id: String = "blank")
 		"slots": slot_data,
 		"parts": {},
 		"canvas": selected_template.get("canvas", get_default_canvas_settings()).duplicate(true),
+		"workflow": {"new_project": true, "completed": false, "current_step": 0, "deferred": false},
 	}
 	return manifest
 
@@ -126,6 +127,7 @@ static func _empty_creator_data(display_name: String) -> Dictionary:
 			"metadata": {"authoring_mode": "imported_image_layers"},
 		},
 		"outfits": {},
+		"appearance_sets": {},
 		"presets": {},
 		"locked_part_ids": [],
 		"locked_palette_channels": [],

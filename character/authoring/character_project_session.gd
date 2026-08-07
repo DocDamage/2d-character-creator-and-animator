@@ -15,9 +15,18 @@ const ImageImporterScript = preload("res://core/assets/image_importer.gd")
 const RecoveryJournalScript = preload("res://core/documents/recovery_journal.gd")
 const MissingFileRepairScript = preload("res://core/assets/missing_file_repair.gd")
 const AssetReportsScript = preload("res://core/assets/asset_reports.gd")
+const RigSchemaScript = preload("res://rigging/bones/rig_schema.gd")
+const BoneSchemaScript = preload("res://rigging/bones/bone_schema.gd")
+const BoneManagerScript = preload("res://rigging/bones/bone_manager.gd")
+const AnimationClipScript = preload("res://animation/clips/clip_schema.gd")
+const TrackDefinitionScript = preload("res://animation/tracks/track_schema.gd")
+const SnapshotServiceScript = preload("res://core/documents/project_snapshot_service.gd")
+const ReadinessValidatorScript = preload("res://quality/readiness/project_readiness_validator.gd")
 
 signal session_changed(description: String)
 signal project_saved(path: String)
+signal snapshots_changed()
+signal appearance_sets_changed()
 
 var project_path := ""
 var manifest: Dictionary = {}
@@ -29,8 +38,11 @@ var asset_registry = AssetRegistryScript.new()
 var thumbnail_cache = ThumbnailCacheScript.new()
 var body_types: Array = []
 var _slot_order: Array[String] = []
+var _rigs: Dictionary = {}
 var last_autosave_unix: int = 0
 var _restoring_document := false
+var _snapshot_service = SnapshotServiceScript.new()
+var _readiness_validator = ReadinessValidatorScript.new()
 
 func _ready() -> void:
 	if asset_registry.get_parent() == null: add_child(asset_registry)
@@ -44,6 +56,7 @@ func open_project(path: String) -> Dictionary:
 	manifest = loaded.duplicate(true)
 	_ensure_authoring_data()
 	_hydrate_registries()
+	_hydrate_rigs()
 	var report := _hydrate_character()
 	if not report.get("success", false): return report
 	model.set_history_recorder(Callable(self, "_record_model_history"))
@@ -103,6 +116,28 @@ func get_canvas_settings() -> Dictionary:
 		"height": clampi(int(canvas.get("height", 512)), 16, 8192),
 		"pixel_scale": clampf(float(canvas.get("pixel_scale", 1.0)), 0.25, 16.0),
 	}
+
+
+func get_workflow_state() -> Dictionary:
+	var authoring: Dictionary = manifest.get("metadata", {}).get("character_authoring", {})
+	var workflow: Dictionary = authoring.get("workflow", {})
+	return {"new_project": bool(workflow.get("new_project", false)), "completed": bool(workflow.get("completed", true)), "current_step": clampi(int(workflow.get("current_step", 0)), 0, 5), "deferred": bool(workflow.get("deferred", false))}
+
+
+func set_workflow_state(updates: Dictionary, description: String = "Updated Guided Setup") -> bool:
+	if is_read_only() or model == null: return false
+	var current := get_workflow_state()
+	var next := current.duplicate(true)
+	for key in updates:
+		if key in ["new_project", "completed", "deferred"]: next[key] = bool(updates[key])
+		elif key == "current_step": next[key] = clampi(int(updates[key]), 0, 5)
+	if next == current: return false
+	var before := _capture_document_snapshot()
+	var authoring: Dictionary = manifest.metadata.get("character_authoring", {}).duplicate(true)
+	authoring["workflow"] = next
+	manifest.metadata["character_authoring"] = authoring
+	_commit_document_edit(before, description)
+	return true
 
 
 func set_canvas_settings(width: int, height: int, pixel_scale: float) -> bool:
@@ -204,6 +239,25 @@ func import_folder(folder_path: String) -> Dictionary:
 	_collect_image_files(folder_path, files)
 	if files.is_empty(): return _failure("The folder contains no supported PNG, WebP, or JPEG artwork.")
 	return import_files_by_slot(files)
+
+
+func import_audio_asset(source_path: String, display_name: String = "") -> Dictionary:
+	if is_read_only(): return _failure("Bundled samples are read-only. Use Save As before importing audio.")
+	var extension := source_path.get_extension().to_lower()
+	if extension not in ["wav", "ogg", "mp3", "flac"] or not FileAccess.file_exists(source_path):
+		return _failure("Choose an imported WAV, OGG, MP3, or FLAC audio file.")
+	var before := _capture_document_snapshot()
+	var copied_path := _copy_asset_into_project(source_path, IDService.generate_id("aud"), "audio")
+	if copied_path.is_empty(): return _failure("The audio file could not be copied into the project assets folder.")
+	var bytes := FileAccess.get_file_as_bytes(copied_path)
+	var hash := HashingContext.new()
+	hash.start(HashingContext.HASH_SHA256)
+	hash.update(bytes)
+	var asset: Dictionary = asset_registry.register_asset(copied_path, AssetRegistryScript.CATEGORY_AUDIO, {"checksum": hash.finish().hex_encode(), "metadata": {"source": "imported_audio"}})
+	if asset.is_empty(): return _failure("The audio file could not be registered.")
+	if not display_name.strip_edges().is_empty(): asset_registry.update_asset(str(asset.get("asset_id", "")), {"name": display_name.strip_edges()})
+	_commit_document_edit(before, "Imported Audio " + (display_name.strip_edges() if not display_name.strip_edges().is_empty() else source_path.get_file().get_basename()))
+	return {"success": true, "errors": [], "asset_id": str(asset.get("asset_id", "")), "path": copied_path}
 
 
 func duplicate_layer(part_id: String) -> Dictionary:
@@ -348,6 +402,155 @@ func autosave_project() -> Dictionary:
 	last_autosave_unix = Time.get_unix_time_from_system()
 	return {"success": true, "errors": [], "path": autosave_path}
 
+
+# === Named project snapshots =================================================
+
+func create_project_snapshot(display_name: String, note: String = "") -> Dictionary:
+	if is_read_only(): return _failure("Bundled samples are read-only. Use Save As before creating a snapshot.")
+	if model == null: return _failure("Open a character project before creating a snapshot.")
+	_sync_manifest()
+	var report: Dictionary = _snapshot_service.create(project_path, manifest, display_name, note)
+	if report.get("success", false):
+		snapshots_changed.emit()
+		session_changed.emit("Created snapshot " + str((report.get("snapshot", {}) as Dictionary).get("name", display_name)))
+	return report
+
+
+func list_project_snapshots() -> Array:
+	return _snapshot_service.list(project_path)
+
+
+func get_project_snapshot(snapshot_id: String) -> Dictionary:
+	return _snapshot_service.get_snapshot(project_path, snapshot_id)
+
+
+func restore_project_snapshot(snapshot_id: String) -> Dictionary:
+	if is_read_only(): return _failure("Bundled samples are read-only. Use Save As before restoring a snapshot.")
+	if model == null: return _failure("Open a character project before restoring a snapshot.")
+	var before := _capture_document_snapshot()
+	var snapshot := _snapshot_service.get_snapshot(project_path, snapshot_id)
+	var report: Dictionary = _snapshot_service.restore(project_path, snapshot_id, before)
+	if not report.get("success", false): return report
+	var restored: Dictionary = report.get("manifest", {})
+	if restored.is_empty(): return _failure("The restored snapshot did not include project data.")
+	_record_document_snapshots(before, restored, "Restored Snapshot " + str(snapshot.get("name", snapshot_id)))
+	snapshots_changed.emit()
+	return report
+
+
+func delete_project_snapshot(snapshot_id: String) -> Dictionary:
+	var report: Dictionary = _snapshot_service.delete(project_path, snapshot_id)
+	if report.get("success", false):
+		snapshots_changed.emit()
+		session_changed.emit("Deleted project snapshot")
+	return report
+
+
+func reveal_project_snapshot(snapshot_id: String = "") -> Dictionary:
+	return _snapshot_service.reveal(project_path, snapshot_id)
+
+
+# === Project readiness and deterministic repair =============================
+
+func get_readiness_report(options: Dictionary = {}) -> Dictionary:
+	return _readiness_validator.validate(self, options)
+
+
+func auto_repair_all() -> Dictionary:
+	return _readiness_validator.auto_repair_all(self)
+
+
+# === Appearance Sets ========================================================
+
+func get_appearance_sets() -> Array:
+	return model.get_appearance_sets() if model != null else []
+
+
+func create_appearance_set(display_name: String) -> Dictionary:
+	if is_read_only(): return _failure("Bundled samples are read-only. Use Save As before saving an Appearance Set.")
+	if model == null: return _failure("Open a character project before saving an Appearance Set.")
+	var clean_name := display_name.strip_edges()
+	if clean_name.is_empty(): clean_name = "Appearance Set"
+	var before := _capture_document_snapshot()
+	var appearance_id := IDService.generate_id("appearance")
+	if not model.create_appearance_set(appearance_id, clean_name): return _failure("The Appearance Set could not be created.")
+	_commit_document_edit(before, "Created Appearance Set " + clean_name)
+	appearance_sets_changed.emit()
+	return {"success": true, "errors": [], "appearance_id": appearance_id}
+
+
+func rename_appearance_set(appearance_id: String, display_name: String) -> bool:
+	if is_read_only() or model == null: return false
+	var before := _capture_document_snapshot()
+	if not model.rename_appearance_set(appearance_id, display_name): return false
+	_commit_document_edit(before, "Renamed Appearance Set to " + display_name.strip_edges())
+	appearance_sets_changed.emit()
+	return true
+
+
+func duplicate_appearance_set(appearance_id: String, display_name: String = "") -> Dictionary:
+	if is_read_only() or model == null: return _failure("Use an editable project before duplicating an Appearance Set.")
+	var source := _appearance_set(appearance_id)
+	if source.is_empty(): return _failure("Choose an Appearance Set to duplicate.")
+	var before := _capture_document_snapshot()
+	var duplicate_id := IDService.generate_id("appearance")
+	var name := display_name.strip_edges() if not display_name.strip_edges().is_empty() else str(source.get("name", appearance_id)) + " Copy"
+	if not model.duplicate_appearance_set(appearance_id, duplicate_id, name): return _failure("The Appearance Set could not be duplicated.")
+	_commit_document_edit(before, "Duplicated Appearance Set " + name)
+	appearance_sets_changed.emit()
+	return {"success": true, "errors": [], "appearance_id": duplicate_id}
+
+
+func delete_appearance_set(appearance_id: String) -> bool:
+	if is_read_only() or model == null: return false
+	var source := _appearance_set(appearance_id)
+	if source.is_empty(): return false
+	var before := _capture_document_snapshot()
+	if not model.delete_appearance_set(appearance_id): return false
+	_commit_document_edit(before, "Deleted Appearance Set " + str(source.get("name", appearance_id)))
+	appearance_sets_changed.emit()
+	return true
+
+
+func apply_appearance_set(appearance_id: String) -> Dictionary:
+	if is_read_only() or model == null: return _failure("Use an editable project before applying an Appearance Set.")
+	var report: Dictionary = model.apply_appearance_set(appearance_id)
+	if report.get("success", false): appearance_sets_changed.emit()
+	return report
+
+
+func get_appearance_preview_layers(appearance_id: String) -> Array:
+	if model == null: return []
+	var appearance := _appearance_set(appearance_id)
+	if appearance.is_empty(): return get_preview_layers()
+	return _preview_layers_for_assembly((appearance.get("equipped_by_slot", {}) as Dictionary).duplicate(true))
+
+
+func generate_appearance_sets(count: int, prefix: String = "Variation", confirmed: bool = false) -> Dictionary:
+	if is_read_only(): return _failure("Bundled samples are read-only. Use Save As before generating Appearance Sets.")
+	if model == null: return _failure("Open a character project before generating Appearance Sets.")
+	var requested: int = max(1, count)
+	if requested > 64 and not confirmed:
+		return {"success": false, "requires_confirmation": true, "max_without_confirmation": 64, "requested": requested, "errors": ["Generate more than 64 Appearance Sets only after confirming the larger request."]}
+	if not confirmed:
+		return {"success": false, "requires_confirmation": true, "requested": requested, "errors": ["Confirm generation to save deterministic combinations of the artwork already imported into this project."]}
+	var candidates := _deterministic_appearance_candidates(requested)
+	if candidates.is_empty(): return _failure("There are not enough compatible imported parts to build an Appearance Set.")
+	var before := _capture_document_snapshot()
+	var created: Array = []
+	var index := 1
+	for data in candidates:
+		var appearance_id := IDService.generate_id("appearance")
+		var name := "%s %02d" % [prefix.strip_edges() if not prefix.strip_edges().is_empty() else "Variation", index]
+		var source: Dictionary = data
+		source["kind"] = "generated_imported_parts"
+		if model.create_appearance_set(appearance_id, name, source): created.append(appearance_id)
+		index += 1
+	if created.is_empty(): return _failure("No Appearance Sets could be saved.")
+	_commit_document_edit(before, "Generated %d Imported Appearance Set%s" % [created.size(), "s" if created.size() != 1 else ""])
+	appearance_sets_changed.emit()
+	return {"success": true, "errors": [], "appearance_ids": created, "requested": requested, "generated": created.size(), "import_only": true}
+
 func get_preview_layers() -> Array:
 	var layers: Array = []
 	if model == null: return layers
@@ -362,6 +565,64 @@ func get_preview_layers() -> Array:
 			"missing": path.is_empty() or not FileAccess.file_exists(path),
 		})
 	return layers
+
+
+func _preview_layers_for_assembly(equipped_by_slot: Dictionary) -> Array:
+	if model == null: return []
+	var ids: Array[String] = []
+	for part_id in model.get_layer_ids_in_order():
+		if _equipped_map_contains(equipped_by_slot, str(part_id)): ids.append(str(part_id))
+	for slot_id in equipped_by_slot:
+		for raw_part_id in (equipped_by_slot[slot_id] as Array):
+			var part_id := str(raw_part_id)
+			if part_id not in ids: ids.append(part_id)
+	var layers: Array = []
+	for part_id in ids:
+		var part = part_registry.get_part(part_id)
+		if part == null: continue
+		var asset: Dictionary = asset_registry.get_asset(part.asset_id)
+		var path := str(asset.get("path", ""))
+		layers.append({"part_id": part.part_id, "name": part.display_name, "slot_id": part.slot_id, "path": path, "state": model.get_layer_state(part.part_id), "visible": model.is_layer_effectively_visible(part.part_id), "missing": path.is_empty() or not FileAccess.file_exists(path)})
+	return layers
+
+
+func _equipped_map_contains(equipped_by_slot: Dictionary, part_id: String) -> bool:
+	for slot_id in equipped_by_slot:
+		if part_id in (equipped_by_slot[slot_id] as Array): return true
+	return false
+
+
+func _appearance_set(appearance_id: String) -> Dictionary:
+	for raw in get_appearance_sets():
+		var appearance: Dictionary = raw
+		if str(appearance.get("appearance_id", "")) == appearance_id: return appearance
+	return {}
+
+
+func _deterministic_appearance_candidates(requested: int) -> Array:
+	var varying_slots: Array = []
+	for slot in get_slots():
+		var choices: Array = part_registry.list_parts({"slot_id": str(slot.slot_id), "body_type_id": model.assembly.body_type_id})
+		if choices.is_empty(): continue
+		varying_slots.append({"slot_id": str(slot.slot_id), "choices": choices})
+	if varying_slots.is_empty(): return []
+	var total := 1
+	for entry in varying_slots:
+		total *= max(1, (entry as Dictionary).get("choices", []).size())
+	var candidate_count: int = min(requested, total)
+	var result: Array = []
+	for combination in range(candidate_count):
+		var cursor := combination
+		var equipped: Dictionary = {}
+		for entry in varying_slots:
+			var info: Dictionary = entry
+			var choices: Array = info.get("choices", [])
+			var selected_index := cursor % choices.size()
+			cursor = cursor / choices.size()
+			var selected = choices[selected_index]
+			equipped[str(info.get("slot_id", ""))] = [selected.part_id]
+		result.append({"equipped_by_slot": equipped, "palette_values": model.assembly.palette_values.duplicate(true), "attachment_maps": model.assembly.attachment_maps.duplicate(true)})
+	return result
 
 
 func get_layer_entries() -> Array:
@@ -386,9 +647,810 @@ func get_part_asset(part_id: String) -> Dictionary:
 	return asset_registry.get_asset(part.asset_id) if part != null else {}
 
 
+# === Rig authoring ===========================================================
+
+func get_rigs() -> Array:
+	var rigs: Array = []
+	var rig_ids: Array = _rigs.keys()
+	rig_ids.sort()
+	for rig_id in rig_ids:
+		rigs.append((_rigs[rig_id] as Dictionary).duplicate(true))
+	return rigs
+
+
+func get_active_rig_id() -> String:
+	return str(manifest.get("metadata", {}).get("character_authoring", {}).get("active_rig_id", ""))
+
+
+func get_active_rig() -> Dictionary:
+	var rig_id := get_active_rig_id()
+	if rig_id.is_empty() or not _rigs.has(rig_id): return {}
+	return _rigs[rig_id] as Dictionary
+
+
+func get_rig(rig_id: String) -> Dictionary:
+	return _rigs.get(rig_id, {}) as Dictionary
+
+
+func set_active_rig_id(rig_id: String) -> bool:
+	if not rig_id.is_empty() and not _rigs.has(rig_id): return false
+	var authoring: Dictionary = manifest.get("metadata", {}).get("character_authoring", {}).duplicate(true)
+	if str(authoring.get("active_rig_id", "")) == rig_id: return false
+	authoring["active_rig_id"] = rig_id
+	manifest.metadata["character_authoring"] = authoring
+	session_changed.emit("Selected " + (str((_rigs[rig_id] as Dictionary).get("name", rig_id)) if not rig_id.is_empty() else "no rig"))
+	return true
+
+
+func create_rig(display_name: String = "Character Rig") -> Dictionary:
+	if is_read_only(): return _failure("Bundled samples are read-only. Use Save As before creating a rig.")
+	var name := display_name.strip_edges()
+	if name.is_empty(): name = "Character Rig"
+	var before := _capture_document_snapshot()
+	var rig_id: String = IDService.generate_id("rig")
+	_rigs[rig_id] = RigSchemaScript.create_empty_rig(rig_id, name)
+	var authoring: Dictionary = manifest.metadata.character_authoring.duplicate(true)
+	authoring["active_rig_id"] = rig_id
+	manifest.metadata["character_authoring"] = authoring
+	_commit_document_edit(before, "Created %s Rig" % name)
+	return {"success": true, "errors": [], "rig_id": rig_id}
+
+
+func rename_rig(rig_id: String, display_name: String) -> bool:
+	if is_read_only() or not _rigs.has(rig_id): return false
+	var name := display_name.strip_edges()
+	if name.is_empty(): return false
+	var rig: Dictionary = _rigs[rig_id]
+	if str(rig.get("name", "")) == name: return false
+	var before := _capture_document_snapshot()
+	rig["name"] = name
+	_rigs[rig_id] = rig
+	_commit_document_edit(before, "Renamed Rig to %s" % name)
+	return true
+
+
+func delete_rig(rig_id: String) -> bool:
+	if is_read_only() or not _rigs.has(rig_id): return false
+	var name := str((_rigs[rig_id] as Dictionary).get("name", rig_id))
+	var before := _capture_document_snapshot()
+	_rigs.erase(rig_id)
+	var authoring: Dictionary = manifest.metadata.character_authoring.duplicate(true)
+	if str(authoring.get("active_rig_id", "")) == rig_id:
+		var remaining: Array = _rigs.keys()
+		remaining.sort()
+		authoring["active_rig_id"] = str(remaining[0]) if not remaining.is_empty() else ""
+	manifest.metadata["character_authoring"] = authoring
+	_commit_document_edit(before, "Deleted %s Rig" % name)
+	return true
+
+
+func create_rig_bone(rig_id: String, display_name: String = "Bone", parent_id: String = "", length: float = 50.0) -> Dictionary:
+	if is_read_only(): return _failure("Bundled samples are read-only. Use Save As before editing the rig.")
+	if not _rigs.has(rig_id): return _failure("Choose a rig before adding a bone.")
+	var rig: Dictionary = _rigs[rig_id]
+	var bones: Dictionary = rig.get("bones", {})
+	if not parent_id.is_empty() and not bones.has(parent_id): return _failure("The parent bone no longer exists.")
+	var name := display_name.strip_edges()
+	if name.is_empty(): name = "Bone"
+	var before := _capture_document_snapshot()
+	var bone_id: String = IDService.generate_id("bone")
+	var bone: Dictionary = BoneSchemaScript.create_default_bone(bone_id, name, parent_id)
+	bone["length"] = maxf(1.0, length)
+	if not parent_id.is_empty():
+		var parent: Dictionary = bones[parent_id]
+		var children: Array = parent.get("children", []).duplicate()
+		children.append(bone_id)
+		parent["children"] = children
+		bones[parent_id] = parent
+	bones[bone_id] = bone
+	rig["bones"] = bones
+	if str(rig.get("root_bone_id", "")).is_empty(): rig["root_bone_id"] = bone_id
+	_rigs[rig_id] = rig
+	_commit_document_edit(before, "Added %s Bone" % name)
+	return {"success": true, "errors": [], "bone_id": bone_id}
+
+
+func delete_rig_bone(rig_id: String, bone_id: String) -> bool:
+	if is_read_only() or not _rigs.has(rig_id): return false
+	var rig: Dictionary = _rigs[rig_id]
+	var bones: Dictionary = rig.get("bones", {})
+	if not bones.has(bone_id): return false
+	var name := str((bones[bone_id] as Dictionary).get("name", bone_id))
+	var before := _capture_document_snapshot()
+	_remove_bone_from_rig(rig, bone_id)
+	_rigs[rig_id] = rig
+	_commit_document_edit(before, "Deleted %s Bone" % name)
+	return true
+
+
+func reparent_rig_bone(rig_id: String, bone_id: String, new_parent_id: String) -> bool:
+	if is_read_only() or not _rigs.has(rig_id): return false
+	var rig: Dictionary = _rigs[rig_id]
+	var bones: Dictionary = rig.get("bones", {})
+	if not bones.has(bone_id) or (not new_parent_id.is_empty() and not bones.has(new_parent_id)) or bone_id == new_parent_id:
+		return false
+	var ancestor := new_parent_id
+	while not ancestor.is_empty():
+		if ancestor == bone_id: return false
+		ancestor = str((bones.get(ancestor, {}) as Dictionary).get("parent_id", ""))
+	var bone: Dictionary = bones[bone_id]
+	if str(bone.get("parent_id", "")) == new_parent_id: return false
+	var before := _capture_document_snapshot()
+	var old_parent_id := str(bone.get("parent_id", ""))
+	if not old_parent_id.is_empty() and bones.has(old_parent_id):
+		var old_parent: Dictionary = bones[old_parent_id]
+		var old_children: Array = old_parent.get("children", []).duplicate()
+		old_children.erase(bone_id)
+		old_parent["children"] = old_children
+		bones[old_parent_id] = old_parent
+	bone["parent_id"] = new_parent_id
+	bones[bone_id] = bone
+	if not new_parent_id.is_empty():
+		var new_parent: Dictionary = bones[new_parent_id]
+		var children: Array = new_parent.get("children", []).duplicate()
+		if not children.has(bone_id): children.append(bone_id)
+		new_parent["children"] = children
+		bones[new_parent_id] = new_parent
+	if str(rig.get("root_bone_id", "")) == bone_id and not new_parent_id.is_empty():
+		rig["root_bone_id"] = _find_first_root_bone_id(bones)
+	elif str(rig.get("root_bone_id", "")).is_empty() and new_parent_id.is_empty():
+		rig["root_bone_id"] = bone_id
+	rig["bones"] = bones
+	_rigs[rig_id] = rig
+	_commit_document_edit(before, "Reparented %s Bone" % str(bone.get("name", bone_id)))
+	return true
+
+
+func set_rig_bone_name(rig_id: String, bone_id: String, display_name: String) -> bool:
+	var name := display_name.strip_edges()
+	if name.is_empty(): return false
+	return _set_rig_bone_value(rig_id, bone_id, "name", name, "Renamed Bone to " + name)
+
+
+func set_rig_bone_transform(rig_id: String, bone_id: String, position: Vector2, rotation_degrees: float, scale: Vector2, description: String = "") -> bool:
+	if is_read_only() or not _rigs.has(rig_id): return false
+	var rig: Dictionary = _rigs[rig_id]
+	var bones: Dictionary = rig.get("bones", {})
+	if not bones.has(bone_id): return false
+	var bone: Dictionary = bones[bone_id]
+	var next_position := position
+	var next_rotation := deg_to_rad(rotation_degrees)
+	var next_scale := Vector2(maxf(0.01, scale.x), maxf(0.01, scale.y))
+	if bone.get("local_position", Vector2.ZERO) == next_position and is_equal_approx(float(bone.get("local_rotation", 0.0)), next_rotation) and bone.get("local_scale", Vector2.ONE) == next_scale:
+		return false
+	var before := _capture_document_snapshot()
+	bone["local_position"] = next_position
+	bone["local_rotation"] = next_rotation
+	bone["local_scale"] = next_scale
+	bones[bone_id] = bone
+	rig["bones"] = bones
+	_rigs[rig_id] = rig
+	var label := description if not description.is_empty() else "Changed %s Bone Transform" % str(bone.get("name", bone_id))
+	_commit_document_edit(before, label)
+	return true
+
+
+func set_rig_bone_length(rig_id: String, bone_id: String, length: float) -> bool:
+	return _set_rig_bone_value(rig_id, bone_id, "length", maxf(1.0, length), "Changed Bone Length")
+
+
+func set_rig_bone_visibility(rig_id: String, bone_id: String, visible: bool) -> bool:
+	return _set_rig_bone_value(rig_id, bone_id, "visible", visible, ("Showed " if visible else "Hid ") + "Bone")
+
+
+func set_rig_bone_locked(rig_id: String, bone_id: String, locked: bool) -> bool:
+	return _set_rig_bone_value(rig_id, bone_id, "locked", locked, ("Locked " if locked else "Unlocked ") + "Bone")
+
+
+func get_rig_bone_world_transform(rig_id: String, bone_id: String) -> Transform2D:
+	if not _rigs.has(rig_id): return Transform2D.IDENTITY
+	var manager = BoneManagerScript.new()
+	manager.initialize(_rigs[rig_id] as Dictionary)
+	return manager.get_global_transform(bone_id)
+
+
+# === Animation authoring =====================================================
+
+func get_animation_clips() -> Array:
+	var clips: Array = []
+	var store := _animation_store()
+	for clip_id in store:
+		var clip: Dictionary = (store[clip_id] as Dictionary).duplicate(true)
+		if str(clip.get("clip_id", "")).is_empty(): clip["clip_id"] = str(clip_id)
+		clips.append(clip)
+	clips.sort_custom(func(a: Dictionary, b: Dictionary): return str(a.get("clip_name", a.get("clip_id", ""))).naturalnocasecmp_to(str(b.get("clip_name", b.get("clip_id", "")))) < 0)
+	return clips
+
+
+func get_active_animation_id() -> String:
+	return str(manifest.get("metadata", {}).get("character_authoring", {}).get("active_animation_id", ""))
+
+
+func get_active_animation_clip() -> Dictionary:
+	return get_animation_clip(get_active_animation_id())
+
+
+func get_animation_clip(clip_id: String) -> Dictionary:
+	var store := _animation_store()
+	return (store.get(clip_id, {}) as Dictionary).duplicate(true)
+
+
+func set_active_animation_id(clip_id: String) -> bool:
+	var store := _animation_store()
+	if not clip_id.is_empty() and not store.has(clip_id): return false
+	var authoring: Dictionary = manifest.get("metadata", {}).get("character_authoring", {}).duplicate(true)
+	if str(authoring.get("active_animation_id", "")) == clip_id: return false
+	authoring["active_animation_id"] = clip_id
+	manifest.metadata["character_authoring"] = authoring
+	session_changed.emit("Selected " + (str((store[clip_id] as Dictionary).get("clip_name", clip_id)) if not clip_id.is_empty() else "no animation"))
+	return true
+
+
+func create_animation_clip(display_name: String = "New Animation") -> Dictionary:
+	if is_read_only(): return _failure("Bundled samples are read-only. Use Save As before creating an animation.")
+	var name := display_name.strip_edges()
+	if name.is_empty(): name = "New Animation"
+	var before := _capture_document_snapshot()
+	var clip_id: String = IDService.generate_id("anim")
+	var clip = AnimationClipScript.new(clip_id, name)
+	var store := _animation_store()
+	store[clip_id] = clip.to_dict()
+	manifest.objects["animations"] = store
+	var authoring: Dictionary = manifest.metadata.character_authoring.duplicate(true)
+	authoring["active_animation_id"] = clip_id
+	manifest.metadata["character_authoring"] = authoring
+	_commit_document_edit(before, "Created %s Animation" % name)
+	return {"success": true, "errors": [], "clip_id": clip_id}
+
+
+func update_animation_clip(clip_id: String, updates: Dictionary, description: String = "Changed Animation") -> bool:
+	if is_read_only(): return false
+	var store := _animation_store()
+	if not store.has(clip_id): return false
+	var clip: Dictionary = store[clip_id]
+	var next := clip.duplicate(true)
+	for key in updates:
+		match str(key):
+			"clip_name": next[key] = str(updates[key]).strip_edges()
+			"duration": next[key] = maxf(0.01, float(updates[key]))
+			"fps": next[key] = maxf(1.0, float(updates[key]))
+			"loop_mode": next[key] = clampi(int(updates[key]), 0, 2)
+			"notes": next[key] = str(updates[key])
+	if str(next.get("clip_name", "")).is_empty(): return false
+	if next == clip: return false
+	var before := _capture_document_snapshot()
+	store[clip_id] = next
+	manifest.objects["animations"] = store
+	_commit_document_edit(before, description)
+	return true
+
+
+func set_animation_loop_region(clip_id: String, region_id: String = "") -> bool:
+	if is_read_only(): return false
+	var store := _animation_store()
+	if not store.has(clip_id): return false
+	var clip: Dictionary = store[clip_id]
+	var selected := ""
+	if not region_id.is_empty():
+		for raw_region in clip.get("regions", []):
+			if str((raw_region as Dictionary).get("region_id", "")) == region_id:
+				selected = region_id
+				break
+		if selected.is_empty(): return false
+	var next := clip.duplicate(true)
+	next["loop_region_enabled"] = not selected.is_empty()
+	next["loop_region_id"] = selected
+	if next == clip: return false
+	var before := _capture_document_snapshot()
+	store[clip_id] = next
+	manifest.objects["animations"] = store
+	_commit_document_edit(before, "Set Animation Loop Region" if not selected.is_empty() else "Cleared Animation Loop Region")
+	return true
+
+
+func add_animation_marker(clip_id: String, display_name: String, time: float) -> Dictionary:
+	if is_read_only(): return _failure("Bundled samples are read-only. Use Save As before adding markers.")
+	var store := _animation_store()
+	if not store.has(clip_id): return _failure("Choose an animation before adding a marker.")
+	var clip: Dictionary = store[clip_id]
+	var before := _capture_document_snapshot()
+	var markers: Array = clip.get("markers", []).duplicate(true)
+	var marker_id := IDService.generate_id("marker")
+	markers.append({"marker_id": marker_id, "name": display_name.strip_edges() if not display_name.strip_edges().is_empty() else "Marker", "time": clampf(time, 0.0, maxf(0.01, float(clip.get("duration", 1.0))))})
+	markers.sort_custom(func(a: Dictionary, b: Dictionary): return float(a.get("time", 0.0)) < float(b.get("time", 0.0)))
+	clip["markers"] = markers
+	store[clip_id] = clip
+	manifest.objects["animations"] = store
+	_commit_document_edit(before, "Added Timeline Marker")
+	return {"success": true, "errors": [], "marker_id": marker_id}
+
+
+func update_animation_marker(clip_id: String, marker_id: String, updates: Dictionary) -> bool:
+	return _update_timeline_annotation(clip_id, "markers", "marker_id", marker_id, updates, "Changed Timeline Marker")
+
+
+func delete_animation_marker(clip_id: String, marker_id: String) -> bool:
+	return _delete_timeline_annotation(clip_id, "markers", "marker_id", marker_id, "Deleted Timeline Marker")
+
+
+func add_animation_region(clip_id: String, display_name: String, start_time: float, end_time: float) -> Dictionary:
+	if is_read_only(): return _failure("Bundled samples are read-only. Use Save As before adding regions.")
+	var store := _animation_store()
+	if not store.has(clip_id): return _failure("Choose an animation before adding a region.")
+	var clip: Dictionary = store[clip_id]
+	var duration := maxf(0.01, float(clip.get("duration", 1.0)))
+	var start := clampf(minf(start_time, end_time), 0.0, duration)
+	var finish := clampf(maxf(start_time, end_time), 0.0, duration)
+	if finish <= start: finish = minf(duration, start + 1.0 / maxf(1.0, float(clip.get("fps", 24.0))))
+	if finish <= start: return _failure("A timeline region needs a positive duration.")
+	var before := _capture_document_snapshot()
+	var regions: Array = clip.get("regions", []).duplicate(true)
+	var region_id := IDService.generate_id("region")
+	regions.append({"region_id": region_id, "name": display_name.strip_edges() if not display_name.strip_edges().is_empty() else "Region", "start_time": start, "end_time": finish})
+	regions.sort_custom(func(a: Dictionary, b: Dictionary): return float(a.get("start_time", 0.0)) < float(b.get("start_time", 0.0)))
+	clip["regions"] = regions
+	store[clip_id] = clip
+	manifest.objects["animations"] = store
+	_commit_document_edit(before, "Added Timeline Region")
+	return {"success": true, "errors": [], "region_id": region_id}
+
+
+func update_animation_region(clip_id: String, region_id: String, updates: Dictionary) -> bool:
+	return _update_timeline_annotation(clip_id, "regions", "region_id", region_id, updates, "Changed Timeline Region")
+
+
+func delete_animation_region(clip_id: String, region_id: String) -> bool:
+	return _delete_timeline_annotation(clip_id, "regions", "region_id", region_id, "Deleted Timeline Region")
+
+
+func delete_animation_clip(clip_id: String) -> bool:
+	if is_read_only(): return false
+	var store := _animation_store()
+	if not store.has(clip_id): return false
+	var name := str((store[clip_id] as Dictionary).get("clip_name", clip_id))
+	var before := _capture_document_snapshot()
+	store.erase(clip_id)
+	manifest.objects["animations"] = store
+	var authoring: Dictionary = manifest.metadata.character_authoring.duplicate(true)
+	if str(authoring.get("active_animation_id", "")) == clip_id:
+		var remaining: Array = store.keys()
+		remaining.sort()
+		authoring["active_animation_id"] = str(remaining[0]) if not remaining.is_empty() else ""
+	manifest.metadata["character_authoring"] = authoring
+	_commit_document_edit(before, "Deleted %s Animation" % name)
+	return true
+
+
+func add_animation_track(clip_id: String, object_id: String, property_path: String, display_name: String = "", track_type: int = TrackDefinitionScript.TrackType.ATTRIBUTE) -> Dictionary:
+	if is_read_only(): return _failure("Bundled samples are read-only. Use Save As before editing animation tracks.")
+	if object_id.is_empty() or property_path.is_empty(): return _failure("Choose an object and property before adding a track.")
+	var store := _animation_store()
+	if not store.has(clip_id): return _failure("Choose an animation before adding a track.")
+	var clip: Dictionary = store[clip_id]
+	for raw_track in clip.get("tracks", []):
+		var existing: Dictionary = raw_track
+		if str(existing.get("object_id", "")) == object_id and str(existing.get("property_path", "")) == property_path:
+			return _failure("This object already has that animation track.")
+	var before := _capture_document_snapshot()
+	var track_id: String = IDService.generate_id("track")
+	var track = TrackDefinitionScript.new(track_id, object_id, property_path)
+	track.track_type = track_type
+	track.display_name = display_name if not display_name.strip_edges().is_empty() else property_path
+	var tracks: Array = clip.get("tracks", []).duplicate(true)
+	var serialized_track := track.to_dict()
+	if track_type == TrackDefinitionScript.TrackType.SCRIPT_PARAMETER:
+		var parameter_segments := property_path.split(".", false)
+		serialized_track["parameter_name"] = str(parameter_segments[parameter_segments.size() - 1]) if not parameter_segments.is_empty() else ""
+		if str(serialized_track.get("parameter_name", "")).is_empty(): serialized_track["parameter_name"] = "parameter"
+		serialized_track["value_type"] = "variant"
+	tracks.append(serialized_track)
+	clip["tracks"] = tracks
+	store[clip_id] = clip
+	manifest.objects["animations"] = store
+	_commit_document_edit(before, "Added %s Track" % track.display_name)
+	return {"success": true, "errors": [], "track_id": track_id}
+
+
+func delete_animation_track(clip_id: String, track_id: String) -> bool:
+	if is_read_only(): return false
+	var store := _animation_store()
+	if not store.has(clip_id): return false
+	var clip: Dictionary = store[clip_id]
+	var tracks: Array = clip.get("tracks", []).duplicate(true)
+	var removed_name := "Track"
+	for index in range(tracks.size()):
+		var track: Dictionary = tracks[index]
+		if str(track.get("track_id", "")) == track_id:
+			removed_name = str(track.get("display_name", track_id))
+			var before := _capture_document_snapshot()
+			tracks.remove_at(index)
+			clip["tracks"] = tracks
+			store[clip_id] = clip
+			manifest.objects["animations"] = store
+			_commit_document_edit(before, "Deleted %s Track" % removed_name)
+			return true
+	return false
+
+
+func add_animation_key(clip_id: String, track_id: String, time: float, value: Variant) -> Dictionary:
+	if is_read_only(): return _failure("Bundled samples are read-only. Use Save As before adding a keyframe.")
+	var store := _animation_store()
+	if not store.has(clip_id): return _failure("Choose an animation before adding a keyframe.")
+	var clip: Dictionary = store[clip_id]
+	var tracks: Array = clip.get("tracks", []).duplicate(true)
+	for index in range(tracks.size()):
+		var track: Dictionary = tracks[index]
+		if str(track.get("track_id", "")) != track_id: continue
+		if bool(track.get("locked", false)): return _failure("Unlock the track before adding a keyframe.")
+		var before := _capture_document_snapshot()
+		var key_time := clampf(time, 0.0, maxf(0.01, float(clip.get("duration", 1.0))))
+		var keys: Array = track.get("keys", []).duplicate(true)
+		for key_index in range(keys.size() - 1, -1, -1):
+			if absf(float((keys[key_index] as Dictionary).get("time", -1.0)) - key_time) <= 0.0001: keys.remove_at(key_index)
+		var key_id: String = IDService.generate_id("key")
+		keys.append({"key_id": key_id, "time": key_time, "value": _json_safe_variant(value), "interpolation": 1})
+		keys.sort_custom(func(a: Dictionary, b: Dictionary): return float(a.get("time", 0.0)) < float(b.get("time", 0.0)))
+		track["keys"] = keys
+		tracks[index] = track
+		clip["tracks"] = tracks
+		store[clip_id] = clip
+		manifest.objects["animations"] = store
+		_commit_document_edit(before, "Added Keyframe to %s" % str(track.get("display_name", track_id)))
+		return {"success": true, "errors": [], "key_id": key_id}
+	return _failure("The selected animation track no longer exists.")
+
+
+func set_or_add_animation_key(clip_id: String, track_id: String, time: float, value: Variant, description: String = "Changed Keyframe") -> Dictionary:
+	if is_read_only(): return _failure("Bundled samples are read-only. Use Save As before editing keyframes.")
+	var store := _animation_store()
+	if not store.has(clip_id): return _failure("Choose an animation before adding a keyframe.")
+	var clip: Dictionary = store[clip_id]
+	var tracks: Array = clip.get("tracks", []).duplicate(true)
+	for index in range(tracks.size()):
+		var track: Dictionary = tracks[index]
+		if str(track.get("track_id", "")) != track_id: continue
+		if bool(track.get("locked", false)): return _failure("Unlock the track before changing keyframes.")
+		var key_time := clampf(time, 0.0, maxf(0.01, float(clip.get("duration", 1.0))))
+		var keys: Array = track.get("keys", []).duplicate(true)
+		var key_id := ""
+		for key_index in range(keys.size()):
+			var key: Dictionary = keys[key_index]
+			if absf(float(key.get("time", -1.0)) - key_time) > 0.0001: continue
+			key_id = str(key.get("key_id", ""))
+			var next_value: Variant = _json_safe_variant(value)
+			if key.get("value") == next_value: return {"success": true, "errors": [], "key_id": key_id, "unchanged": true}
+			var before_existing := _capture_document_snapshot()
+			key["value"] = next_value
+			keys[key_index] = key
+			track["keys"] = keys
+			tracks[index] = track
+			clip["tracks"] = tracks
+			store[clip_id] = clip
+			manifest.objects["animations"] = store
+			_commit_document_edit(before_existing, description)
+			return {"success": true, "errors": [], "key_id": key_id, "updated": true}
+		return add_animation_key(clip_id, track_id, key_time, value)
+	return _failure("The selected animation track no longer exists.")
+
+
+func set_animation_key_interpolation(clip_id: String, track_id: String, key_id: String, interpolation: int, out_handle: Variant = null, in_handle: Variant = null) -> bool:
+	if is_read_only(): return false
+	var store := _animation_store()
+	if not store.has(clip_id): return false
+	var clip: Dictionary = store[clip_id]
+	var tracks: Array = clip.get("tracks", []).duplicate(true)
+	for track_index in range(tracks.size()):
+		var track: Dictionary = tracks[track_index]
+		if str(track.get("track_id", "")) != track_id or bool(track.get("locked", false)): continue
+		var keys: Array = track.get("keys", []).duplicate(true)
+		for key_index in range(keys.size()):
+			var key: Dictionary = keys[key_index]
+			if str(key.get("key_id", "")) != key_id: continue
+			var next := key.duplicate(true)
+			next["interpolation"] = clampi(interpolation, TrackDefinitionScript.Interpolation.STEPPED, TrackDefinitionScript.Interpolation.BEZIER)
+			if out_handle != null: next["out_handle"] = _json_safe_variant(out_handle)
+			if in_handle != null: next["in_handle"] = _json_safe_variant(in_handle)
+			if next == key: return false
+			var before := _capture_document_snapshot()
+			keys[key_index] = next
+			track["keys"] = keys
+			tracks[track_index] = track
+			clip["tracks"] = tracks
+			store[clip_id] = clip
+			manifest.objects["animations"] = store
+			_commit_document_edit(before, "Changed Keyframe Interpolation")
+			return true
+	return false
+
+
+func edit_animation_keys_batch(clip_id: String, edits: Array, description: String = "Edited Keyframes") -> Dictionary:
+	if is_read_only(): return _failure("Bundled samples are read-only. Use Save As before editing keyframes.")
+	var store := _animation_store()
+	if not store.has(clip_id): return _failure("Choose an animation before editing keys.")
+	var clip: Dictionary = store[clip_id]
+	var tracks: Array = clip.get("tracks", []).duplicate(true)
+	var before := _capture_document_snapshot()
+	var changed := 0
+	for raw_edit in edits:
+		if not (raw_edit is Dictionary): continue
+		var edit: Dictionary = raw_edit
+		var track_id := str(edit.get("track_id", ""))
+		var key_id := str(edit.get("key_id", ""))
+		for track_index in range(tracks.size()):
+			var track: Dictionary = tracks[track_index]
+			if str(track.get("track_id", "")) != track_id or bool(track.get("locked", false)): continue
+			var keys: Array = track.get("keys", []).duplicate(true)
+			for key_index in range(keys.size()):
+				var key: Dictionary = keys[key_index]
+				if str(key.get("key_id", "")) != key_id: continue
+				var next := key.duplicate(true)
+				if edit.has("time"): next["time"] = clampf(float(edit.get("time", 0.0)), 0.0, maxf(0.01, float(clip.get("duration", 1.0))))
+				if edit.has("value"): next["value"] = _json_safe_variant(edit.get("value"))
+				if edit.has("interpolation"): next["interpolation"] = clampi(int(edit.get("interpolation", 1)), 0, TrackDefinitionScript.Interpolation.BEZIER)
+				if edit.has("out_handle"): next["out_handle"] = _json_safe_variant(edit.get("out_handle"))
+				if edit.has("in_handle"): next["in_handle"] = _json_safe_variant(edit.get("in_handle"))
+				if next == key: continue
+				keys[key_index] = next
+				keys.sort_custom(func(a: Dictionary, b: Dictionary): return float(a.get("time", 0.0)) < float(b.get("time", 0.0)))
+				track["keys"] = keys
+				tracks[track_index] = track
+				changed += 1
+				break
+			break
+	if changed == 0: return {"success": true, "errors": [], "changed": 0}
+	clip["tracks"] = tracks
+	store[clip_id] = clip
+	manifest.objects["animations"] = store
+	_commit_document_edit(before, description)
+	return {"success": true, "errors": [], "changed": changed}
+
+
+func paste_animation_keys(clip_id: String, entries: Array, at_time: float) -> Dictionary:
+	if is_read_only(): return _failure("Bundled samples are read-only. Use Save As before pasting keyframes.")
+	var store := _animation_store()
+	if not store.has(clip_id): return _failure("Choose an animation before pasting keyframes.")
+	var clip: Dictionary = store[clip_id]
+	var tracks: Array = clip.get("tracks", []).duplicate(true)
+	var before := _capture_document_snapshot()
+	var pasted := 0
+	for raw_entry in entries:
+		if not (raw_entry is Dictionary): continue
+		var entry: Dictionary = raw_entry
+		var source: Dictionary = entry.get("key", {}) as Dictionary
+		var target_track_id := str(entry.get("track_id", ""))
+		for track_index in range(tracks.size()):
+			var track: Dictionary = tracks[track_index]
+			if str(track.get("track_id", "")) != target_track_id or bool(track.get("locked", false)): continue
+			var target_time := clampf(at_time + float(entry.get("offset", 0.0)), 0.0, maxf(0.01, float(clip.get("duration", 1.0))))
+			var keys: Array = track.get("keys", []).duplicate(true)
+			for key_index in range(keys.size() - 1, -1, -1):
+				if absf(float((keys[key_index] as Dictionary).get("time", -1.0)) - target_time) <= 0.0001: keys.remove_at(key_index)
+			var next := source.duplicate(true)
+			next["key_id"] = IDService.generate_id("key")
+			next["time"] = target_time
+			keys.append(next)
+			keys.sort_custom(func(a: Dictionary, b: Dictionary): return float(a.get("time", 0.0)) < float(b.get("time", 0.0)))
+			track["keys"] = keys
+			tracks[track_index] = track
+			pasted += 1
+			break
+	if pasted == 0: return {"success": false, "errors": ["No unlocked target tracks were available for pasting."], "pasted": 0}
+	clip["tracks"] = tracks
+	store[clip_id] = clip
+	manifest.objects["animations"] = store
+	_commit_document_edit(before, "Pasted %d Keyframe%s" % [pasted, "s" if pasted != 1 else ""])
+	return {"success": true, "errors": [], "pasted": pasted}
+
+
+func move_animation_key(clip_id: String, track_id: String, key_id: String, time: float) -> bool:
+	if is_read_only(): return false
+	var store := _animation_store()
+	if not store.has(clip_id): return false
+	var clip: Dictionary = store[clip_id]
+	var tracks: Array = clip.get("tracks", []).duplicate(true)
+	for index in range(tracks.size()):
+		var track: Dictionary = tracks[index]
+		if str(track.get("track_id", "")) != track_id or bool(track.get("locked", false)): continue
+		var keys: Array = track.get("keys", []).duplicate(true)
+		for key_index in range(keys.size()):
+			var key: Dictionary = keys[key_index]
+			if str(key.get("key_id", "")) != key_id: continue
+			var next_time := clampf(time, 0.0, maxf(0.01, float(clip.get("duration", 1.0))))
+			if is_equal_approx(float(key.get("time", 0.0)), next_time): return false
+			var before := _capture_document_snapshot()
+			key["time"] = next_time
+			keys[key_index] = key
+			keys.sort_custom(func(a: Dictionary, b: Dictionary): return float(a.get("time", 0.0)) < float(b.get("time", 0.0)))
+			track["keys"] = keys
+			tracks[index] = track
+			clip["tracks"] = tracks
+			store[clip_id] = clip
+			manifest.objects["animations"] = store
+			_commit_document_edit(before, "Moved Keyframe on %s" % str(track.get("display_name", track_id)))
+			return true
+	return false
+
+
+func set_animation_key_value(clip_id: String, track_id: String, key_id: String, value: Variant) -> bool:
+	if is_read_only(): return false
+	var store := _animation_store()
+	if not store.has(clip_id): return false
+	var clip: Dictionary = store[clip_id]
+	var tracks: Array = clip.get("tracks", []).duplicate(true)
+	for index in range(tracks.size()):
+		var track: Dictionary = tracks[index]
+		if str(track.get("track_id", "")) != track_id or bool(track.get("locked", false)): continue
+		var keys: Array = track.get("keys", []).duplicate(true)
+		for key_index in range(keys.size()):
+			var key: Dictionary = keys[key_index]
+			if str(key.get("key_id", "")) != key_id: continue
+			var next_value: Variant = _json_safe_variant(value)
+			if key.get("value") == next_value: return false
+			var before := _capture_document_snapshot()
+			key["value"] = next_value
+			keys[key_index] = key
+			track["keys"] = keys
+			tracks[index] = track
+			clip["tracks"] = tracks
+			store[clip_id] = clip
+			manifest.objects["animations"] = store
+			_commit_document_edit(before, "Changed Keyframe Value on %s" % str(track.get("display_name", track_id)))
+			return true
+	return false
+
+
+func delete_animation_key(clip_id: String, track_id: String, key_id: String) -> bool:
+	if is_read_only(): return false
+	var store := _animation_store()
+	if not store.has(clip_id): return false
+	var clip: Dictionary = store[clip_id]
+	var tracks: Array = clip.get("tracks", []).duplicate(true)
+	for index in range(tracks.size()):
+		var track: Dictionary = tracks[index]
+		if str(track.get("track_id", "")) != track_id: continue
+		var keys: Array = track.get("keys", []).duplicate(true)
+		for key_index in range(keys.size()):
+			if str((keys[key_index] as Dictionary).get("key_id", "")) != key_id: continue
+			var before := _capture_document_snapshot()
+			keys.remove_at(key_index)
+			track["keys"] = keys
+			tracks[index] = track
+			clip["tracks"] = tracks
+			store[clip_id] = clip
+			manifest.objects["animations"] = store
+			_commit_document_edit(before, "Deleted Keyframe from %s" % str(track.get("display_name", track_id)))
+			return true
+	return false
+
+
+func get_animation_track(clip_id: String, track_id: String) -> Dictionary:
+	var clip := get_animation_clip(clip_id)
+	for raw_track in clip.get("tracks", []):
+		var track: Dictionary = raw_track
+		if str(track.get("track_id", "")) == track_id: return track.duplicate(true)
+	return {}
+
+
+func _update_timeline_annotation(clip_id: String, collection_name: String, id_name: String, item_id: String, updates: Dictionary, description: String) -> bool:
+	if is_read_only(): return false
+	var store := _animation_store()
+	if not store.has(clip_id): return false
+	var clip: Dictionary = store[clip_id]
+	var items: Array = clip.get(collection_name, []).duplicate(true)
+	for index in range(items.size()):
+		var item: Dictionary = items[index]
+		if str(item.get(id_name, "")) != item_id: continue
+		var next := item.duplicate(true)
+		for key in updates:
+			match str(key):
+				"name": next[key] = str(updates[key]).strip_edges()
+				"time", "start_time", "end_time": next[key] = maxf(0.0, float(updates[key]))
+		if collection_name == "regions" and float(next.get("end_time", 0.0)) <= float(next.get("start_time", 0.0)): return false
+		if next == item: return false
+		var before := _capture_document_snapshot()
+		items[index] = next
+		clip[collection_name] = items
+		store[clip_id] = clip
+		manifest.objects["animations"] = store
+		_commit_document_edit(before, description)
+		return true
+	return false
+
+
+func _delete_timeline_annotation(clip_id: String, collection_name: String, id_name: String, item_id: String, description: String) -> bool:
+	if is_read_only(): return false
+	var store := _animation_store()
+	if not store.has(clip_id): return false
+	var clip: Dictionary = store[clip_id]
+	var items: Array = clip.get(collection_name, []).duplicate(true)
+	for index in range(items.size()):
+		if str((items[index] as Dictionary).get(id_name, "")) != item_id: continue
+		var before := _capture_document_snapshot()
+		items.remove_at(index)
+		clip[collection_name] = items
+		if collection_name == "regions" and str(clip.get("loop_region_id", "")) == item_id:
+			clip["loop_region_id"] = ""
+			clip["loop_region_enabled"] = false
+		store[clip_id] = clip
+		manifest.objects["animations"] = store
+		_commit_document_edit(before, description)
+		return true
+	return false
+
+
+func _set_rig_bone_value(rig_id: String, bone_id: String, property_name: String, value: Variant, description: String) -> bool:
+	if is_read_only() or not _rigs.has(rig_id): return false
+	var rig: Dictionary = _rigs[rig_id]
+	var bones: Dictionary = rig.get("bones", {})
+	if not bones.has(bone_id): return false
+	var bone: Dictionary = bones[bone_id]
+	if bone.get(property_name) == value: return false
+	var before := _capture_document_snapshot()
+	bone[property_name] = value
+	bones[bone_id] = bone
+	rig["bones"] = bones
+	_rigs[rig_id] = rig
+	_commit_document_edit(before, description)
+	return true
+
+
+func _remove_bone_from_rig(rig: Dictionary, bone_id: String) -> void:
+	var bones: Dictionary = rig.get("bones", {})
+	if not bones.has(bone_id): return
+	var bone: Dictionary = bones[bone_id]
+	for child_id in (bone.get("children", []) as Array).duplicate():
+		_remove_bone_from_rig(rig, str(child_id))
+	bones = rig.get("bones", {})
+	var parent_id := str(bone.get("parent_id", ""))
+	if not parent_id.is_empty() and bones.has(parent_id):
+		var parent: Dictionary = bones[parent_id]
+		var children: Array = parent.get("children", []).duplicate()
+		children.erase(bone_id)
+		parent["children"] = children
+		bones[parent_id] = parent
+	bones.erase(bone_id)
+	rig["bones"] = bones
+	if str(rig.get("root_bone_id", "")) == bone_id:
+		rig["root_bone_id"] = _find_first_root_bone_id(bones)
+
+
+func _find_first_root_bone_id(bones: Dictionary) -> String:
+	var bone_ids: Array = bones.keys()
+	bone_ids.sort()
+	for bone_id in bone_ids:
+		if str((bones[bone_id] as Dictionary).get("parent_id", "")).is_empty(): return str(bone_id)
+	return ""
+
+
+func _animation_store() -> Dictionary:
+	var objects: Dictionary = manifest.get("objects", {})
+	if not objects.has("animations") or typeof(objects.get("animations")) != TYPE_DICTIONARY:
+		objects["animations"] = {}
+		manifest["objects"] = objects
+	return objects["animations"] as Dictionary
+
+
+func _json_safe_variant(value: Variant) -> Variant:
+	if value is Vector2:
+		var vector: Vector2 = value
+		return [vector.x, vector.y]
+	if value is Color:
+		var color: Color = value
+		return [color.r, color.g, color.b, color.a]
+	if value is Dictionary:
+		var result := {}
+		for key in (value as Dictionary): result[key] = _json_safe_variant((value as Dictionary)[key])
+		return result
+	if value is Array:
+		var result: Array = []
+		for entry in (value as Array): result.append(_json_safe_variant(entry))
+		return result
+	return value
+
+
 func _ensure_authoring_data() -> void:
 	if not manifest.has("objects"): manifest["objects"] = {}
-	for category in ["characters", "body_types", "assets"]:
+	for category in ["characters", "body_types", "assets", "rigs", "animations"]:
 		if not manifest.objects.has(category): manifest.objects[category] = {}
 	if not manifest.has("metadata"): manifest["metadata"] = {}
 	var authoring: Dictionary = manifest.metadata.get("character_authoring", {})
@@ -414,6 +1476,10 @@ func _ensure_authoring_data() -> void:
 		var character_ids: Array = manifest.objects.characters.keys()
 		character_ids.sort()
 		authoring["active_character_id"] = str(character_ids[0]) if not character_ids.is_empty() else FactoryScript.DEFAULT_CHARACTER_ID
+	if not authoring.has("active_rig_id"): authoring["active_rig_id"] = ""
+	if not authoring.has("active_animation_id"): authoring["active_animation_id"] = ""
+	if not authoring.has("workflow"):
+		authoring["workflow"] = {"new_project": false, "completed": true, "current_step": 0, "deferred": false}
 	manifest.metadata["character_authoring"] = authoring
 
 
@@ -433,6 +1499,21 @@ func _hydrate_registries() -> void:
 		var body = BodyScript.new().from_dict(body_data)
 		if body.validate().is_empty(): body_types.append(body)
 	asset_registry.from_dict({"assets": manifest.objects.assets})
+
+
+func _hydrate_rigs() -> void:
+	_rigs.clear()
+	var serialized: Dictionary = manifest.get("objects", {}).get("rigs", {}) as Dictionary
+	for rig_id in serialized:
+		var raw: Dictionary = serialized[rig_id] as Dictionary
+		var rig: Dictionary = RigSchemaScript.from_json_dict(raw)
+		if str(rig.get("id", "")).is_empty(): rig["id"] = str(rig_id)
+		_rigs[str(rig.get("id", rig_id))] = rig
+	var authoring: Dictionary = manifest.get("metadata", {}).get("character_authoring", {}) as Dictionary
+	var active_id := str(authoring.get("active_rig_id", ""))
+	if not active_id.is_empty() and not _rigs.has(active_id):
+		authoring["active_rig_id"] = ""
+		manifest.metadata["character_authoring"] = authoring
 
 
 func _hydrate_character() -> Dictionary:
@@ -468,14 +1549,22 @@ func _sync_manifest() -> void:
 	manifest.metadata["character_authoring"] = authoring
 	manifest.objects.assets = asset_registry.to_dict().assets
 	manifest.objects.characters[active_character_id] = model.to_dict()
+	var serialized_rigs := {}
+	for rig_id in _rigs:
+		serialized_rigs[rig_id] = RigSchemaScript.to_json_dict(_rigs[rig_id] as Dictionary)
+	manifest.objects["rigs"] = serialized_rigs
 	manifest["modified_at"] = Time.get_unix_time_from_system()
 
 
 func _copy_into_project(source_path: String, part_id: String) -> String:
-	var asset_dir := _asset_root_for_project(project_path).path_join("character_parts")
+	return _copy_asset_into_project(source_path, part_id, "character_parts")
+
+
+func _copy_asset_into_project(source_path: String, asset_id: String, folder: String) -> String:
+	var asset_dir := _asset_root_for_project(project_path).path_join(folder)
 	var absolute_dir := ProjectSettings.globalize_path(asset_dir)
 	if DirAccess.make_dir_recursive_absolute(absolute_dir) != OK and not DirAccess.dir_exists_absolute(absolute_dir): return ""
-	var target := asset_dir.path_join(part_id + "_" + source_path.get_file().validate_filename())
+	var target := asset_dir.path_join(asset_id + "_" + source_path.get_file().validate_filename())
 	if DirAccess.copy_absolute(ProjectSettings.globalize_path(source_path), ProjectSettings.globalize_path(target)) != OK: return ""
 	return target
 
@@ -559,6 +1648,7 @@ func _apply_document_snapshot(snapshot: Dictionary, description: String = "") ->
 	manifest = snapshot.duplicate(true)
 	_ensure_authoring_data()
 	_hydrate_registries()
+	_hydrate_rigs()
 	active_character_id = str(manifest.metadata.character_authoring.get("active_character_id", active_character_id))
 	var character_data: Dictionary = manifest.objects.characters.get(active_character_id, {})
 	if model == null:

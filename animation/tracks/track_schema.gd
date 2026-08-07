@@ -24,8 +24,9 @@ enum TrackType {
 	SCRIPT_PARAMETER
 }
 
-## Interpolation modes (Bezier deferred to Milestone 8 CRV tasks).
-enum Interpolation { STEPPED, LINEAR, SMOOTH }
+## Interpolation modes.  The first three values are deliberately stable so
+## projects created before Bézier support retain their original behaviour.
+enum Interpolation { STEPPED, LINEAR, SMOOTH, BEZIER }
 
 ## Stable unique identifier.
 var track_id: String = ""

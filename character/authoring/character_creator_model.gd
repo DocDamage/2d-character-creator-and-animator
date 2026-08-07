@@ -13,6 +13,10 @@ var body_types: Array = []
 var weapons: Dictionary = {}
 var palettes: Dictionary = {}
 var outfits: Dictionary = {}
+## Named Appearance Sets are the artist-facing evolution of legacy outfits.
+## They store references to imported parts and palette values only; no artwork
+## is duplicated or generated.
+var appearance_sets: Dictionary = {}
 var presets: Dictionary = {}
 var locked_part_ids: Array = []
 var locked_palette_channels: Array = []
@@ -105,6 +109,74 @@ func save_outfit(outfit_id: String) -> bool:
 	if assembly == null or outfit_id.strip_edges().is_empty(): return false
 	outfits[outfit_id.strip_edges()] = {"equipped_by_slot": assembly.equipped_by_slot.duplicate(true), "palette_values": assembly.palette_values.duplicate(true), "attachment_maps": assembly.attachment_maps.duplicate(true)}
 	return true
+
+
+func get_appearance_sets() -> Array:
+	# Legacy outfits remain valid data, but become user-visible Appearance Sets
+	# the first time this newer surface asks for them.
+	_migrate_legacy_outfits()
+	var result: Array = []
+	for appearance_id in appearance_sets:
+		var entry: Dictionary = (appearance_sets[appearance_id] as Dictionary).duplicate(true)
+		entry["appearance_id"] = str(entry.get("appearance_id", appearance_id))
+		result.append(entry)
+	result.sort_custom(func(a: Dictionary, b: Dictionary): return str(a.get("name", a.get("appearance_id", ""))).naturalnocasecmp_to(str(b.get("name", b.get("appearance_id", "")))) < 0)
+	return result
+
+
+func create_appearance_set(appearance_id: String, display_name: String, source: Dictionary = {}) -> bool:
+	if assembly == null or appearance_id.strip_edges().is_empty() or appearance_sets.has(appearance_id): return false
+	var content := source.duplicate(true) if not source.is_empty() else {"equipped_by_slot": assembly.equipped_by_slot.duplicate(true), "palette_values": assembly.palette_values.duplicate(true), "attachment_maps": assembly.attachment_maps.duplicate(true)}
+	appearance_sets[appearance_id] = {
+		"appearance_id": appearance_id, "name": display_name.strip_edges() if not display_name.strip_edges().is_empty() else appearance_id,
+		"kind": str(content.get("kind", "manual")), "created_at": int(content.get("created_at", Time.get_unix_time_from_system())),
+		"equipped_by_slot": (content.get("equipped_by_slot", {}) as Dictionary).duplicate(true),
+		"palette_values": (content.get("palette_values", {}) as Dictionary).duplicate(true),
+		"attachment_maps": (content.get("attachment_maps", {}) as Dictionary).duplicate(true),
+		"thumbnail": (content.get("thumbnail", {}) as Dictionary).duplicate(true),
+	}
+	return true
+
+
+func rename_appearance_set(appearance_id: String, display_name: String) -> bool:
+	if not appearance_sets.has(appearance_id) or display_name.strip_edges().is_empty(): return false
+	var entry: Dictionary = appearance_sets[appearance_id]
+	if str(entry.get("name", "")) == display_name.strip_edges(): return false
+	entry["name"] = display_name.strip_edges()
+	appearance_sets[appearance_id] = entry
+	return true
+
+
+func delete_appearance_set(appearance_id: String) -> bool:
+	if not appearance_sets.has(appearance_id): return false
+	appearance_sets.erase(appearance_id)
+	return true
+
+
+func duplicate_appearance_set(appearance_id: String, duplicate_id: String, display_name: String) -> bool:
+	if not appearance_sets.has(appearance_id) or duplicate_id.strip_edges().is_empty() or appearance_sets.has(duplicate_id): return false
+	var source: Dictionary = (appearance_sets[appearance_id] as Dictionary).duplicate(true)
+	source["appearance_id"] = duplicate_id
+	source["name"] = display_name.strip_edges() if not display_name.strip_edges().is_empty() else str(source.get("name", appearance_id)) + " Copy"
+	source["kind"] = "manual"
+	source["created_at"] = Time.get_unix_time_from_system()
+	appearance_sets[duplicate_id] = source
+	return true
+
+
+func apply_appearance_set(appearance_id: String) -> Dictionary:
+	if assembly == null or not appearance_sets.has(appearance_id): return _failure("Choose a saved Appearance Set.")
+	var before := _snapshot()
+	var entry: Dictionary = appearance_sets[appearance_id]
+	assembly.equipped_by_slot = (entry.get("equipped_by_slot", {}) as Dictionary).duplicate(true)
+	assembly.palette_values = (entry.get("palette_values", {}) as Dictionary).duplicate(true)
+	assembly.attachment_maps = (entry.get("attachment_maps", {}) as Dictionary).duplicate(true)
+	var report: Dictionary = assembly.validate()
+	if not report.get("success", false):
+		apply_snapshot(before)
+		return report
+	_record(before, "Applied Appearance Set " + str(entry.get("name", appearance_id)))
+	return report
 
 
 func apply_outfit(outfit_id: String) -> Dictionary:
@@ -346,12 +418,14 @@ func move_layer_by(part_id: String, delta: int) -> bool:
 
 
 func to_dict() -> Dictionary:
-	return {"assembly": assembly.to_dict() if assembly != null else {}, "outfits": outfits.duplicate(true), "presets": presets.duplicate(true), "locked_part_ids": locked_part_ids.duplicate(), "locked_palette_channels": locked_palette_channels.duplicate()}
+	return {"assembly": assembly.to_dict() if assembly != null else {}, "outfits": outfits.duplicate(true), "appearance_sets": appearance_sets.duplicate(true), "presets": presets.duplicate(true), "locked_part_ids": locked_part_ids.duplicate(), "locked_palette_channels": locked_palette_channels.duplicate()}
 
 
 func from_dict(data: Dictionary) -> bool:
 	if not data.has("assembly") or (data.get("assembly", {}) as Dictionary).is_empty(): return false
 	outfits = (data.get("outfits", {}) as Dictionary).duplicate(true)
+	appearance_sets = (data.get("appearance_sets", {}) as Dictionary).duplicate(true)
+	_migrate_legacy_outfits()
 	presets = (data.get("presets", {}) as Dictionary).duplicate(true)
 	apply_snapshot(data)
 	return assembly.validate().get("success", false)
@@ -363,6 +437,11 @@ func apply_snapshot(data: Dictionary) -> void:
 	assembly.configure(part_registry, slot_registry, body_types)
 	locked_part_ids = data.get("locked_part_ids", []).duplicate()
 	locked_palette_channels = data.get("locked_palette_channels", []).duplicate()
+	if data.has("outfits"): outfits = (data.get("outfits", {}) as Dictionary).duplicate(true)
+	if data.has("appearance_sets"):
+		appearance_sets = (data.get("appearance_sets", {}) as Dictionary).duplicate(true)
+		_migrate_legacy_outfits()
+	if data.has("presets"): presets = (data.get("presets", {}) as Dictionary).duplicate(true)
 
 
 func _record(before: Dictionary, description: String) -> void:
@@ -377,7 +456,19 @@ func _record(before: Dictionary, description: String) -> void:
 
 
 func _snapshot() -> Dictionary:
-	return {"assembly": assembly.to_dict() if assembly != null else {}, "locked_part_ids": locked_part_ids.duplicate(), "locked_palette_channels": locked_palette_channels.duplicate()}
+	return {"assembly": assembly.to_dict() if assembly != null else {}, "outfits": outfits.duplicate(true), "appearance_sets": appearance_sets.duplicate(true), "presets": presets.duplicate(true), "locked_part_ids": locked_part_ids.duplicate(), "locked_palette_channels": locked_palette_channels.duplicate()}
+
+
+func _migrate_legacy_outfits() -> void:
+	for outfit_id in outfits:
+		var legacy: Dictionary = outfits[outfit_id] as Dictionary
+		if appearance_sets.has(outfit_id): continue
+		appearance_sets[outfit_id] = {
+			"appearance_id": str(outfit_id), "name": str(legacy.get("name", outfit_id)), "kind": "manual", "created_at": int(legacy.get("created_at", 0)),
+			"equipped_by_slot": (legacy.get("equipped_by_slot", {}) as Dictionary).duplicate(true),
+			"palette_values": (legacy.get("palette_values", {}) as Dictionary).duplicate(true),
+			"attachment_maps": (legacy.get("attachment_maps", {}) as Dictionary).duplicate(true), "thumbnail": {},
+		}
 
 
 func _set_layer_values(part_id: String, updates: Dictionary, description: String, permit_locked: bool = false) -> bool:

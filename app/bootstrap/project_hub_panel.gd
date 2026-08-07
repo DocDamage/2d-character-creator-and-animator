@@ -3,6 +3,7 @@ extends Control
 
 const SAMPLE_PROJECT_PATH := "res://samples/humanoid_modular.chrproj"
 const STARTUP_SCENE_PATH := "res://app/bootstrap/startup.tscn"
+const WorkflowWizardScript = preload("res://app/bootstrap/project_workflow_wizard.gd")
 
 @onready var _project_name: Label = %ProjectName
 @onready var _project_path: Label = %ProjectPath
@@ -21,6 +22,7 @@ const STARTUP_SCENE_PATH := "res://app/bootstrap/startup.tscn"
 @onready var _archive_button: Button = $Margin/Root/Content/Center/Recent/Margin/VBox/RecentActions/Archive
 @onready var _reveal_button: Button = $Margin/Root/Content/Center/Recent/Margin/VBox/RecentActions/Reveal
 @onready var _locate_button: Button = $Margin/Root/Content/Center/Recent/Margin/VBox/RecentActions/Locate
+@onready var _margin: MarginContainer = $Margin
 
 var _rename_dialog: AcceptDialog
 var _rename_input: LineEdit
@@ -28,11 +30,53 @@ var _locate_dialog: FileDialog
 var _pending_locate_path := ""
 var _update_download_available := false
 var _autosave_display_timer: Timer
+var _layout_sync_frames := 0
+var _session = null
+var _snapshot_name_input: LineEdit
+var _snapshot_note_input: LineEdit
+var _snapshot_list: ItemList
+var _snapshot_status: Label
+var _appearance_name_input: LineEdit
+var _appearance_list: ItemList
+var _appearance_status: Label
+var _appearance_generate_count: SpinBox
+var _readiness_status: Label
+var _wizard = null
+var _generate_appearances_dialog: ConfirmationDialog
+var _preview_controller = null
 
 func _ready() -> void:
+	if not resized.is_connected(_request_layout_sync):
+		resized.connect(_request_layout_sync)
+	_request_layout_sync()
 	_connect_signals()
+	_build_authoring_sections()
 	_start_autosave_display_timer()
 	_refresh()
+
+
+func _sync_fill_layout() -> void:
+	# This panel is hosted inside dock containers whose height can change after
+	# their tabs initialize. Keep the anchored root in the panel's current rect.
+	if _margin == null: return
+	_margin.position = Vector2.ZERO
+	_margin.size = size
+
+
+func _request_layout_sync() -> void:
+	# Dock split containers can settle over more than one layout pass. Keep the
+	# explicit child rect current through those initial passes, then sleep.
+	_layout_sync_frames = 3
+	set_process(true)
+	_sync_fill_layout()
+
+
+func _process(_delta: float) -> void:
+	if _layout_sync_frames <= 0:
+		set_process(false)
+		return
+	_sync_fill_layout()
+	_layout_sync_frames -= 1
 
 func _connect_signals() -> void:
 	%CreateButton.pressed.connect(_create_or_continue)
@@ -84,6 +128,31 @@ func _refresh() -> void:
 	_refresh_health()
 	_refresh_autosave()
 	_refresh_recent_action_state()
+	_refresh_authoring_sections()
+
+
+func bind_session(session) -> void:
+	if _session != null and is_instance_valid(_session):
+		if _session.session_changed.is_connected(_on_session_changed): _session.session_changed.disconnect(_on_session_changed)
+		if _session.snapshots_changed.is_connected(_refresh_authoring_sections): _session.snapshots_changed.disconnect(_refresh_authoring_sections)
+		if _session.appearance_sets_changed.is_connected(_refresh_authoring_sections): _session.appearance_sets_changed.disconnect(_refresh_authoring_sections)
+	_session = session
+	if _session != null and is_instance_valid(_session):
+		if not _session.session_changed.is_connected(_on_session_changed): _session.session_changed.connect(_on_session_changed)
+		if not _session.snapshots_changed.is_connected(_refresh_authoring_sections): _session.snapshots_changed.connect(_refresh_authoring_sections)
+		if not _session.appearance_sets_changed.is_connected(_refresh_authoring_sections): _session.appearance_sets_changed.connect(_refresh_authoring_sections)
+		if _wizard != null: _wizard.bind_session(_session)
+	_refresh_authoring_sections()
+
+
+func bind_preview_controller(controller) -> void:
+	_preview_controller = controller
+
+
+func open_guided_setup() -> void:
+	if _session == null or not is_instance_valid(_session) or _wizard == null: return
+	_wizard.bind_session(_session)
+	_wizard.open()
 
 func _refresh_recent_projects() -> void:
 	_recent_list.clear()
@@ -332,3 +401,358 @@ func _on_located_project(path: String) -> void:
 		_project_state.set_status("The selected file could not repair this recent project", PaperQuestStatusChip.Status.ERROR)
 	_pending_locate_path = ""
 	_refresh()
+
+
+# === Project authoring surfaces =============================================
+
+func _build_authoring_sections() -> void:
+	var right_column := get_node_or_null("Margin/Root/Content/Right") as VBoxContainer
+	if right_column == null: return
+	# The hub can host a long project history and many named appearances. Keep
+	# those surfaces scrollable instead of squeezing the header/health cards at
+	# 1280×720 or high-DPI compact layouts.
+	var scroll := ScrollContainer.new()
+	scroll.name = "AuthoringScroll"
+	scroll.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	right_column.add_child(scroll)
+	var column := VBoxContainer.new()
+	column.name = "AuthoringSections"
+	column.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	column.add_theme_constant_override("separation", 10)
+	scroll.add_child(column)
+	var workflow_panel := _make_panel("GuidedSetup", "GUIDED SETUP")
+	var workflow_box := workflow_panel.get_node("Margin/VBox") as VBoxContainer
+	var resume := Button.new()
+	resume.name = "ResumeGuidedSetup"
+	resume.text = "Resume guided setup"
+	resume.pressed.connect(open_guided_setup)
+	workflow_box.add_child(resume)
+	var workflow_copy := Label.new()
+	workflow_copy.name = "GuidedSetupCopy"
+	workflow_copy.text = "Import → map slots → rig → idle → preview/export"
+	workflow_copy.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	workflow_copy.add_theme_font_size_override("font_size", 12)
+	workflow_box.add_child(workflow_copy)
+	column.add_child(workflow_panel)
+
+	var snapshot_panel := _make_panel("Snapshots", "SNAPSHOTS")
+	var snapshot_box := snapshot_panel.get_node("Margin/VBox") as VBoxContainer
+	_snapshot_name_input = LineEdit.new()
+	_snapshot_name_input.name = "SnapshotName"
+	_snapshot_name_input.placeholder_text = "Milestone name (for example: before rig rewrite)"
+	snapshot_box.add_child(_snapshot_name_input)
+	_snapshot_note_input = LineEdit.new()
+	_snapshot_note_input.name = "SnapshotNote"
+	_snapshot_note_input.placeholder_text = "Optional note"
+	snapshot_box.add_child(_snapshot_note_input)
+	var snapshot_actions := HFlowContainer.new()
+	snapshot_box.add_child(snapshot_actions)
+	var snapshot_create := Button.new()
+	snapshot_create.name = "CreateSnapshot"
+	snapshot_create.text = "Create"
+	snapshot_create.pressed.connect(_create_snapshot)
+	snapshot_actions.add_child(snapshot_create)
+	var snapshot_restore := Button.new()
+	snapshot_restore.name = "RestoreSnapshot"
+	snapshot_restore.text = "Restore"
+	snapshot_restore.pressed.connect(_restore_snapshot)
+	snapshot_actions.add_child(snapshot_restore)
+	var snapshot_delete := Button.new()
+	snapshot_delete.name = "DeleteSnapshot"
+	snapshot_delete.text = "Delete"
+	snapshot_delete.pressed.connect(_delete_snapshot)
+	snapshot_actions.add_child(snapshot_delete)
+	var snapshot_reveal := Button.new()
+	snapshot_reveal.name = "RevealSnapshot"
+	snapshot_reveal.text = "Reveal"
+	snapshot_reveal.pressed.connect(_reveal_snapshot)
+	snapshot_actions.add_child(snapshot_reveal)
+	_snapshot_list = ItemList.new()
+	_snapshot_list.name = "SnapshotList"
+	_snapshot_list.custom_minimum_size = Vector2(0, 92)
+	_snapshot_list.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	snapshot_box.add_child(_snapshot_list)
+	_snapshot_list.item_selected.connect(_inspect_snapshot)
+	_snapshot_status = Label.new()
+	_snapshot_status.name = "SnapshotStatus"
+	_snapshot_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_snapshot_status.add_theme_font_size_override("font_size", 12)
+	snapshot_box.add_child(_snapshot_status)
+	column.add_child(snapshot_panel)
+
+	var appearance_panel := _make_panel("AppearanceSets", "APPEARANCE SETS")
+	var appearance_box := appearance_panel.get_node("Margin/VBox") as VBoxContainer
+	_appearance_name_input = LineEdit.new()
+	_appearance_name_input.name = "AppearanceName"
+	_appearance_name_input.placeholder_text = "Knight, Mage, Red Outfit…"
+	appearance_box.add_child(_appearance_name_input)
+	var appearance_actions := HFlowContainer.new()
+	appearance_box.add_child(appearance_actions)
+	for item in [["SaveAppearance", "Save", _create_appearance], ["RenameAppearance", "Rename", _rename_appearance], ["PreviewAppearance", "Preview", _preview_appearance], ["ApplyAppearance", "Apply", _apply_appearance], ["DuplicateAppearance", "Duplicate", _duplicate_appearance], ["DeleteAppearance", "Delete", _delete_appearance], ["GenerateAppearances", "Generate", _confirm_generate_appearances]]:
+		var button := Button.new()
+		button.name = str(item[0])
+		button.text = str(item[1])
+		button.pressed.connect(item[2] as Callable)
+		appearance_actions.add_child(button)
+	_appearance_generate_count = SpinBox.new()
+	_appearance_generate_count.name = "AppearanceGenerateCount"
+	_appearance_generate_count.min_value = 1
+	_appearance_generate_count.max_value = 512
+	_appearance_generate_count.step = 1
+	_appearance_generate_count.value = 8
+	_appearance_generate_count.tooltip_text = "Number of deterministic imported-part combinations to request. More than 64 requires explicit confirmation."
+	appearance_box.add_child(_appearance_generate_count)
+	_appearance_list = ItemList.new()
+	_appearance_list.name = "AppearanceList"
+	_appearance_list.custom_minimum_size = Vector2(0, 92)
+	_appearance_list.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	appearance_box.add_child(_appearance_list)
+	_appearance_status = Label.new()
+	_appearance_status.name = "AppearanceStatus"
+	_appearance_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_appearance_status.add_theme_font_size_override("font_size", 12)
+	appearance_box.add_child(_appearance_status)
+	column.add_child(appearance_panel)
+
+	var readiness_panel := _make_panel("Readiness", "READINESS")
+	var readiness_box := readiness_panel.get_node("Margin/VBox") as VBoxContainer
+	var readiness_actions := HBoxContainer.new()
+	readiness_box.add_child(readiness_actions)
+	var validate := Button.new()
+	validate.name = "ValidateProject"
+	validate.text = "Validate"
+	validate.pressed.connect(_validate_project)
+	readiness_actions.add_child(validate)
+	var repair := Button.new()
+	repair.name = "AutoRepairAll"
+	repair.text = "Auto Repair All"
+	repair.pressed.connect(_auto_repair_all)
+	readiness_actions.add_child(repair)
+	_readiness_status = Label.new()
+	_readiness_status.name = "ReadinessStatus"
+	_readiness_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_readiness_status.add_theme_font_size_override("font_size", 12)
+	readiness_box.add_child(_readiness_status)
+	column.add_child(readiness_panel)
+
+	_wizard = WorkflowWizardScript.new()
+	_wizard.name = "ProjectWorkflowWizard"
+	_wizard.route_requested.connect(_route_wizard_step)
+	add_child(_wizard)
+	_generate_appearances_dialog = ConfirmationDialog.new()
+	_generate_appearances_dialog.name = "GenerateAppearancesConfirmation"
+	_generate_appearances_dialog.title = "Generate imported Appearance Sets"
+	_generate_appearances_dialog.dialog_text = "Create deterministic combinations of the parts already imported into this project? No artwork will be generated or duplicated."
+	_generate_appearances_dialog.confirmed.connect(_generate_appearances)
+	add_child(_generate_appearances_dialog)
+
+
+func _make_panel(name_id: String, title_text: String) -> PanelContainer:
+	var panel := PanelContainer.new()
+	panel.name = name_id
+	panel.theme_type_variation = &"PaperPanel"
+	var margin := MarginContainer.new()
+	margin.name = "Margin"
+	margin.add_theme_constant_override("margin_left", 10)
+	margin.add_theme_constant_override("margin_top", 10)
+	margin.add_theme_constant_override("margin_right", 10)
+	margin.add_theme_constant_override("margin_bottom", 10)
+	panel.add_child(margin)
+	var box := VBoxContainer.new()
+	box.name = "VBox"
+	margin.add_child(box)
+	var title := Label.new()
+	title.text = title_text
+	title.add_theme_font_size_override("font_size", 12)
+	box.add_child(title)
+	return panel
+
+
+func _refresh_authoring_sections() -> void:
+	if _snapshot_list == null or _appearance_list == null or _readiness_status == null: return
+	_snapshot_list.clear()
+	_appearance_list.clear()
+	if _session == null or not is_instance_valid(_session):
+		_snapshot_status.text = "Open an editable project to create portable milestones."
+		_appearance_status.text = "Open a project to save imported-art appearances."
+		_readiness_status.text = "Open a project to validate readiness."
+		return
+	var editable: bool = not _session.is_read_only()
+	for control_name in ["CreateSnapshot", "RestoreSnapshot", "DeleteSnapshot", "SaveAppearance", "RenameAppearance", "ApplyAppearance", "DuplicateAppearance", "DeleteAppearance", "GenerateAppearances", "AutoRepairAll"]:
+		var control := find_child(control_name, true, false) as BaseButton
+		if control != null: control.disabled = not editable
+	if not editable:
+		_snapshot_status.text = "Bundled sample is read-only. Use Save As before creating, restoring, or deleting snapshots."
+		_appearance_status.text = "Bundled sample is read-only. Use Save As before changing Appearance Sets."
+	for snapshot in _session.list_project_snapshots():
+		var data: Dictionary = snapshot
+		var timestamp := Time.get_datetime_string_from_unix_time(int(data.get("timestamp", 0)))
+		var note: String = str(data.get("note", "")).strip_edges()
+		var line := "%s\n%s%s" % [str(data.get("name", data.get("id", "Snapshot"))), timestamp, " · " + note.left(80) if not note.is_empty() else ""]
+		var index := _snapshot_list.add_item(line)
+		_snapshot_list.set_item_metadata(index, str(data.get("id", "")))
+	_snapshot_status.text = "%d portable snapshot%s." % [_snapshot_list.item_count, "s" if _snapshot_list.item_count != 1 else ""]
+	for appearance in _session.get_appearance_sets():
+		var data: Dictionary = appearance
+		var index := _appearance_list.add_item(str(data.get("name", data.get("appearance_id", "Appearance"))) + " · " + str(data.get("kind", "manual")))
+		_appearance_list.set_item_metadata(index, str(data.get("appearance_id", "")))
+	_appearance_status.text = "Uses only existing imported parts and palette values." if _appearance_list.item_count > 0 else "Save the current imported assembly as a named appearance."
+	var report: Dictionary = _session.get_readiness_report()
+	_readiness_status.text = "%d blocking issue%s · %d warning%s" % [(report.get("errors", []) as Array).size(), "s" if (report.get("errors", []) as Array).size() != 1 else "", (report.get("warnings", []) as Array).size(), "s" if (report.get("warnings", []) as Array).size() != 1 else ""]
+
+
+func _selected_snapshot_id() -> String:
+	var selected := _snapshot_list.get_selected_items() if _snapshot_list != null else PackedInt32Array()
+	return str(_snapshot_list.get_item_metadata(selected[0])) if not selected.is_empty() else ""
+
+
+func _selected_appearance_id() -> String:
+	var selected := _appearance_list.get_selected_items() if _appearance_list != null else PackedInt32Array()
+	return str(_appearance_list.get_item_metadata(selected[0])) if not selected.is_empty() else ""
+
+
+func _create_snapshot() -> void:
+	if _session == null: return
+	var name := _snapshot_name_input.text.strip_edges() if _snapshot_name_input != null else ""
+	var note := _snapshot_note_input.text.strip_edges() if _snapshot_note_input != null else ""
+	var report: Dictionary = _session.create_project_snapshot(name if not name.is_empty() else "Snapshot", note)
+	_snapshot_status.text = "Created portable snapshot." if report.get("success", false) else str(report.get("errors", ["Snapshot failed."])[0])
+	if _snapshot_name_input != null: _snapshot_name_input.clear()
+	if _snapshot_note_input != null: _snapshot_note_input.clear()
+	_refresh_authoring_sections()
+
+
+func _inspect_snapshot(index: int) -> void:
+	if _session == null or _snapshot_list == null or index < 0: return
+	var snapshot: Dictionary = _session.get_project_snapshot(str(_snapshot_list.get_item_metadata(index)))
+	if snapshot.is_empty():
+		_snapshot_status.text = "This snapshot is no longer available."
+		return
+	var preview: Dictionary = snapshot.get("preview", {}) as Dictionary
+	_snapshot_status.text = "%s · %d asset%s · %d clip%s%s" % [str(snapshot.get("kind", "manual")).replace("_", " ").capitalize(), int(preview.get("asset_count", 0)), "s" if int(preview.get("asset_count", 0)) != 1 else "", int(preview.get("clip_count", 0)), "s" if int(preview.get("clip_count", 0)) != 1 else "", " · " + str(snapshot.get("note", "")) if not str(snapshot.get("note", "")).is_empty() else ""]
+
+
+func _restore_snapshot() -> void:
+	if _session == null: return
+	var id := _selected_snapshot_id()
+	if id.is_empty(): _snapshot_status.text = "Select a snapshot to restore."; return
+	var report: Dictionary = _session.restore_project_snapshot(id)
+	_snapshot_status.text = "Restored snapshot; a Before restoring recovery point was created." if report.get("success", false) else str(report.get("errors", ["Restore failed."])[0])
+	_refresh_authoring_sections()
+
+
+func _delete_snapshot() -> void:
+	if _session == null: return
+	var id := _selected_snapshot_id()
+	if id.is_empty(): _snapshot_status.text = "Select a snapshot to delete."; return
+	var report: Dictionary = _session.delete_project_snapshot(id)
+	_snapshot_status.text = "Deleted snapshot." if report.get("success", false) else str(report.get("errors", ["Delete failed."])[0])
+	_refresh_authoring_sections()
+
+
+func _reveal_snapshot() -> void:
+	if _session == null: return
+	var report: Dictionary = _session.reveal_project_snapshot(_selected_snapshot_id())
+	_snapshot_status.text = "Opened snapshot folder in Explorer." if report.get("success", false) else str(report.get("errors", ["Reveal failed."])[0])
+
+
+func _create_appearance() -> void:
+	if _session == null: return
+	var name := _appearance_name_input.text.strip_edges() if _appearance_name_input != null else ""
+	var report: Dictionary = _session.create_appearance_set(name if not name.is_empty() else "Appearance Set")
+	_appearance_status.text = "Saved Appearance Set." if report.get("success", false) else str(report.get("errors", ["Could not save Appearance Set."])[0])
+	if _appearance_name_input != null: _appearance_name_input.clear()
+	_refresh_authoring_sections()
+
+
+func _apply_appearance() -> void:
+	if _session == null: return
+	var id := _selected_appearance_id()
+	if id.is_empty(): _appearance_status.text = "Select an Appearance Set to apply."; return
+	var report: Dictionary = _session.apply_appearance_set(id)
+	if report.get("success", false) and _preview_controller != null and is_instance_valid(_preview_controller): _preview_controller.set_appearance_preview("")
+	_appearance_status.text = "Applied Appearance Set." if report.get("success", false) else str(report.get("errors", ["Could not apply Appearance Set."])[0])
+
+
+func _rename_appearance() -> void:
+	if _session == null: return
+	var id := _selected_appearance_id()
+	var name := _appearance_name_input.text.strip_edges() if _appearance_name_input != null else ""
+	if id.is_empty() or name.is_empty():
+		_appearance_status.text = "Select an Appearance Set and enter its new name."
+		return
+	_appearance_status.text = "Renamed Appearance Set." if _session.rename_appearance_set(id, name) else "Could not rename Appearance Set."
+	_refresh_authoring_sections()
+
+
+func _preview_appearance() -> void:
+	if _session == null: return
+	var id := _selected_appearance_id()
+	if id.is_empty():
+		_appearance_status.text = "Select an Appearance Set to preview."
+		return
+	if _preview_controller == null or not is_instance_valid(_preview_controller):
+		_appearance_status.text = "Canvas preview is unavailable."
+		return
+	_preview_controller.set_appearance_preview(id)
+	_appearance_status.text = "Previewing this Appearance Set in the Canvas. Apply it to make the selection permanent."
+
+
+func _duplicate_appearance() -> void:
+	if _session == null: return
+	var id := _selected_appearance_id()
+	if id.is_empty(): _appearance_status.text = "Select an Appearance Set to duplicate."; return
+	var report: Dictionary = _session.duplicate_appearance_set(id)
+	_appearance_status.text = "Duplicated Appearance Set." if report.get("success", false) else str(report.get("errors", ["Could not duplicate Appearance Set."])[0])
+	_refresh_authoring_sections()
+
+
+func _delete_appearance() -> void:
+	if _session == null: return
+	var id := _selected_appearance_id()
+	if id.is_empty(): _appearance_status.text = "Select an Appearance Set to delete."; return
+	_appearance_status.text = "Deleted Appearance Set." if _session.delete_appearance_set(id) else "Could not delete Appearance Set."
+	_refresh_authoring_sections()
+
+
+func _confirm_generate_appearances() -> void:
+	if _session == null or _generate_appearances_dialog == null: return
+	var count: int = int(_appearance_generate_count.value) if _appearance_generate_count != null else 8
+	_generate_appearances_dialog.dialog_text = "Create %d deterministic combinations of the parts already imported into this project? No artwork will be generated or duplicated.%s" % [count, " This is above the normal 64-set cap; confirming explicitly approves the larger request." if count > 64 else ""]
+	_generate_appearances_dialog.popup_centered()
+
+
+func _generate_appearances() -> void:
+	if _session == null: return
+	var count: int = int(_appearance_generate_count.value) if _appearance_generate_count != null else 8
+	var report: Dictionary = _session.generate_appearance_sets(count, "Variation", true)
+	_appearance_status.text = "Generated %d deterministic imported-art Appearance Sets." % int(report.get("generated", 0)) if report.get("success", false) else str(report.get("errors", ["Could not generate appearances."])[0])
+	_refresh_authoring_sections()
+
+
+func _validate_project() -> void:
+	if _session == null: return
+	var report: Dictionary = _session.get_readiness_report({"require_clips": false})
+	_readiness_status.text = "Ready for review." if report.get("can_export", false) and (report.get("warnings", []) as Array).is_empty() else "%d errors · %d warnings. Fix the next listed issue before export." % [(report.get("errors", []) as Array).size(), (report.get("warnings", []) as Array).size()]
+
+
+func _auto_repair_all() -> void:
+	if _session == null: return
+	var report: Dictionary = _session.auto_repair_all()
+	if report.get("success", false):
+		_readiness_status.text = "Auto Repair created a portable pre-repair snapshot; %d repair%s, %d preserved orphaned track%s." % [(report.get("repaired", []) as Array).size(), "s" if (report.get("repaired", []) as Array).size() != 1 else "", (report.get("muted_orphaned_tracks", []) as Array).size(), "s" if (report.get("muted_orphaned_tracks", []) as Array).size() != 1 else ""]
+	else:
+		_readiness_status.text = str(report.get("errors", ["Auto Repair failed."])[0])
+	_refresh_authoring_sections()
+
+
+func _route_wizard_step(workspace_id: String, panel_id: String) -> void:
+	if WorkspaceManager != null: WorkspaceManager.switch_workspace(workspace_id)
+	var manager := WorkspaceManager.get_dock_layout_manager() if WorkspaceManager != null else null
+	if manager != null and not panel_id.is_empty():
+		manager.call("set_panel_visible", panel_id, true)
+		manager.call("activate_panel", panel_id)
+
+
+func _on_session_changed(_description: String) -> void:
+	_refresh_authoring_sections()
