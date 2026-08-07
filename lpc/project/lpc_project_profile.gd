@@ -2,7 +2,7 @@
 class_name LpcProjectProfile
 extends RefCounted
 
-const PROFILE_SCHEMA_VERSION := "1.0.0"
+const PROFILE_SCHEMA_VERSION := "1.1.0"
 const METADATA_KEY := "lpc_profile"
 const NameSequenceScript = preload("res://lpc/project/lpc_name_sequence.gd")
 
@@ -26,7 +26,7 @@ static func create(options: Dictionary) -> Dictionary:
 		"body_family_id": str(options.get("body_family_id", "")),
 		"direction_set": {"id": "lpc_cardinal_4", "directions": ["up", "left", "down", "right"]},
 		"selections": [], "layer_groups": {}, "selected_license_options": {}, "palette_state": {},
-		"source_frame_references": [], "derivative_references": [], "clips": [], "frame_meshes": [],
+		"source_frame_references": [], "derivative_references": [], "cels": [], "cel_timeline": {"fps": 10.0, "onion_before": 1, "onion_after": 1}, "pixel_editor_state": {"zoom": 8, "active_tool": "pencil"}, "clips": [], "frame_meshes": [],
 		"rig_adapters": [], "rig_overrides": {}, "bake_caches": [], "validation_reports": [],
 		"export_profiles": [], "acceptance_records": [], "credit_manifest_inputs": [],
 		"workspace_state": {"workspace_id": "creator", "playhead": 0.0},
@@ -47,6 +47,10 @@ static func validate(profile: Dictionary) -> Array[String]:
 	if str(profile.get("body_family_id", "")).is_empty(): errors.append("LPC profile must select a body family.")
 	var directions: Array = (profile.get("direction_set", {}) as Dictionary).get("directions", [])
 	if directions.is_empty(): errors.append("LPC profile must record a direction set.")
+	for key in ["selections", "derivative_references", "cels", "clips", "frame_meshes"]:
+		if not profile.get(key, []) is Array: errors.append("LPC profile field '%s' must be an array." % key)
+	if not profile.get("cel_timeline", {}) is Dictionary: errors.append("LPC profile cel_timeline must be an object.")
+	if not profile.get("pixel_editor_state", {}) is Dictionary: errors.append("LPC profile pixel_editor_state must be an object.")
 	return errors
 
 
@@ -71,15 +75,23 @@ static func migrate(profile: Dictionary) -> Dictionary:
 	var result := profile.duplicate(true)
 	var from_version := str(result.get("profile_schema_version", "0.1.0"))
 	if from_version == PROFILE_SCHEMA_VERSION: return {"success": true, "changed": false, "profile": result, "errors": []}
-	if from_version != "0.1.0": return {"success": false, "changed": false, "profile": result, "errors": ["Unsupported LPC profile schema %s." % from_version]}
-	if not result.has("policy"):
-		result["policy"] = {"profile_id": str(result.get("policy_profile", "full_source")), "policy_version": "1.0.0", "custom": {}}
-	result.erase("policy_profile")
-	if not result.has("workspace_state"):
-		result["workspace_state"] = {"workspace_id": str(result.get("workspace", "creator")), "playhead": float(result.get("playhead", 0.0))}
-	result.erase("workspace"); result.erase("playhead")
-	result["profile_schema_version"] = PROFILE_SCHEMA_VERSION
-	return {"success": true, "changed": true, "profile": result, "errors": []}
+	var changed := false
+	if from_version == "0.1.0":
+		if not result.has("policy"):
+			result["policy"] = {"profile_id": str(result.get("policy_profile", "full_source")), "policy_version": "1.0.0", "custom": {}}
+		result.erase("policy_profile")
+		if not result.has("workspace_state"):
+			result["workspace_state"] = {"workspace_id": str(result.get("workspace", "creator")), "playhead": float(result.get("playhead", 0.0))}
+		result.erase("workspace"); result.erase("playhead")
+		from_version = "1.0.0"; changed = true
+	if from_version == "1.0.0":
+		if not result.has("cels"): result["cels"] = []
+		if not result.has("cel_timeline"): result["cel_timeline"] = {"fps": 10.0, "onion_before": 1, "onion_after": 1}
+		if not result.has("pixel_editor_state"): result["pixel_editor_state"] = {"zoom": 8, "active_tool": "pencil"}
+		result["profile_schema_version"] = PROFILE_SCHEMA_VERSION
+		changed = true
+		return {"success": true, "changed": changed, "profile": result, "errors": []}
+	return {"success": false, "changed": false, "profile": result, "errors": ["Unsupported LPC profile schema %s." % from_version]}
 
 
 static func _uuid() -> String:

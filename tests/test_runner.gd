@@ -41,6 +41,7 @@ const TestReleaseHardeningScript = preload("res://tests/integration/test_release
 const TestProductionDeliveryScript = preload("res://tests/integration/test_production_delivery.gd")
 const TestLpcPhase01Script = preload("res://tests/integration/test_lpc_phase_0_1.gd")
 const TestLpcPhase2Script = preload("res://tests/integration/test_lpc_phase_2.gd")
+const TestLpcPhase3Script = preload("res://tests/integration/test_lpc_phase_3.gd")
 func _ready() -> void:
 	print("=== Running Automated Test Suite ===")
 	print("")
@@ -306,6 +307,9 @@ func _ready() -> void:
 	# 45. Exercise the focused LPC creator and exact native frame export path.
 	var r45 := _exec_sub(TestLpcPhase2Script.new(), pass_count, fail_count)
 	pass_count = r45[0]; fail_count = r45[1]
+	# 46. Exercise project-owned LPC pixel edits, cels, onion state, and derivative persistence.
+	var r46 := _exec_sub(TestLpcPhase3Script.new(), pass_count, fail_count)
+	pass_count = r46[0]; fail_count = r46[1]
 	print("")
 	print("=== Test Suite Finished: %d PASS, %d FAIL ===" % [pass_count, fail_count])
 	get_tree().quit(0 if fail_count == 0 else 1)

@@ -99,7 +99,7 @@ for CLI examples, review packages, asset packs, and runtime export contracts.
 
 ## Direct-start LPC creation
 
-Phases 0–2 of the dedicated **direct-start LPC creator** are implemented.
+Phases 0–3 of the dedicated **direct-start LPC creator** are implemented.
 On a normal desktop launch, the LPC chooser lets a creator locate a locked
 local source library, rebuild its deterministic catalog, choose a license
 policy and compatible body family, create a project, or resume the latest
@@ -121,6 +121,11 @@ catalog queries. The focused three-column LPC Creator now assembles compatible
 body/features and equipment layers, shows capability badges and explicit
 missing-animation conflicts, plays verified native four-direction clips, and
 exports exact PNG frame sequences with render-snapshot and credit manifests.
+The **Pixel & Cels** workspace makes copy-on-first-edit, content-addressed
+project derivatives; supports atomic pencil/eraser/fill/selection operations,
+PNG round-tripping, timed per-layer or whole-character cels, reference layers,
+and onion-skin state; and preserves derivative ancestry without modifying the
+locked source library.
 
 Read the complete
 [Direct-Start LPC Creator plan](DIRECT_START_LPC_CREATOR_PLAN.md) for scope,
@@ -132,6 +137,7 @@ Run the focused phase-0/1 acceptance check with:
 ```powershell
 godot --headless --path . --scene tests/lpc_phase01_runner.tscn
 godot --headless --path . --scene tests/lpc_phase2_runner.tscn
+godot --headless --path . --scene tests/lpc_phase3_runner.tscn
 ```
 
 ## Documentation

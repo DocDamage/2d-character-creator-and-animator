@@ -6,6 +6,8 @@ const ModelScript = preload("res://lpc/creator/lpc_creator_model.gd")
 
 const LEFT_TYPES := ["body", "base", "face", "hair", "eyes", "mouth", "nose", "skin"]
 
+signal profile_changed(profile: Dictionary, manifest: Dictionary, project_path: String)
+
 var _model = ModelScript.new()
 var _left_assets: ItemList
 var _right_assets: ItemList
@@ -178,6 +180,7 @@ func _show_credits() -> void:
 
 func _on_model_changed(_description: String) -> void:
 	_refresh_all()
+	profile_changed.emit(_model.profile.duplicate(true), _model.manifest.duplicate(true), _model.project_path)
 
 
 func _set_status(message: String) -> void:
