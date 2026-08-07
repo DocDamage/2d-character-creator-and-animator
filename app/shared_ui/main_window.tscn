@@ -1,10 +1,15 @@
-[gd_scene load_steps=6 format=3 uid="uid://main_window_app_shell_002"]
+[gd_scene load_steps=11 format=3 uid="uid://main_window_app_shell_002"]
 
 [ext_resource type="Script" path="res://app/shared_ui/main_window.gd" id="1_main_win"]
 [ext_resource type="Script" path="res://app/shared_ui/dock_layout_manager.gd" id="2_layout_mgr"]
 [ext_resource type="PackedScene" path="res://app/commands/command_palette.tscn" id="3_cmdpal"]
 [ext_resource type="PackedScene" path="res://app/application_state/unsaved_changes_dialog.tscn" id="4_unsaved"]
 [ext_resource type="Script" path="res://app/shared_ui/workspace_navigation.gd" id="5_navigation"]
+[ext_resource type="Texture2D" path="res://app/shared_ui/paper_quest/textures/kraft_base.png" id="6_kraft"]
+[ext_resource type="Script" path="res://app/shared_ui/paper_quest/paper_header_bar.gd" id="7_header"]
+[ext_resource type="PackedScene" path="res://app/shared_ui/paper_quest/status_chip.tscn" id="8_chip"]
+[ext_resource type="Script" path="res://app/shared_ui/paper_quest/paper_quest_shell_presenter.gd" id="9_presenter"]
+[ext_resource type="Script" path="res://app/shared_ui/project_persistence_controller.gd" id="10_persistence"]
 
 [node name="MainWindow" type="Control"]
 layout_mode = 3
@@ -18,7 +23,14 @@ script = ExtResource("1_main_win")
 [node name="DockLayoutManager" type="Node" parent="."]
 script = ExtResource("2_layout_mgr")
 
-[node name="RootBackground" type="ColorRect" parent="."]
+[node name="ProjectPersistenceController" type="Node" parent="."]
+unique_name_in_owner = true
+script = ExtResource("10_persistence")
+
+[node name="PaperQuestShellPresenter" type="Node" parent="."]
+script = ExtResource("9_presenter")
+
+[node name="RootBackground" type="PanelContainer" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -26,46 +38,69 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
-color = Color(0.0352941, 0.0431373, 0.0627451, 1)
+theme_type_variation = &"CardboardPanel"
 
-[node name="RootVBox" type="VBoxContainer" parent="."]
+[node name="RootTexture" type="TextureRect" parent="." groups=["paper_quest_texture"]]
+visible = false
+modulate = Color(1, 1, 1, 0.46)
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
+texture_repeat = 2
+texture = ExtResource("6_kraft")
+expand_mode = 1
+stretch_mode = 1
 
-[node name="TopHeaderBar" type="HBoxContainer" parent="RootVBox"]
-layout_mode = 2
-custom_minimum_size = Vector2(0, 64)
+[node name="RootVBox" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 12.0
+offset_top = 10.0
+offset_right = -12.0
+offset_bottom = -10.0
+grow_horizontal = 2
+grow_vertical = 2
 theme_override_constants/separation = 8
 
+[node name="TopHeaderBar" type="HBoxContainer" parent="RootVBox"]
+custom_minimum_size = Vector2(0, 72)
+layout_mode = 2
+theme_override_constants/separation = 8
+script = ExtResource("7_header")
+
 [node name="HeaderInsetLeft" type="Control" parent="RootVBox/TopHeaderBar"]
-custom_minimum_size = Vector2(18, 0)
+custom_minimum_size = Vector2(14, 0)
 layout_mode = 2
 
 [node name="BrandMark" type="Button" parent="RootVBox/TopHeaderBar"]
-custom_minimum_size = Vector2(36, 36)
+custom_minimum_size = Vector2(48, 48)
 layout_mode = 2
+focus_mode = 2
 theme_type_variation = &"PrimaryButton"
-text = "CS"
+text = "PQ"
+tooltip_text = "Paper Quest Character Studio"
 
 [node name="BrandCopy" type="VBoxContainer" parent="RootVBox/TopHeaderBar"]
-custom_minimum_size = Vector2(184, 0)
+custom_minimum_size = Vector2(148, 0)
 layout_mode = 2
+alignment = 1
 theme_override_constants/separation = 0
 
 [node name="Title" type="Label" parent="RootVBox/TopHeaderBar/BrandCopy"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 18
-text = "Character Studio"
+theme_type_variation = &"BrandTitle"
+text = "PAPER QUEST"
 
 [node name="ProjectContext" type="Label" parent="RootVBox/TopHeaderBar/BrandCopy"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.560784, 0.611765, 0.698039, 1)
-theme_override_font_sizes/font_size = 11
-text = "Project dashboard"
+theme_type_variation = &"BrandSubtitle"
+text = "PROJECT PLAY HUB"
 
 [node name="WorkspaceNavigation" type="HBoxContainer" parent="RootVBox/TopHeaderBar" node_paths=PackedStringArray("project_context_path")]
 layout_mode = 2
@@ -74,27 +109,39 @@ script = ExtResource("5_navigation")
 project_context_path = NodePath("../BrandCopy/ProjectContext")
 
 [node name="ProjectButton" type="Button" parent="RootVBox/TopHeaderBar/WorkspaceNavigation"]
+custom_minimum_size = Vector2(112, 48)
 layout_mode = 2
+focus_mode = 2
 text = "PROJECT"
 
 [node name="CreateButton" type="Button" parent="RootVBox/TopHeaderBar/WorkspaceNavigation"]
+custom_minimum_size = Vector2(112, 48)
 layout_mode = 2
+focus_mode = 2
 text = "CREATE"
 
 [node name="RigButton" type="Button" parent="RootVBox/TopHeaderBar/WorkspaceNavigation"]
+custom_minimum_size = Vector2(112, 48)
 layout_mode = 2
+focus_mode = 2
 text = "RIG"
 
 [node name="AnimateButton" type="Button" parent="RootVBox/TopHeaderBar/WorkspaceNavigation"]
+custom_minimum_size = Vector2(112, 48)
 layout_mode = 2
+focus_mode = 2
 text = "ANIMATE"
 
 [node name="WeaponButton" type="Button" parent="RootVBox/TopHeaderBar/WorkspaceNavigation"]
+custom_minimum_size = Vector2(112, 48)
 layout_mode = 2
+focus_mode = 2
 text = "WEAPON"
 
 [node name="ExportButton" type="Button" parent="RootVBox/TopHeaderBar/WorkspaceNavigation"]
+custom_minimum_size = Vector2(112, 48)
 layout_mode = 2
+focus_mode = 2
 text = "EXPORT"
 
 [node name="HeaderSpacer" type="Control" parent="RootVBox/TopHeaderBar"]
@@ -117,14 +164,28 @@ title = "View"
 
 [node name="CommandPaletteButton" type="Button" parent="RootVBox/TopHeaderBar"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(102, 40)
 layout_mode = 2
-custom_minimum_size = Vector2(126, 32)
-text = "⌘  Search"
+focus_mode = 2
+text = "Find tools"
+tooltip_text = "Open the command palette (Ctrl+Shift+P)"
 
-[node name="MoreButton" type="Button" parent="RootVBox/TopHeaderBar"]
-custom_minimum_size = Vector2(36, 32)
+[node name="MoreButton" type="OptionButton" parent="RootVBox/TopHeaderBar"]
+custom_minimum_size = Vector2(240, 40)
 layout_mode = 2
-text = "⋯"
+focus_mode = 2
+tooltip_text = "Choose the studio appearance"
+
+[node name="HelpButton" type="Button" parent="RootVBox/TopHeaderBar"]
+custom_minimum_size = Vector2(40, 40)
+layout_mode = 2
+focus_mode = 2
+text = "?"
+tooltip_text = "Paper Quest help"
+
+[node name="HeaderInsetRight" type="Control" parent="RootVBox/TopHeaderBar"]
+custom_minimum_size = Vector2(6, 0)
+layout_mode = 2
 
 [node name="WorkspaceLabel" type="Label" parent="RootVBox/TopHeaderBar"]
 visible = false
@@ -152,63 +213,85 @@ custom_minimum_size = Vector2(160, 28)
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 3
+split_offset = 0
 
 [node name="LeftDockRegion" type="TabContainer" parent="RootVBox/MainHSplit"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(270, 0)
 layout_mode = 2
-custom_minimum_size = Vector2(260, 0)
 size_flags_horizontal = 3
-size_flags_stretch_ratio = 0.25
+size_flags_stretch_ratio = 0.22
 
 [node name="CenterVSplit" type="VSplitContainer" parent="RootVBox/MainHSplit"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
-size_flags_stretch_ratio = 0.75
+size_flags_stretch_ratio = 0.78
 
 [node name="InnerHSplit" type="HSplitContainer" parent="RootVBox/MainHSplit/CenterVSplit"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_vertical = 3
-size_flags_stretch_ratio = 0.75
+size_flags_stretch_ratio = 0.76
 
 [node name="CenterDockRegion" type="TabContainer" parent="RootVBox/MainHSplit/CenterVSplit/InnerHSplit"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
-size_flags_stretch_ratio = 0.7
+size_flags_stretch_ratio = 0.70
 
 [node name="RightDockRegion" type="TabContainer" parent="RootVBox/MainHSplit/CenterVSplit/InnerHSplit"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(320, 0)
 layout_mode = 2
-custom_minimum_size = Vector2(280, 0)
 size_flags_horizontal = 3
-size_flags_stretch_ratio = 0.3
+size_flags_stretch_ratio = 0.30
 
 [node name="BottomDockRegion" type="TabContainer" parent="RootVBox/MainHSplit/CenterVSplit"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 220)
 layout_mode = 2
-custom_minimum_size = Vector2(0, 240)
 size_flags_vertical = 3
-size_flags_stretch_ratio = 0.25
+size_flags_stretch_ratio = 0.24
 
 [node name="StatusBar" type="PanelContainer" parent="RootVBox"]
+custom_minimum_size = Vector2(0, 34)
 layout_mode = 2
-custom_minimum_size = Vector2(0, 28)
+theme_type_variation = &"StatusBar"
 
 [node name="StatusHBox" type="HBoxContainer" parent="RootVBox/StatusBar"]
 layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="SystemStateChip" parent="RootVBox/StatusBar/StatusHBox" instance=ExtResource("8_chip")]
+unique_name_in_owner = true
+layout_mode = 2
+status_text = "Ready"
 
 [node name="StatusMessageLabel" type="Label" parent="RootVBox/StatusBar/StatusHBox"]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 3
-text = "Ready"
+theme_type_variation = &"StatusBarLabel"
+text = "All systems operational"
+
+[node name="StatusProjectLabel" type="Label" parent="RootVBox/StatusBar/StatusHBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"StatusBarLabel"
+text = "PROJECT: No project"
+
+[node name="StatusWorkspaceLabel" type="Label" parent="RootVBox/StatusBar/StatusHBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_type_variation = &"StatusBarLabel"
+text = "MODE: Project"
 
 [node name="StatusInfoLabel" type="Label" parent="RootVBox/StatusBar/StatusHBox"]
 unique_name_in_owner = true
 layout_mode = 2
-text = "Modular 2D Character Studio v0.1.0-dev | Godot 4.7.1"
+theme_type_variation = &"StatusBarLabel"
+text = "Obsidian Studio · 100%"
 
 [node name="CommandPalette" parent="." instance=ExtResource("3_cmdpal")]
 unique_name_in_owner = true

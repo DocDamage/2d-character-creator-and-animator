@@ -1,0 +1,6 @@
+{
+  "version": "0.1.0-dev",
+  "channel": "stable",
+  "download_url": "",
+  "notes": "This development build includes import-first character authoring, recovery, and portable Windows packaging."
+}

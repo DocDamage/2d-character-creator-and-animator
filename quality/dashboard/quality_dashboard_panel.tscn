@@ -25,12 +25,25 @@ theme_override_constants/margin_bottom = 8
 
 [node name="Root" type="VBoxContainer" parent="Margin"]
 layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="Eyebrow" type="Label" parent="Margin/Root"]
+layout_mode = 2
+theme_type_variation = &"SectionLabel"
+text = "RECOVERY & QUALITY"
+
+[node name="Title" type="Label" parent="Margin/Root"]
+layout_mode = 2
+theme_type_variation = &"H1Label"
+text = "Keep the quest healthy"
 
 [node name="Hint" type="Label" parent="Margin/Root"]
 layout_mode = 2
+theme_type_variation = &"MutedLabel"
 text = "Recovery, performance, accessibility, and release safety"
 
 [node name="ProjectPath" type="LineEdit" parent="Margin/Root"]
+custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
 focus_mode = 2
 placeholder_text = "Project path (res:// or user://)"
@@ -39,19 +52,29 @@ placeholder_text = "Project path (res:// or user://)"
 layout_mode = 2
 
 [node name="Scan" type="Button" parent="Margin/Root/Actions"]
+custom_minimum_size = Vector2(130, 40)
 layout_mode = 2
 focus_mode = 2
 text = "Scan Recovery"
 
 [node name="Recover" type="Button" parent="Margin/Root/Actions"]
+custom_minimum_size = Vector2(130, 40)
 layout_mode = 2
 focus_mode = 2
 text = "Recover Latest"
 
 [node name="Audit" type="Button" parent="Margin/Root/Actions"]
+custom_minimum_size = Vector2(150, 40)
 layout_mode = 2
 focus_mode = 2
+theme_type_variation = &"SecondaryButton"
 text = "Run Quality Audit"
+
+[node name="RecoveryList" type="ItemList" parent="Margin/Root"]
+custom_minimum_size = Vector2(0, 126)
+layout_mode = 2
+focus_mode = 2
+tooltip_text = "Recovery files with timestamp and project preview"
 
 [node name="Preferences" type="HBoxContainer" parent="Margin/Root"]
 layout_mode = 2
@@ -73,4 +96,5 @@ bbcode_enabled = false
 
 [node name="Status" type="Label" parent="Margin/Root"]
 layout_mode = 2
+theme_type_variation = &"MutedLabel"
 autowrap_mode = 2

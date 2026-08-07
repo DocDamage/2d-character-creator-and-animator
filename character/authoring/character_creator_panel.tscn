@@ -1,7 +1,8 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://character/authoring/character_creator_panel.gd" id="1_script"]
-[ext_resource type="Script" path="res://app/shared_ui/studio_surface.gd" id="2_surface"]
+[ext_resource type="Script" path="res://character/authoring/character_layer_preview.gd" id="2_preview"]
+[ext_resource type="Script" path="res://character/authoring/character_layer_list.gd" id="3_layer_list"]
 
 [node name="CharacterCreatorPanel" type="Control"]
 layout_mode = 3
@@ -30,6 +31,7 @@ theme_override_constants/separation = 12
 
 [node name="Header" type="HBoxContainer" parent="Margin/Root"]
 layout_mode = 2
+theme_override_constants/separation = 12
 
 [node name="TitleGroup" type="VBoxContainer" parent="Margin/Root/Header"]
 layout_mode = 2
@@ -38,213 +40,455 @@ theme_override_constants/separation = 2
 
 [node name="Eyebrow" type="Label" parent="Margin/Root/Header/TitleGroup"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.560784, 0.611765, 0.698039, 1)
-theme_override_font_sizes/font_size = 11
-text = "CHARACTER"
+theme_type_variation = &"SectionLabel"
+text = "CHARACTER AUTHORING"
 
 [node name="Title" type="Label" parent="Margin/Root/Header/TitleGroup"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
-text = "Character Creator"
+text = "Build from your artwork"
 
 [node name="Hint" type="Label" parent="Margin/Root/Header/TitleGroup"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.560784, 0.611765, 0.698039, 1)
-theme_override_font_sizes/font_size = 12
-text = "Choose compatible modular parts and validate the live character."
+theme_type_variation = &"MutedLabel"
+text = "Import image layers, equip them by slot, and save the exact composition."
+autowrap_mode = 2
 
 [node name="Apply" type="Button" parent="Margin/Root/Header"]
+custom_minimum_size = Vector2(150, 0)
 layout_mode = 2
 theme_type_variation = &"PrimaryButton"
-text = "Apply & Validate"
+focus_mode = 2
+text = "Save Character"
 
 [node name="Content" type="HSplitContainer" parent="Margin/Root"]
 layout_mode = 2
 size_flags_vertical = 3
-split_offset = 244
+split_offset = 320
 
 [node name="Picker" type="PanelContainer" parent="Margin/Root/Content"]
-custom_minimum_size = Vector2(210, 0)
+custom_minimum_size = Vector2(280, 0)
 layout_mode = 2
 size_flags_horizontal = 3
-size_flags_stretch_ratio = 0.34
+size_flags_stretch_ratio = 0.38
 
 [node name="PickerMargin" type="MarginContainer" parent="Margin/Root/Content/Picker"]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
+
+[node name="PickerVBox" type="VBoxContainer" parent="Margin/Root/Content/Picker/PickerMargin"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="NameGroup" type="VBoxContainer" parent="Margin/Root/Content/Picker/PickerMargin/PickerVBox"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="NameLabel" type="Label" parent="Margin/Root/Content/Picker/PickerMargin/PickerVBox/NameGroup"]
+layout_mode = 2
+theme_type_variation = &"SectionLabel"
+text = "CHARACTER NAME"
+
+[node name="Name" type="LineEdit" parent="Margin/Root/Content/Picker/PickerMargin/PickerVBox/NameGroup"]
+layout_mode = 2
+focus_mode = 2
+placeholder_text = "Character name"
+
+[node name="WizardSetup" type="VBoxContainer" parent="Margin/Root/Content/Picker/PickerMargin/PickerVBox"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Label" type="Label" parent="Margin/Root/Content/Picker/PickerMargin/PickerVBox/WizardSetup"]
+layout_mode = 2
+theme_type_variation = &"SectionLabel"
+text = "IMPORT-ONLY SETUP"
+
+[node name="TemplateRow" type="HBoxContainer" parent="Margin/Root/Content/Picker/PickerMargin/PickerVBox/WizardSetup"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Template" type="OptionButton" parent="Margin/Root/Content/Picker/PickerMargin/PickerVBox/WizardSetup/TemplateRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+focus_mode = 2
+tooltip_text = "Choose a layer slot template before importing artwork"
+
+[node name="ApplyTemplate" type="Button" parent="Margin/Root/Content/Picker/PickerMargin/PickerVBox/WizardSetup/TemplateRow"]
+layout_mode = 2
+focus_mode = 2
+text = "Use"
+tooltip_text = "Apply this slot template to an empty project"
+
+[node name="CanvasRow" type="HBoxContainer" parent="Margin/Root/Content/Picker/PickerMargin/PickerVBox/WizardSetup"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="CanvasWidth" type="SpinBox" parent="Margin/Root/Content/Picker/PickerMargin/PickerVBox/WizardSetup/CanvasRow"]
+custom_minimum_size = Vector2(78, 0)
+layout_mode = 2
+focus_mode = 2
+min_value = 16.0
+max_value = 8192.0
+step = 1.0
+tooltip_text = "Canvas width in pixels"
+
+[node name="CanvasHeight" type="SpinBox" parent="Margin/Root/Content/Picker/PickerMargin/PickerVBox/WizardSetup/CanvasRow"]
+custom_minimum_size = Vector2(78, 0)
+layout_mode = 2
+focus_mode = 2
+min_value = 16.0
+max_value = 8192.0
+step = 1.0
+tooltip_text = "Canvas height in pixels"
+
+[node name="PixelScale" type="SpinBox" parent="Margin/Root/Content/Picker/PickerMargin/PickerVBox/WizardSetup/CanvasRow"]
+custom_minimum_size = Vector2(72, 0)
+layout_mode = 2
+focus_mode = 2
+min_value = 0.25
+max_value = 16.0
+step = 0.25
+tooltip_text = "Pixel preview scale"
+
+[node name="ApplyCanvas" type="Button" parent="Margin/Root/Content/Picker/PickerMargin/PickerVBox/WizardSetup/CanvasRow"]
+layout_mode = 2
+focus_mode = 2
+text = "Canvas"
+tooltip_text = "Save canvas size and pixel scale"
+
+[node name="StepOne" type="Label" parent="Margin/Root/Content/Picker/PickerMargin/PickerVBox"]
+layout_mode = 2
+theme_type_variation = &"SectionLabel"
+text = "1 · CHOOSE A LAYER SLOT"
+
+[node name="Slot" type="OptionButton" parent="Margin/Root/Content/Picker/PickerMargin/PickerVBox"]
+layout_mode = 2
+focus_mode = 2
+
+[node name="StepTwo" type="Label" parent="Margin/Root/Content/Picker/PickerMargin/PickerVBox"]
+layout_mode = 2
+theme_type_variation = &"SectionLabel"
+text = "2 · IMPORT YOUR ARTWORK"
+
+[node name="Import" type="Button" parent="Margin/Root/Content/Picker/PickerMargin/PickerVBox"]
+layout_mode = 2
+theme_type_variation = &"PrimaryButton"
+focus_mode = 2
+text = "+ Import Part Image…"
+tooltip_text = "Copy a PNG, WebP, JPEG, or JPG into this project"
+
+[node name="ImportFolder" type="Button" parent="Margin/Root/Content/Picker/PickerMargin/PickerVBox"]
+layout_mode = 2
+focus_mode = 2
+text = "+ Import Artwork Folder…"
+tooltip_text = "Import a folder and map layer files to slots by filename"
+
+[node name="RepairMissing" type="Button" parent="Margin/Root/Content/Picker/PickerMargin/PickerVBox"]
+layout_mode = 2
+focus_mode = 2
+text = "Repair Missing Artwork…"
+tooltip_text = "Search a folder for missing layer files"
+
+[node name="Search" type="LineEdit" parent="Margin/Root/Content/Picker/PickerMargin/PickerVBox"]
+layout_mode = 2
+focus_mode = 2
+placeholder_text = "Search imported parts…"
+
+[node name="PartList" type="ItemList" parent="Margin/Root/Content/Picker/PickerMargin/PickerVBox"]
+custom_minimum_size = Vector2(0, 120)
+layout_mode = 2
+size_flags_vertical = 3
+focus_mode = 2
+fixed_icon_size = Vector2i(48, 48)
+
+[node name="EditActions" type="HBoxContainer" parent="Margin/Root/Content/Picker/PickerMargin/PickerVBox"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Equip" type="Button" parent="Margin/Root/Content/Picker/PickerMargin/PickerVBox/EditActions"]
+layout_mode = 2
+size_flags_horizontal = 3
+focus_mode = 2
+text = "Equip Selected"
+
+[node name="Unequip" type="Button" parent="Margin/Root/Content/Picker/PickerMargin/PickerVBox/EditActions"]
+layout_mode = 2
+size_flags_horizontal = 3
+focus_mode = 2
+text = "Unequip"
+
+[node name="History" type="HBoxContainer" parent="Margin/Root/Content/Picker/PickerMargin/PickerVBox"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Undo" type="Button" parent="Margin/Root/Content/Picker/PickerMargin/PickerVBox/History"]
+layout_mode = 2
+size_flags_horizontal = 3
+focus_mode = 2
+text = "Undo"
+
+[node name="Redo" type="Button" parent="Margin/Root/Content/Picker/PickerMargin/PickerVBox/History"]
+layout_mode = 2
+size_flags_horizontal = 3
+focus_mode = 2
+text = "Redo"
+
+[node name="HistoryLabel" type="Label" parent="Margin/Root/Content/Picker/PickerMargin/PickerVBox"]
+layout_mode = 2
+theme_type_variation = &"MutedLabel"
+text = "No document changes in history."
+autowrap_mode = 2
+
+[node name="LayerEditor" type="VBoxContainer" parent="Margin/Root/Content/Picker/PickerMargin/PickerVBox"]
+layout_mode = 2
+theme_override_constants/separation = 5
+
+[node name="Title" type="Label" parent="Margin/Root/Content/Picker/PickerMargin/PickerVBox/LayerEditor"]
+layout_mode = 2
+theme_type_variation = &"SectionLabel"
+text = "ASSEMBLED LAYERS"
+
+[node name="LayerList" type="ItemList" parent="Margin/Root/Content/Picker/PickerMargin/PickerVBox/LayerEditor"]
+custom_minimum_size = Vector2(0, 118)
+layout_mode = 2
+size_flags_vertical = 3
+focus_mode = 2
+fixed_icon_size = Vector2i(40, 40)
+tooltip_text = "Drag artwork here to import it. Select a layer to edit it."
+script = ExtResource("3_layer_list")
+
+[node name="LayerActions" type="GridContainer" parent="Margin/Root/Content/Picker/PickerMargin/PickerVBox/LayerEditor"]
+layout_mode = 2
+columns = 4
+theme_override_constants/h_separation = 4
+theme_override_constants/v_separation = 4
+
+[node name="MoveUp" type="Button" parent="Margin/Root/Content/Picker/PickerMargin/PickerVBox/LayerEditor/LayerActions"]
+layout_mode = 2
+focus_mode = 2
+text = "Up"
+tooltip_text = "Move selected layer forward"
+
+[node name="MoveDown" type="Button" parent="Margin/Root/Content/Picker/PickerMargin/PickerVBox/LayerEditor/LayerActions"]
+layout_mode = 2
+focus_mode = 2
+text = "Down"
+tooltip_text = "Move selected layer backward"
+
+[node name="Visibility" type="Button" parent="Margin/Root/Content/Picker/PickerMargin/PickerVBox/LayerEditor/LayerActions"]
+layout_mode = 2
+focus_mode = 2
+text = "Hide"
+
+[node name="Lock" type="Button" parent="Margin/Root/Content/Picker/PickerMargin/PickerVBox/LayerEditor/LayerActions"]
+layout_mode = 2
+focus_mode = 2
+text = "Lock"
+
+[node name="Solo" type="Button" parent="Margin/Root/Content/Picker/PickerMargin/PickerVBox/LayerEditor/LayerActions"]
+layout_mode = 2
+focus_mode = 2
+text = "Solo"
+
+[node name="Duplicate" type="Button" parent="Margin/Root/Content/Picker/PickerMargin/PickerVBox/LayerEditor/LayerActions"]
+layout_mode = 2
+focus_mode = 2
+text = "Duplicate"
+
+[node name="Replace" type="Button" parent="Margin/Root/Content/Picker/PickerMargin/PickerVBox/LayerEditor/LayerActions"]
+layout_mode = 2
+focus_mode = 2
+text = "Replace"
+
+[node name="Delete" type="Button" parent="Margin/Root/Content/Picker/PickerMargin/PickerVBox/LayerEditor/LayerActions"]
+layout_mode = 2
+focus_mode = 2
+text = "Delete"
+
+[node name="Transform" type="GridContainer" parent="Margin/Root/Content/Picker/PickerMargin/PickerVBox/LayerEditor"]
+layout_mode = 2
+columns = 4
+theme_override_constants/h_separation = 4
+theme_override_constants/v_separation = 4
+
+[node name="PosX" type="SpinBox" parent="Margin/Root/Content/Picker/PickerMargin/PickerVBox/LayerEditor/Transform"]
+layout_mode = 2
+focus_mode = 2
+min_value = -8192.0
+max_value = 8192.0
+step = 1.0
+tooltip_text = "Position X"
+
+[node name="PosY" type="SpinBox" parent="Margin/Root/Content/Picker/PickerMargin/PickerVBox/LayerEditor/Transform"]
+layout_mode = 2
+focus_mode = 2
+min_value = -8192.0
+max_value = 8192.0
+step = 1.0
+tooltip_text = "Position Y"
+
+[node name="ScaleX" type="SpinBox" parent="Margin/Root/Content/Picker/PickerMargin/PickerVBox/LayerEditor/Transform"]
+layout_mode = 2
+focus_mode = 2
+min_value = 0.01
+max_value = 32.0
+step = 0.01
+value = 1.0
+tooltip_text = "Scale X"
+
+[node name="ScaleY" type="SpinBox" parent="Margin/Root/Content/Picker/PickerMargin/PickerVBox/LayerEditor/Transform"]
+layout_mode = 2
+focus_mode = 2
+min_value = 0.01
+max_value = 32.0
+step = 0.01
+value = 1.0
+tooltip_text = "Scale Y"
+
+[node name="Rotation" type="SpinBox" parent="Margin/Root/Content/Picker/PickerMargin/PickerVBox/LayerEditor/Transform"]
+layout_mode = 2
+focus_mode = 2
+min_value = -360.0
+max_value = 360.0
+step = 1.0
+tooltip_text = "Rotation in degrees"
+
+[node name="PivotX" type="SpinBox" parent="Margin/Root/Content/Picker/PickerMargin/PickerVBox/LayerEditor/Transform"]
+layout_mode = 2
+focus_mode = 2
+min_value = 0.0
+max_value = 1.0
+step = 0.01
+value = 0.5
+tooltip_text = "Pivot X (0–1)"
+
+[node name="PivotY" type="SpinBox" parent="Margin/Root/Content/Picker/PickerMargin/PickerVBox/LayerEditor/Transform"]
+layout_mode = 2
+focus_mode = 2
+min_value = 0.0
+max_value = 1.0
+step = 0.01
+value = 0.5
+tooltip_text = "Pivot Y (0–1)"
+
+[node name="Opacity" type="SpinBox" parent="Margin/Root/Content/Picker/PickerMargin/PickerVBox/LayerEditor/Transform"]
+layout_mode = 2
+focus_mode = 2
+min_value = 0.0
+max_value = 1.0
+step = 0.01
+value = 1.0
+tooltip_text = "Opacity"
+
+[node name="Tint" type="ColorPickerButton" parent="Margin/Root/Content/Picker/PickerMargin/PickerVBox/LayerEditor"]
+layout_mode = 2
+focus_mode = 2
+color = Color(1, 1, 1, 1)
+tooltip_text = "Tint selected layer"
+
+[node name="PreviewCard" type="PanelContainer" parent="Margin/Root/Content"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 0.62
+
+[node name="PreviewMargin" type="MarginContainer" parent="Margin/Root/Content/PreviewCard"]
 layout_mode = 2
 theme_override_constants/margin_left = 10
 theme_override_constants/margin_top = 10
 theme_override_constants/margin_right = 10
 theme_override_constants/margin_bottom = 10
 
-[node name="PickerVBox" type="VBoxContainer" parent="Margin/Root/Content/Picker/PickerMargin"]
-layout_mode = 2
-theme_override_constants/separation = 8
-
-[node name="PickerTitle" type="Label" parent="Margin/Root/Content/Picker/PickerMargin/PickerVBox"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.560784, 0.611765, 0.698039, 1)
-theme_override_font_sizes/font_size = 11
-text = "ASSETS"
-
-[node name="Search" type="LineEdit" parent="Margin/Root/Content/Picker/PickerMargin/PickerVBox"]
-layout_mode = 2
-focus_mode = 2
-placeholder_text = "Search compatible parts…"
-
-[node name="FilterRow" type="HBoxContainer" parent="Margin/Root/Content/Picker/PickerMargin/PickerVBox"]
-layout_mode = 2
-theme_override_constants/separation = 6
-
-[node name="All" type="Button" parent="Margin/Root/Content/Picker/PickerMargin/PickerVBox/FilterRow"]
-layout_mode = 2
-theme_type_variation = &"PrimaryButton"
-text = "All"
-
-[node name="Recent" type="Button" parent="Margin/Root/Content/Picker/PickerMargin/PickerVBox/FilterRow"]
-layout_mode = 2
-text = "Recent"
-
-[node name="Favorites" type="Button" parent="Margin/Root/Content/Picker/PickerMargin/PickerVBox/FilterRow"]
-layout_mode = 2
-text = "Favorites"
-
-[node name="PartList" type="ItemList" parent="Margin/Root/Content/Picker/PickerMargin/PickerVBox"]
-layout_mode = 2
-size_flags_vertical = 3
-focus_mode = 2
-
-[node name="Actions" type="HBoxContainer" parent="Margin/Root/Content/Picker/PickerMargin/PickerVBox"]
-layout_mode = 2
-theme_override_constants/separation = 6
-
-[node name="Seed" type="SpinBox" parent="Margin/Root/Content/Picker/PickerMargin/PickerVBox/Actions"]
-layout_mode = 2
-custom_minimum_size = Vector2(72, 0)
-focus_mode = 2
-min_value = 0.0
-max_value = 2147483647.0
-value = 1.0
-
-[node name="Randomize" type="Button" parent="Margin/Root/Content/Picker/PickerMargin/PickerVBox/Actions"]
-layout_mode = 2
-focus_mode = 2
-text = "Randomize"
-
-[node name="Undo" type="Button" parent="Margin/Root/Content/Picker/PickerMargin/PickerVBox/Actions"]
-layout_mode = 2
-focus_mode = 2
-text = "Undo"
-
-[node name="Redo" type="Button" parent="Margin/Root/Content/Picker/PickerMargin/PickerVBox/Actions"]
-layout_mode = 2
-focus_mode = 2
-text = "Redo"
-
-[node name="PreviewCard" type="PanelContainer" parent="Margin/Root/Content"]
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_stretch_ratio = 0.66
-
-[node name="PreviewMargin" type="MarginContainer" parent="Margin/Root/Content/PreviewCard"]
-layout_mode = 2
-theme_override_constants/margin_left = 8
-theme_override_constants/margin_top = 8
-theme_override_constants/margin_right = 8
-theme_override_constants/margin_bottom = 8
-
 [node name="PreviewVBox" type="VBoxContainer" parent="Margin/Root/Content/PreviewCard/PreviewMargin"]
 layout_mode = 2
 theme_override_constants/separation = 8
 
-[node name="ToolRow" type="HBoxContainer" parent="Margin/Root/Content/PreviewCard/PreviewMargin/PreviewVBox"]
+[node name="PreviewTools" type="HBoxContainer" parent="Margin/Root/Content/PreviewCard/PreviewMargin/PreviewVBox"]
 layout_mode = 2
 theme_override_constants/separation = 6
 
-[node name="Select" type="Button" parent="Margin/Root/Content/PreviewCard/PreviewMargin/PreviewVBox/ToolRow"]
-layout_mode = 2
-theme_type_variation = &"PrimaryButton"
-text = "Select"
-
-[node name="Move" type="Button" parent="Margin/Root/Content/PreviewCard/PreviewMargin/PreviewVBox/ToolRow"]
-layout_mode = 2
-text = "Move"
-
-[node name="Rotate" type="Button" parent="Margin/Root/Content/PreviewCard/PreviewMargin/PreviewVBox/ToolRow"]
-layout_mode = 2
-text = "Rotate"
-
-[node name="Scale" type="Button" parent="Margin/Root/Content/PreviewCard/PreviewMargin/PreviewVBox/ToolRow"]
-layout_mode = 2
-text = "Scale"
-
-[node name="ToolSpacer" type="Control" parent="Margin/Root/Content/PreviewCard/PreviewMargin/PreviewVBox/ToolRow"]
+[node name="Title" type="Label" parent="Margin/Root/Content/PreviewCard/PreviewMargin/PreviewVBox/PreviewTools"]
 layout_mode = 2
 size_flags_horizontal = 3
+theme_type_variation = &"SectionLabel"
+text = "LIVE IMAGE-LAYER PREVIEW"
 
-[node name="PixelGrid" type="Button" parent="Margin/Root/Content/PreviewCard/PreviewMargin/PreviewVBox/ToolRow"]
+[node name="ZoomOut" type="Button" parent="Margin/Root/Content/PreviewCard/PreviewMargin/PreviewVBox/PreviewTools"]
+custom_minimum_size = Vector2(36, 0)
 layout_mode = 2
+focus_mode = 2
+text = "−"
+tooltip_text = "Zoom out"
+
+[node name="Reset" type="Button" parent="Margin/Root/Content/PreviewCard/PreviewMargin/PreviewVBox/PreviewTools"]
+layout_mode = 2
+focus_mode = 2
+text = "Fit"
+tooltip_text = "Reset preview zoom"
+
+[node name="ZoomIn" type="Button" parent="Margin/Root/Content/PreviewCard/PreviewMargin/PreviewVBox/PreviewTools"]
+custom_minimum_size = Vector2(36, 0)
+layout_mode = 2
+focus_mode = 2
+text = "+"
+tooltip_text = "Zoom in"
+
+[node name="PixelGrid" type="CheckButton" parent="Margin/Root/Content/PreviewCard/PreviewMargin/PreviewVBox/PreviewTools"]
+layout_mode = 2
+focus_mode = 2
 text = "Pixel grid"
 
-[node name="PreviewSurface" type="Control" parent="Margin/Root/Content/PreviewCard/PreviewMargin/PreviewVBox"]
+[node name="Preview" type="Control" parent="Margin/Root/Content/PreviewCard/PreviewMargin/PreviewVBox"]
+custom_minimum_size = Vector2(0, 240)
 layout_mode = 2
-custom_minimum_size = Vector2(0, 260)
 size_flags_vertical = 3
-script = ExtResource("2_surface")
-surface_mode = "viewport"
+mouse_default_cursor_shape = 2
+script = ExtResource("2_preview")
 
-[node name="DirectionLabel" type="Label" parent="Margin/Root/Content/PreviewCard/PreviewMargin/PreviewVBox"]
+[node name="LayerSummary" type="Label" parent="Margin/Root/Content/PreviewCard/PreviewMargin/PreviewVBox"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.560784, 0.611765, 0.698039, 1)
-theme_override_font_sizes/font_size = 11
-text = "DIRECTION PREVIEW"
-
-[node name="Directions" type="HBoxContainer" parent="Margin/Root/Content/PreviewCard/PreviewMargin/PreviewVBox"]
-layout_mode = 2
-theme_override_constants/separation = 6
-
-[node name="N" type="Button" parent="Margin/Root/Content/PreviewCard/PreviewMargin/PreviewVBox/Directions"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "N"
-
-[node name="NE" type="Button" parent="Margin/Root/Content/PreviewCard/PreviewMargin/PreviewVBox/Directions"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "NE"
-
-[node name="E" type="Button" parent="Margin/Root/Content/PreviewCard/PreviewMargin/PreviewVBox/Directions"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "E"
-
-[node name="SE" type="Button" parent="Margin/Root/Content/PreviewCard/PreviewMargin/PreviewVBox/Directions"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "SE"
-
-[node name="S" type="Button" parent="Margin/Root/Content/PreviewCard/PreviewMargin/PreviewVBox/Directions"]
-layout_mode = 2
-size_flags_horizontal = 3
-theme_type_variation = &"PrimaryButton"
-text = "S"
-
-[node name="SW" type="Button" parent="Margin/Root/Content/PreviewCard/PreviewMargin/PreviewVBox/Directions"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "SW"
-
-[node name="W" type="Button" parent="Margin/Root/Content/PreviewCard/PreviewMargin/PreviewVBox/Directions"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "W"
-
-[node name="NW" type="Button" parent="Margin/Root/Content/PreviewCard/PreviewMargin/PreviewVBox/Directions"]
-layout_mode = 2
-size_flags_horizontal = 3
-text = "NW"
+theme_type_variation = &"MutedLabel"
+text = "0 layers equipped · imported artwork will appear here"
+horizontal_alignment = 1
+autowrap_mode = 2
 
 [node name="Status" type="Label" parent="Margin/Root"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.321569, 0.8, 0.501961, 1)
 theme_override_font_sizes/font_size = 12
 autowrap_mode = 2
+
+[node name="ImportFileDialog" type="FileDialog" parent="."]
+title = "Import Character Part Image"
+initial_position = 2
+size = Vector2i(900, 620)
+ok_button_text = "Import & Equip"
+file_mode = 0
+access = 2
+filters = PackedStringArray("*.png ; PNG Images", "*.webp ; WebP Images", "*.jpg,*.jpeg ; JPEG Images")
+
+[node name="ImportFolderDialog" type="FileDialog" parent="."]
+title = "Import Character Artwork Folder"
+initial_position = 2
+size = Vector2i(900, 620)
+ok_button_text = "Import Folder"
+file_mode = 2
+access = 2
+
+[node name="ReplaceFileDialog" type="FileDialog" parent="."]
+title = "Replace Layer Artwork"
+initial_position = 2
+size = Vector2i(900, 620)
+ok_button_text = "Replace Layer"
+file_mode = 0
+access = 2
+filters = PackedStringArray("*.png ; PNG Images", "*.webp ; WebP Images", "*.jpg,*.jpeg ; JPEG Images")
+
+[node name="RepairFolderDialog" type="FileDialog" parent="."]
+title = "Find Missing Artwork In Folder"
+initial_position = 2
+size = Vector2i(900, 620)
+ok_button_text = "Repair From Folder"
+file_mode = 2
+access = 2

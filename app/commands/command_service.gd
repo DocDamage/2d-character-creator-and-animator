@@ -47,7 +47,7 @@ func undo() -> bool:
 	_apply_command(cmd["undo"])
 	_redo_stack.append(cmd)
 	_notify_change()
-	AppState.mark_dirty()
+	_update_document_dirty_state()
 	return true
 
 
@@ -58,7 +58,7 @@ func redo() -> bool:
 	_apply_command(cmd["do"])
 	_undo_stack.append(cmd)
 	_notify_change()
-	AppState.mark_dirty()
+	_update_document_dirty_state()
 	return true
 
 
@@ -72,10 +72,12 @@ func end_macro() -> void:
 	_macro_recording = false
 	if _macro_commands.is_empty():
 		return
-	var macro_do := _macro_commands.duplicate()
+	var macro_do: Array[Dictionary] = []
 	var macro_undo: Array[Dictionary] = []
+	for command in _macro_commands:
+		macro_do.append((command as Dictionary).get("do", {}))
 	for i in range(_macro_commands.size() - 1, -1, -1):
-		macro_undo.append(_macro_commands[i])
+		macro_undo.append((_macro_commands[i] as Dictionary).get("undo", {}))
 	_macro_commands.clear()
 	_push_and_apply({"macro": macro_do}, {"macro": macro_undo}, _macro_description)
 
@@ -131,7 +133,7 @@ func _push_and_apply(do_data: Dictionary, undo_data: Dictionary, description: St
 	if _undo_stack.size() > MAX_UNDO:
 		_undo_stack.pop_front()
 	_notify_change()
-	AppState.mark_dirty()
+	_update_document_dirty_state()
 	command_executed.emit(description, description)
 	return true
 
@@ -140,7 +142,8 @@ func _apply_command(data: Dictionary) -> void:
 	if data.has("macro"):
 		var commands: Array = data["macro"]
 		for cmd in commands:
-			_apply_single(cmd["do"] if data["macro"].size() > 0 and commands[0].has("do") else cmd["undo"])
+			if cmd is Dictionary:
+				_apply_single(cmd as Dictionary)
 	else:
 		_apply_single(data)
 
@@ -169,3 +172,8 @@ func _notify_change() -> void:
 	undo_stack_changed.emit(can_undo(), can_redo())
 	AppState.set_undo_available(can_undo())
 	AppState.set_redo_available(can_redo())
+
+
+func _update_document_dirty_state() -> void:
+	if AppState != null and AppState.has_method("update_undo_dirty_state"):
+		AppState.update_undo_dirty_state(get_undo_count())

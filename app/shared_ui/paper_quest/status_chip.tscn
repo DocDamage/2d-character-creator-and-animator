@@ -1,0 +1,29 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://app/shared_ui/paper_quest/status_chip.gd" id="1_script"]
+
+[node name="StatusChip" type="PanelContainer"]
+custom_minimum_size = Vector2(92, 28)
+mouse_filter = 2
+script = ExtResource("1_script")
+
+[node name="Margin" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 3
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 3
+
+[node name="Row" type="HBoxContainer" parent="Margin"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="Icon" type="Label" parent="Margin/Row"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "✓"
+
+[node name="Text" type="Label" parent="Margin/Row"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 11
+text = "Ready"

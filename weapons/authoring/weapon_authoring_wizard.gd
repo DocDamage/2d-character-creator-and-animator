@@ -6,6 +6,7 @@ signal coverage_changed(coverage: Dictionary)
 signal workflow_changed(workflow_id: String)
 
 const WizardModelScript = preload("res://weapons/authoring/weapon_authoring_wizard_model.gd")
+const DocumentHistoryScript = preload("res://app/commands/document_history.gd")
 
 var workflow_option: OptionButton
 var body_types_input: LineEdit
@@ -35,21 +36,27 @@ func bind_context(weapon, pose_profile, rig: Dictionary, hand_pose_library = nul
 	_refresh_labels({}, model.validate_workflow())
 
 
-func set_coverage_dimensions(body_types: Array, directions: Array) -> void:
+func set_coverage_dimensions(body_types: Array, directions: Array, record_history: bool = true) -> void:
 	_ensure_controls()
+	var before := _capture_document_snapshot()
 	model.set_coverage_dimensions(body_types, directions)
 	body_types_input.text = ", ".join(body_types)
 	directions_input.text = ", ".join(directions)
+	if record_history and before != _capture_document_snapshot() and not _record_document_change(before, "Changed Weapon Coverage Dimensions"):
+		_mark_dirty()
 
 
 func set_workflow(workflow_id: String) -> bool:
 	_ensure_controls()
+	var before := _capture_document_snapshot()
 	if not model.set_workflow(workflow_id):
 		return false
 	for index in workflow_option.item_count:
 		if workflow_option.get_item_text(index) == workflow_id:
 			workflow_option.select(index)
 	workflow_changed.emit(workflow_id)
+	if before != _capture_document_snapshot() and not _record_document_change(before, "Changed Weapon Workflow to " + workflow_id.capitalize()):
+		_mark_dirty()
 	return true
 
 
@@ -88,8 +95,8 @@ func save_session() -> Dictionary:
 func restore_session(data: Dictionary) -> bool:
 	var restored := model.from_dict(data)
 	if restored:
-		set_coverage_dimensions(model.body_type_ids, model.direction_ids)
-		set_workflow(model.workflow_id)
+		set_coverage_dimensions(model.body_type_ids, model.direction_ids, false)
+		_sync_workflow_control()
 	return restored
 
 
@@ -110,9 +117,11 @@ func _refresh_labels(coverage: Dictionary, validation: Dictionary) -> void:
 	else:
 		summary_label.text = "%d / %d body-direction poses covered." % [int(coverage.get("covered_count", 0)), int(coverage.get("total_count", 0))]
 	var messages: Array = validation.get("errors", []).duplicate()
-	if messages.is_empty():
-		messages.append("Workflow is valid.")
-	diagnostics_label.text = "\n".join(messages)
+	var valid := messages.is_empty()
+	if valid: messages.append("Workflow is valid.")
+	diagnostics_label.text = ("✓ " if valid else "× ") + "\n".join(messages)
+	if ThemeService != null:
+		diagnostics_label.add_theme_color_override("font_color", ThemeService.get_color_token("success" if valid else "error"))
 
 
 func _on_workflow_selected(index: int) -> void:
@@ -135,3 +144,42 @@ func _ensure_controls() -> void:
 		diagnostics_label = get_node_or_null("Margin/RootVBox/DiagnosticsLabel") as Label
 	if workflow_option != null and workflow_option.item_count == 0:
 		_setup_workflows()
+
+
+func _sync_workflow_control() -> void:
+	if workflow_option == null:
+		return
+	for index in workflow_option.item_count:
+		if workflow_option.get_item_text(index) == model.workflow_id:
+			workflow_option.select(index)
+			return
+
+
+func _capture_document_snapshot() -> Dictionary:
+	return {
+		"wizard": model.to_dict(),
+		"weapon": model.weapon.to_dict() if model.weapon != null and model.weapon.has_method("to_dict") else {},
+		"pose_profile": model.pose_profile.to_dict() if model.pose_profile != null and model.pose_profile.has_method("to_dict") else {},
+	}
+
+
+func _record_document_change(before: Dictionary, description: String) -> bool:
+	return DocumentHistoryScript.record_applied(self, before, _capture_document_snapshot(), description)
+
+
+func _apply_document_snapshot(snapshot: Dictionary, description: String = "") -> void:
+	if snapshot.is_empty():
+		return
+	if model.weapon != null and model.weapon.has_method("from_dict") and snapshot.get("weapon", {}) is Dictionary:
+		model.weapon.from_dict(snapshot.get("weapon", {}) as Dictionary)
+	if model.pose_profile != null and model.pose_profile.has_method("from_dict") and snapshot.get("pose_profile", {}) is Dictionary:
+		model.pose_profile.from_dict(snapshot.get("pose_profile", {}) as Dictionary)
+	model.from_dict(snapshot.get("wizard", {}) as Dictionary)
+	set_coverage_dimensions(model.body_type_ids, model.direction_ids, false)
+	_sync_workflow_control()
+	_refresh_labels(model.get_last_coverage(), model.validate_workflow())
+
+
+func _mark_dirty() -> void:
+	if AppState != null:
+		AppState.mark_dirty()

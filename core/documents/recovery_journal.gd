@@ -49,6 +49,49 @@ static func get_latest_entry(event_type: String = "") -> Dictionary:
 	return {}
 
 
+static func begin_session() -> Dictionary:
+	return record_event("session_started", "")
+
+
+static func complete_session() -> Dictionary:
+	return record_event("clean_shutdown", "")
+
+
+static func get_pending_recoveries() -> Array[Dictionary]:
+	var entries := get_journal_entries()
+	var last_clean_shutdown := -1
+	for entry in entries:
+		if str(entry.get("event_type", "")) == "clean_shutdown":
+			last_clean_shutdown = int(entry.get("timestamp", -1))
+	var pending: Array[Dictionary] = []
+	for entry in entries:
+		if str(entry.get("event_type", "")) != "autosave": continue
+		if int(entry.get("timestamp", 0)) <= last_clean_shutdown: continue
+		var path := str(entry.get("file_path", ""))
+		if path.is_empty() or not FileAccess.file_exists(path): continue
+		var candidate := entry.duplicate(true)
+		candidate["preview"] = get_project_preview(path)
+		pending.append(candidate)
+	pending.sort_custom(func(a, b): return int(a.get("timestamp", 0)) > int(b.get("timestamp", 0)))
+	return pending
+
+
+static func get_project_preview(path: String) -> Dictionary:
+	var preview := {"name": path.get_file().get_basename(), "layers": 0, "valid": false}
+	if path.is_empty() or not FileAccess.file_exists(path): return preview
+	var file := FileAccess.open(path, FileAccess.READ)
+	if file == null: return preview
+	var json := JSON.new()
+	if json.parse(file.get_as_text()) == OK and json.get_data() is Dictionary:
+		var data: Dictionary = json.get_data()
+		preview["name"] = str(data.get("project_name", preview.name))
+		var authoring: Dictionary = data.get("metadata", {}).get("character_authoring", {})
+		preview["layers"] = (authoring.get("parts", {}) as Dictionary).size()
+		preview["valid"] = true
+	file.close()
+	return preview
+
+
 static func clear_journal() -> void:
 	if FileAccess.file_exists(JOURNAL_PATH):
 		DirAccess.remove_absolute(JOURNAL_PATH)

@@ -9,13 +9,136 @@ const SlotRegistryScript = preload("res://character/registries/character_slot_re
 const PartRegistryScript = preload("res://character/registries/character_part_registry.gd")
 const CreatorScript = preload("res://character/authoring/character_creator_model.gd")
 const WeaponScript = preload("res://weapons/definitions/weapon_definition.gd")
+const ProjectFactoryScript = preload("res://character/authoring/character_project_factory.gd")
+const ProjectSessionScript = preload("res://character/authoring/character_project_session.gd")
+const CreatorPanelScene = preload("res://character/authoring/character_creator_panel.tscn")
 
 
 func run_tests() -> int:
 	var passes := 0
 	passes += test_creator_edits_are_browseable_reversible_and_weapon_safe()
 	passes += test_seeded_npc_batch_has_one_hundred_unique_valid_assemblies()
+	passes += test_manual_panel_imports_real_art_and_persists_it()
+	passes += test_import_wizard_layer_controls_and_document_history()
 	return passes
+
+
+func test_import_wizard_layer_controls_and_document_history() -> int:
+	var test_id: String = IDService.generate_short("wizard")
+	var test_dir := "user://character_authoring_tests/" + test_id
+	DirAccess.make_dir_recursive_absolute(ProjectSettings.globalize_path(test_dir))
+	var project_path := test_dir.path_join("ImportedHero.chrproj")
+	var body_path := test_dir.path_join("body.png")
+	var head_path := test_dir.path_join("head.png")
+	var body_image := Image.create(16, 16, false, Image.FORMAT_RGBA8)
+	body_image.fill(Color(0.1, 0.5, 0.9, 1.0))
+	var head_image := Image.create(16, 16, false, Image.FORMAT_RGBA8)
+	head_image.fill(Color(0.95, 0.65, 0.4, 1.0))
+	var project_created := SerializationService.save_project(ProjectFactoryScript.create_manifest("Imported Hero", "blank"), project_path)
+	var images_created := body_image.save_png(body_path) == OK and head_image.save_png(head_path) == OK
+	AppState.open_project(project_path)
+	CommandService.clear_history()
+	var session = ProjectSessionScript.new()
+	var opened: Dictionary = session.open_project(project_path)
+	var template: Dictionary = session.apply_slot_template("portrait")
+	var canvas_changed := session.set_canvas_settings(640, 480, 2.0)
+	var mapping: Dictionary = session.map_files_to_slots([body_path, head_path])
+	var imported: Dictionary = session.import_files_by_slot([body_path, head_path])
+	var duplicated_asset: Dictionary = session.import_part(body_path, "face", "Face Copy")
+	var body_part_id := ""
+	for result in imported.get("imported", []):
+		if str((result as Dictionary).get("path", "")).get_file().contains("body"):
+			body_part_id = str((result as Dictionary).get("part_id", ""))
+	if body_part_id.is_empty() and not (imported.get("imported", []) as Array).is_empty():
+		body_part_id = str((imported.get("imported", [])[0] as Dictionary).get("part_id", ""))
+	CommandService.clear_history()
+	AppState.mark_clean()
+	var moved: bool = session.model.set_layer_position(body_part_id, Vector2(24.0, -12.0))
+	var move_label := CommandService.get_undo_description()
+	var moved_state: Dictionary = session.model.get_layer_state(body_part_id)
+	var undo_move: bool = CommandService.undo()
+	var undone_state: Dictionary = session.model.get_layer_state(body_part_id)
+	var redo_move: bool = CommandService.redo()
+	var redone_state: Dictionary = session.model.get_layer_state(body_part_id)
+	var pivot_changed: bool = session.model.set_layer_pivot(body_part_id, Vector2(0.25, 0.75))
+	var pivot_label := CommandService.get_undo_description()
+	var locked: bool = session.model.set_layer_locked(body_part_id, true)
+	var locked_edit_blocked: bool = not session.model.set_layer_rotation(body_part_id, 45.0)
+	var unlocked: bool = session.model.set_layer_locked(body_part_id, false)
+	var tinted: bool = session.model.set_layer_tint(body_part_id, Color(0.8, 0.9, 1.0, 0.75))
+	var duplicate_layer: Dictionary = session.duplicate_layer(body_part_id)
+	var deleted_duplicate: Dictionary = session.delete_layer(str(duplicate_layer.get("part_id", "")))
+	var health: Dictionary = session.get_asset_health_report()
+	var saved: Dictionary = session.save_project()
+	var settings: Dictionary = session.get_canvas_settings()
+	var imported_count := (imported.get("imported", []) as Array).size()
+	var mapped_count := (mapping.get("mapped", []) as Array).size()
+	var duplicate_detected := not (duplicated_asset.get("duplicate_asset_ids", []) as Array).is_empty() and int(health.get("duplicate_groups", 0)) > 0
+	var history_ok: bool = moved and move_label.begins_with("Moved ") and (moved_state.get("position", []) as Array) == [24.0, -12.0] and undo_move and (undone_state.get("position", []) as Array) == [0.0, 0.0] and redo_move and (redone_state.get("position", []) as Array) == [24.0, -12.0] and pivot_changed and pivot_label.begins_with("Changed Pivot")
+	var workflow_ok: bool = project_created and images_created and opened.get("success", false) and template.get("success", false) and canvas_changed and mapped_count == 2 and imported_count == 2 and duplicated_asset.get("success", false) and duplicate_detected and history_ok and locked and locked_edit_blocked and unlocked and tinted and duplicate_layer.get("success", false) and deleted_duplicate.get("success", false) and saved.get("success", false) and settings == {"width": 640, "height": 480, "pixel_scale": 2.0}
+	var asset_paths: Array = []
+	for asset in session.asset_registry.list_assets():
+		asset_paths.append(str((asset as Dictionary).get("path", "")))
+	session.asset_registry.free()
+	session.thumbnail_cache.free()
+	session.free()
+	AppState.close_project()
+	for path in asset_paths + [body_path, head_path, project_path, project_path.get_basename() + ".autosave.json"]:
+		if not str(path).is_empty():
+			DirAccess.remove_absolute(ProjectSettings.globalize_path(str(path)))
+	if workflow_ok:
+		print("  PASS: Import wizard maps artwork, exposes layer controls, detects duplicates, and uses document history")
+		return 1
+	printerr("  FAIL: Import wizard and layer workflow failed: %s" % str([project_created, images_created, opened, template, canvas_changed, mapping, imported, duplicated_asset, health, history_ok, locked, locked_edit_blocked, unlocked, tinted, duplicate_layer, deleted_duplicate, saved, settings]))
+	return 0
+
+
+func test_manual_panel_imports_real_art_and_persists_it() -> int:
+	var test_id: String = IDService.generate_short("ui")
+	var project_path := "user://character_authoring_tests/%s.chrproj" % test_id
+	var source_path := "user://character_authoring_tests/%s_source.png" % test_id
+	var manifest := ProjectFactoryScript.create_manifest("Hand Drawn Hero", "blank")
+	var project_saved: bool = SerializationService.save_project(manifest, project_path)
+	var image := Image.create(12, 12, false, Image.FORMAT_RGBA8)
+	image.fill(Color(0.0, 0.0, 0.0, 0.0))
+	image.fill_rect(Rect2i(2, 2, 8, 8), Color(0.2, 0.7, 1.0, 1.0))
+	var image_saved: bool = image.save_png(source_path) == OK
+	var session = ProjectSessionScript.new()
+	var opened: Dictionary = session.open_project(project_path)
+	var imported: Dictionary = session.import_part(source_path, "body")
+	var copied_path := str(imported.get("path", ""))
+	var panel := CreatorPanelScene.instantiate()
+	var preview = panel.get_node("Margin/Root/Content/PreviewCard/PreviewMargin/PreviewVBox/Preview")
+	preview.set_layers(session.get_preview_layers())
+	var preview_uses_real_art: bool = preview.get_loaded_layer_count() == 1
+	var no_random_ui: bool = panel.find_child("Randomize", true, false) == null
+	var autosaved: Dictionary = session.autosave_project()
+	var autosave_path := str(autosaved.get("path", ""))
+	var autosave_kept_dirty: bool = bool(autosaved.get("success", false)) and AppState.is_dirty() and FileAccess.file_exists(autosave_path)
+	var saved: Dictionary = session.save_project()
+	var loaded: Dictionary = SerializationService.load_project(project_path)
+	var authoring: Dictionary = loaded.get("metadata", {}).get("character_authoring", {})
+	var characters: Dictionary = loaded.get("objects", {}).get("characters", {})
+	var active_id := str(authoring.get("active_character_id", ""))
+	var equipped: Dictionary = (characters.get(active_id, {}) as Dictionary).get("assembly", {}).get("equipped_by_slot", {})
+	var persisted: bool = (authoring.get("parts", {}) as Dictionary).size() == 1 and (equipped.get("body", []) as Array).size() == 1
+	var copy_path := "user://character_authoring_tests/%s_copy.chrproj" % test_id
+	var copied: Dictionary = session.save_project_as(copy_path)
+	var copied_manifest: Dictionary = SerializationService.load_project(copy_path)
+	var copied_assets: Dictionary = copied_manifest.get("objects", {}).get("assets", {})
+	var copied_asset_path := str((copied_assets.values()[0] as Dictionary).get("path", "")) if not copied_assets.is_empty() else ""
+	var copy_is_independent: bool = bool(copied.get("success", false)) and not copied_manifest.is_empty() and copied_asset_path != copied_path and FileAccess.file_exists(copied_asset_path)
+	panel.free()
+	session.asset_registry.free()
+	session.thumbnail_cache.free()
+	session.free()
+	for path in [source_path, copied_path, copied_asset_path, autosave_path, copy_path, project_path]:
+		if not str(path).is_empty(): DirAccess.remove_absolute(ProjectSettings.globalize_path(str(path)))
+	if project_saved and image_saved and opened.get("success", false) and imported.get("success", false) and preview_uses_real_art and no_random_ui and autosave_kept_dirty and saved.get("success", false) and persisted and copy_is_independent:
+		print("  PASS: Character Creator imports exact art, autosaves safely, and persists independent project copies")
+		return 1
+	printerr("  FAIL: Manual character panel flow failed: %s" % str([project_saved, image_saved, opened, imported, preview_uses_real_art, no_random_ui, autosave_kept_dirty, saved, persisted, copy_is_independent]))
+	return 0
 
 
 func test_creator_edits_are_browseable_reversible_and_weapon_safe() -> int:

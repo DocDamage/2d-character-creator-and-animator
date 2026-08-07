@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://weapons/authoring/weapon_authoring_wizard.gd" id="1_wizard"]
+[ext_resource type="Script" path="res://app/shared_ui/paper_quest/paper_weapon_stage.gd" id="2_stage"]
 
 [node name="WeaponAuthoringWizard" type="Control"]
 layout_mode = 3
@@ -16,30 +17,63 @@ layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_left = 8.0
-offset_top = 8.0
-offset_right = -8.0
-offset_bottom = -8.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
 
 [node name="RootVBox" type="VBoxContainer" parent="Margin"]
 layout_mode = 2
 size_flags_vertical = 3
+theme_override_constants/separation = 10
 
-[node name="TitleLabel" type="Label" parent="Margin/RootVBox"]
+[node name="Header" type="HBoxContainer" parent="Margin/RootVBox"]
 layout_mode = 2
-text = "Weapon Authoring Wizard"
+
+[node name="Copy" type="VBoxContainer" parent="Margin/RootVBox/Header"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="Eyebrow" type="Label" parent="Margin/RootVBox/Header/Copy"]
+layout_mode = 2
+theme_type_variation = &"SectionLabel"
+text = "WEAPON STUDIO"
+
+[node name="TitleLabel" type="Label" parent="Margin/RootVBox/Header/Copy"]
+layout_mode = 2
+theme_type_variation = &"H1Label"
+text = "Grip & coverage workshop"
+
+[node name="Hint" type="Label" parent="Margin/RootVBox/Header/Copy"]
+layout_mode = 2
+theme_type_variation = &"MutedLabel"
+text = "Author sockets, test body-direction coverage, and repair unreachable grips."
+
+[node name="PreviewCard" type="PanelContainer" parent="Margin/RootVBox"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_type_variation = &"PaperPanel"
+
+[node name="PreviewSurface" type="Control" parent="Margin/RootVBox/PreviewCard"]
+custom_minimum_size = Vector2(0, 320)
+layout_mode = 2
+size_flags_vertical = 3
+script = ExtResource("2_stage")
 
 [node name="WorkflowRow" type="HBoxContainer" parent="Margin/RootVBox"]
 layout_mode = 2
 
 [node name="Label" type="Label" parent="Margin/RootVBox/WorkflowRow"]
+custom_minimum_size = Vector2(110, 0)
 layout_mode = 2
-text = "Workflow"
+theme_type_variation = &"SectionLabel"
+text = "WORKFLOW"
 
 [node name="WorkflowOption" type="OptionButton" parent="Margin/RootVBox/WorkflowRow"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
 size_flags_horizontal = 3
 focus_mode = 2
@@ -47,16 +81,18 @@ tooltip_text = "Choose the equipment workflow to validate."
 
 [node name="BodyTypesInput" type="LineEdit" parent="Margin/RootVBox"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
 focus_mode = 2
-placeholder_text = "Body types: tall, medium"
+placeholder_text = "Body types to test: tall, medium"
 tooltip_text = "Optional comma-separated body types to cover."
 
 [node name="DirectionsInput" type="LineEdit" parent="Margin/RootVBox"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
 focus_mode = 2
-placeholder_text = "Directions: north, east"
+placeholder_text = "Directions to test: north, east"
 tooltip_text = "Optional comma-separated directions to cover."
 
 [node name="ActionsRow" type="HBoxContainer" parent="Margin/RootVBox"]
@@ -64,25 +100,29 @@ layout_mode = 2
 
 [node name="CoverageButton" type="Button" parent="Margin/RootVBox/ActionsRow"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
 size_flags_horizontal = 3
 focus_mode = 2
-text = "Review Coverage"
+text = "Review coverage"
 
 [node name="ValidateButton" type="Button" parent="Margin/RootVBox/ActionsRow"]
 unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 44)
 layout_mode = 2
 size_flags_horizontal = 3
 focus_mode = 2
-text = "Validate Workflow"
+theme_type_variation = &"SecondaryButton"
+text = "Validate weapon"
 
 [node name="SummaryLabel" type="Label" parent="Margin/RootVBox"]
 unique_name_in_owner = true
 layout_mode = 2
+theme_type_variation = &"SectionLabel"
 autowrap_mode = 2
 
 [node name="DiagnosticsLabel" type="Label" parent="Margin/RootVBox"]
 unique_name_in_owner = true
 layout_mode = 2
-size_flags_vertical = 3
+theme_type_variation = &"MutedLabel"
 autowrap_mode = 2

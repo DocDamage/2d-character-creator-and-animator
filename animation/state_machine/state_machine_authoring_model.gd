@@ -9,42 +9,63 @@ var machine = null
 var node_positions: Dictionary = {}
 var evaluator = null
 var preview_context: Dictionary = {}
+var _history_recorder: Callable
+
+
+func set_history_recorder(recorder: Callable = Callable()) -> void:
+	_history_recorder = recorder
 
 
 func create(machine_id: String, display_name: String) -> bool:
+	var before := to_dict()
 	machine = DefinitionScript.new(machine_id, display_name)
 	node_positions.clear()
 	evaluator = null
 	preview_context.clear()
-	return not machine_id.strip_edges().is_empty()
+	var created := not machine_id.strip_edges().is_empty()
+	if created:
+		_record(before, "Created Animation State Machine")
+	return created
 
 
 func add_state(state_id: String, clip_id: String = "", display_name: String = "", position: Vector2 = Vector2.ZERO) -> bool:
+	var before := to_dict()
 	if machine == null or not machine.add_state(state_id, clip_id, display_name):
 		return false
 	node_positions[state_id] = [position.x, position.y]
+	_record(before, "Added Animation State " + (display_name if not display_name.is_empty() else state_id))
 	return true
 
 
 func move_state(state_id: String, position: Vector2) -> bool:
+	var before := to_dict()
 	if machine == null or machine.get_state(state_id).is_empty():
 		return false
+	if node_positions.get(state_id, []) == [position.x, position.y]:
+		return false
 	node_positions[state_id] = [position.x, position.y]
+	_record(before, "Moved Animation State " + state_id)
 	return true
 
 
 func connect_states(transition_id: String, from_state: String, to_state: String, conditions: Array = [], duration: float = 0.15, exit_time: float = -1.0, priority: int = 0, can_interrupt: bool = true) -> bool:
+	var before := to_dict()
 	if machine == null or not machine.add_transition(transition_id, from_state, to_state, conditions):
 		return false
 	machine.set_transition_property(transition_id, "duration", maxf(0.0, duration))
 	machine.set_transition_property(transition_id, "exit_time", exit_time)
 	machine.set_transition_property(transition_id, "priority", priority)
 	machine.set_transition_property(transition_id, "can_interrupt", can_interrupt)
+	_record(before, "Connected Animation States")
 	return true
 
 
 func set_nested_machine(state_id: String, nested) -> bool:
-	return machine != null and machine.set_nested_machine(state_id, nested)
+	var before := to_dict()
+	var changed: bool = machine != null and machine.set_nested_machine(state_id, nested)
+	if changed:
+		_record(before, "Changed Nested Animation State")
+	return changed
 
 
 func configure_preview(clip_durations: Dictionary = {}) -> bool:
@@ -82,6 +103,11 @@ func from_dict(data: Dictionary) -> bool:
 	node_positions = (data.get("node_positions", {}) as Dictionary).duplicate(true)
 	evaluator = null
 	return diagnostics().is_empty()
+
+
+func _record(before: Dictionary, description: String) -> void:
+	if _history_recorder.is_valid():
+		_history_recorder.call(before, to_dict(), description)
 
 
 func diagnostics() -> Array:

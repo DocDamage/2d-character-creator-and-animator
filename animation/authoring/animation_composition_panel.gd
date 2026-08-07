@@ -2,10 +2,13 @@
 class_name AnimationCompositionPanel
 extends Control
 
+const DocumentHistoryScript = preload("res://app/commands/document_history.gd")
+
 @onready var graph_edit: GraphEdit = $Margin/Root/Graph
 @onready var time_input: SpinBox = $Margin/Root/Controls/Time
 @onready var output: RichTextLabel = $Margin/Root/Output
 @onready var status_label: Label = $Margin/Root/Status
+@onready var frame_label: Label = $Margin/Root/Header/FrameLabel
 
 var blend_stack = null
 var state_machine_model = null
@@ -21,8 +24,50 @@ func bind_context(blend, state_model, rule_model) -> void:
 	blend_stack = blend
 	state_machine_model = state_model
 	rule_graph_model = rule_model
+	_bind_document_history()
 	_rebuild_graph()
+	var state_count: int = state_machine_model.machine.states.size() if state_machine_model != null and state_machine_model.machine != null else 0
+	var rule_count: int = rule_graph_model.graph.rules.size() if rule_graph_model != null and rule_graph_model.graph != null else 0
+	frame_label.text = "%d states · %d rules" % [state_count, rule_count]
 	_refresh("Composition graph ready.")
+
+
+func _bind_document_history() -> void:
+	if blend_stack != null and blend_stack.has_method("set_history_recorder"):
+		blend_stack.set_history_recorder(Callable(self, "_record_animation_history").bind("blend_stack"))
+	if state_machine_model != null and state_machine_model.has_method("set_history_recorder"):
+		state_machine_model.set_history_recorder(Callable(self, "_record_animation_history").bind("state_machine"))
+	if rule_graph_model != null and rule_graph_model.has_method("set_history_recorder"):
+		rule_graph_model.set_history_recorder(Callable(self, "_record_animation_history").bind("rule_graph"))
+
+
+func _record_animation_history(before: Dictionary, after: Dictionary, description: String, source_id: String) -> bool:
+	var before_document := _capture_document_snapshot()
+	before_document[source_id] = before.duplicate(true)
+	var after_document := _capture_document_snapshot()
+	after_document[source_id] = after.duplicate(true)
+	return DocumentHistoryScript.record_applied(self, before_document, after_document, description)
+
+
+func _capture_document_snapshot() -> Dictionary:
+	return {
+		"blend_stack": blend_stack.to_dict() if blend_stack != null and blend_stack.has_method("to_dict") else {},
+		"state_machine": state_machine_model.to_dict() if state_machine_model != null and state_machine_model.has_method("to_dict") else {},
+		"rule_graph": rule_graph_model.to_dict() if rule_graph_model != null and rule_graph_model.has_method("to_dict") else {},
+	}
+
+
+func _apply_document_snapshot(snapshot: Dictionary, description: String = "") -> void:
+	if snapshot.is_empty():
+		return
+	if blend_stack != null and blend_stack.has_method("from_dict"):
+		blend_stack.from_dict(snapshot.get("blend_stack", {}) as Dictionary)
+	if state_machine_model != null and state_machine_model.has_method("from_dict"):
+		state_machine_model.from_dict(snapshot.get("state_machine", {}) as Dictionary)
+	if rule_graph_model != null and rule_graph_model.has_method("from_dict"):
+		rule_graph_model.from_dict(snapshot.get("rule_graph", {}) as Dictionary)
+	_rebuild_graph()
+	_refresh(description if not description.is_empty() else "Restored animation document state.")
 
 
 func _on_preview() -> void:
@@ -30,6 +75,7 @@ func _on_preview() -> void:
 	var rules: Dictionary = rule_graph_model.preview({"time": time_input.value}, true) if rule_graph_model != null else {}
 	var layers: int = int(blend_stack.layers.size()) if blend_stack != null else 0
 	output.text = "Layers: %d\nState: %s\nRules fired: %s\nDiagnostics: %s" % [layers, str(state.get("state_id", "—")), str(rules.get("fired_rule_ids", [])), str(rules.get("diagnostics", []))]
+	frame_label.text = "Preview at %.3fs" % time_input.value
 	_refresh("Previewed composition at %.3fs." % time_input.value)
 
 
@@ -54,6 +100,7 @@ func _add_node(node_id: String, title: String, position: Array, detail: String) 
 	var node := GraphNode.new()
 	node.name = node_id
 	node.title = title
+	node.draggable = false
 	node.position_offset = Vector2(float(position[0]), float(position[1]))
 	var label := Label.new()
 	label.text = detail
@@ -63,4 +110,7 @@ func _add_node(node_id: String, title: String, position: Array, detail: String) 
 
 
 func _refresh(message: String) -> void:
-	if status_label != null: status_label.text = message
+	if status_label == null: return
+	var ready := "ready" in message.to_lower()
+	status_label.text = ("✓ " if ready else "i ") + message
+	if ThemeService != null: status_label.add_theme_color_override("font_color", ThemeService.get_color_token("success" if ready else "blue"))

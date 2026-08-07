@@ -1,0 +1,22 @@
+=== Test Results: PQ-UI ===
+Status: PASS
+
+Godot parser/editor scan: PASS
+Startup scene smoke test: PASS
+Main shell smoke test: PASS
+Automated suite: 508 PASS, 0 FAIL
+Source UI acceptance: 36 PASS, 0 FAIL
+Packaged EXE UI acceptance: 36 PASS, 0 FAIL
+Windows release export: PASS
+Bundled starter sample: PASS
+Open Project file dialog: PASS
+Live 1440x960 starter-sample click-through: PASS
+300-line production-source audit: PASS
+Affected-production stub-marker scan: PASS
+Git whitespace/error check: PASS
+
+Release artifact: release/windows/Modular2DCharacterStudio.exe (109071360 bytes)
+EXE SHA-256: B37A29570C30A222E399C68AAE87D2B9594890239EE55F4372D15C80D1F41EA1
+PCK SHA-256: 3B216F8EE6469E33110B79A3727FE2A5A9EC7605D89C9C311CA1C5310024D01B
+
+Covered integrations include startup, bundled samples, file dialogs, dock registration, responsive 1440x960 containment, all six workspaces, theme and DPI settings, keyboard/controller focus, recent projects, Weapon authoring, Export, diagnostics, persistence, and runtime export compatibility.

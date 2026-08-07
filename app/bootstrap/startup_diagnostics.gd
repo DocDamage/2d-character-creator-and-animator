@@ -4,7 +4,7 @@ extends RefCounted
 
 ## === Constants ==============================================================
 
-const APP_NAME := "Modular 2D Character Studio"
+const APP_NAME := "Paper Quest Character Studio"
 const APP_VERSION := "0.1.0-dev"
 const APP_BUILD_DATE := "2026-08-05"
 const TARGET_GODOT_VERSION := "4.7"

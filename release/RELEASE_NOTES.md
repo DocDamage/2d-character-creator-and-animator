@@ -5,6 +5,23 @@ gameplay metadata authoring, batch export, a portable Godot runtime addon, and
 quality/recovery workflows. See the sample catalog and guides for reproducible
 entry points.
 
+## Import-first character authoring
+
+Character Creator now starts with canvas and slot-template choices, then builds
+only from imported PNG/WebP/JPEG layers. Folder and drag-and-drop imports map
+filenames to slots. Layers support thumbnails, missing-file status, ordering,
+lock/hide/solo, duplication, replacement, deletion, transforms, pivot, opacity,
+and tint. No generated character workflow is included.
+
+## Project safety and distribution
+
+The Project hub now manages rename, independent duplicate, archive, reveal, and
+locate actions. Autosave age, crash recovery candidates, bundled-sample warnings,
+and duplicate/missing asset reporting are visible in the application. Windows
+exports include app icon/version metadata and support a portable EXE+PCK ZIP or
+an embedded-PCK single-file build; signing is available through the release
+builder when release credentials are configured.
+
 ## Windows package fix
 
 Startup diagnostics in exported templates now validate packaged runtime

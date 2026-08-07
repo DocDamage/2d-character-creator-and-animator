@@ -1,6 +1,7 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://export/batch/batch_export_panel.gd" id="1_script"]
+[ext_resource type="Script" path="res://app/shared_ui/paper_quest/paper_export_preview.gd" id="2_preview"]
 
 [node name="BatchExportPanel" type="Control"]
 layout_mode = 3
@@ -18,37 +19,72 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-theme_override_constants/margin_left = 8
-theme_override_constants/margin_top = 8
-theme_override_constants/margin_right = 8
-theme_override_constants/margin_bottom = 8
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
 
 [node name="Root" type="VBoxContainer" parent="Margin"]
 layout_mode = 2
+theme_override_constants/separation = 10
 
-[node name="Hint" type="Label" parent="Margin/Root"]
+[node name="Header" type="VBoxContainer" parent="Margin/Root"]
 layout_mode = 2
-text = "Export character and weapon runtime-package variants"
+
+[node name="Eyebrow" type="Label" parent="Margin/Root/Header"]
+layout_mode = 2
+theme_type_variation = &"SectionLabel"
+text = "EXPORT WORKSHOP"
+
+[node name="Title" type="Label" parent="Margin/Root/Header"]
+layout_mode = 2
+theme_type_variation = &"H1Label"
+text = "Package your paper quest"
+
+[node name="Hint" type="Label" parent="Margin/Root/Header"]
+layout_mode = 2
+theme_type_variation = &"MutedLabel"
+text = "Queue character and weapon variants, validate every artifact, and export production-ready packages."
+
+[node name="PreviewCard" type="PanelContainer" parent="Margin/Root"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_type_variation = &"PaperPanel"
+
+[node name="Preview" type="Control" parent="Margin/Root/PreviewCard"]
+custom_minimum_size = Vector2(0, 280)
+layout_mode = 2
+size_flags_vertical = 3
+script = ExtResource("2_preview")
+
+[node name="QueueLabel" type="Label" parent="Margin/Root"]
+layout_mode = 2
+theme_type_variation = &"SectionLabel"
+text = "EXPORT QUEUE"
 
 [node name="Queue" type="HBoxContainer" parent="Margin/Root"]
 layout_mode = 2
 
 [node name="VariantId" type="LineEdit" parent="Margin/Root/Queue"]
+custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
 focus_mode = 2
 placeholder_text = "Variant ID"
 size_flags_horizontal = 3
 
 [node name="VariantType" type="OptionButton" parent="Margin/Root/Queue"]
+custom_minimum_size = Vector2(150, 40)
 layout_mode = 2
 focus_mode = 2
 
 [node name="Add" type="Button" parent="Margin/Root/Queue"]
+custom_minimum_size = Vector2(90, 40)
 layout_mode = 2
 focus_mode = 2
 text = "Add"
 
 [node name="OutputPath" type="LineEdit" parent="Margin/Root"]
+custom_minimum_size = Vector2(0, 40)
 layout_mode = 2
 focus_mode = 2
 text = "user://batch_exports"
@@ -57,20 +93,25 @@ text = "user://batch_exports"
 layout_mode = 2
 
 [node name="Export" type="Button" parent="Margin/Root/Actions"]
+custom_minimum_size = Vector2(180, 44)
 layout_mode = 2
 focus_mode = 2
-text = "Export Queue"
+theme_type_variation = &"SecondaryButton"
+text = "Export queue"
 
 [node name="Cancel" type="Button" parent="Margin/Root/Actions"]
+custom_minimum_size = Vector2(110, 44)
 layout_mode = 2
 focus_mode = 2
+theme_type_variation = &"DestructiveButton"
 text = "Cancel"
 
 [node name="Output" type="RichTextLabel" parent="Margin/Root"]
 layout_mode = 2
-size_flags_vertical = 3
+custom_minimum_size = Vector2(0, 84)
 bbcode_enabled = false
 
 [node name="Status" type="Label" parent="Margin/Root"]
 layout_mode = 2
+theme_type_variation = &"MutedLabel"
 autowrap_mode = 2

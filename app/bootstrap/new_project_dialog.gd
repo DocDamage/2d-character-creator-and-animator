@@ -6,6 +6,8 @@ extends ConfirmationDialog
 
 signal project_created(project_path: String, project_title: String, template_id: String)
 
+const CharacterProjectFactoryScript = preload("res://character/authoring/character_project_factory.gd")
+
 ## === State & Node References ================================================
 
 @onready var _name_input: LineEdit = get_node_or_null("VBox/NameBox/NameEdit")
@@ -13,10 +15,7 @@ signal project_created(project_path: String, project_title: String, template_id:
 @onready var _template_select: OptionButton = get_node_or_null("VBox/TemplateBox/TemplateSelect")
 @onready var _error_label: Label = get_node_or_null("VBox/ErrorLabel")
 
-const TEMPLATES := [
-	{"id": "blank", "name": "Blank Project (Empty Character)"},
-	{"id": "sample", "name": "Sample Character (Baseline Rig & Textures)"}
-]
+var _templates: Array = []
 
 ## === Lifecycle ==============================================================
 
@@ -29,8 +28,11 @@ func _ready() -> void:
 
 	if _template_select != null:
 		_template_select.clear()
-		for t in TEMPLATES:
-			_template_select.add_item(t["name"])
+		_templates = CharacterProjectFactoryScript.get_slot_template_options()
+		for template in _templates:
+			var t: Dictionary = template
+			_template_select.add_item(str(t.get("name", "Import-Only Character")))
+			_template_select.set_item_metadata(_template_select.item_count - 1, str(t.get("id", "blank")))
 		_template_select.select(0)
 
 	if _name_input != null:
@@ -38,7 +40,7 @@ func _ready() -> void:
 		_name_input.text_changed.connect(func(_t): _validate_inputs())
 
 	if _path_input != null:
-		_path_input.text = "user://projects/NewCharacter.json"
+		_path_input.text = "user://projects/NewCharacter.chrproj"
 		_path_input.text_changed.connect(func(_t): _validate_inputs())
 
 	_validate_inputs()
@@ -50,7 +52,7 @@ func open_dialog() -> void:
 	if _name_input != null:
 		_name_input.text = "NewCharacter"
 	if _path_input != null:
-		_path_input.text = "user://projects/NewCharacter.json"
+		_path_input.text = "user://projects/NewCharacter.chrproj"
 	if _error_label != null:
 		_error_label.text = ""
 	_validate_inputs()
@@ -58,7 +60,7 @@ func open_dialog() -> void:
 
 
 var _fallback_name: String = "NewCharacter"
-var _fallback_path: String = "user://projects/NewCharacter.json"
+var _fallback_path: String = "user://projects/NewCharacter.chrproj"
 
 func get_project_name() -> String:
 	if _name_input != null:
@@ -75,8 +77,8 @@ func get_project_path() -> String:
 func get_selected_template() -> String:
 	if _template_select != null:
 		var idx := _template_select.selected
-		if idx >= 0 and idx < TEMPLATES.size():
-			return TEMPLATES[idx]["id"]
+		if idx >= 0 and idx < _templates.size():
+			return str(_template_select.get_item_metadata(idx))
 	return "blank"
 
 
@@ -94,6 +96,9 @@ func _validate_inputs() -> bool:
 	elif path_text.is_empty():
 		is_valid = false
 		err_msg = "Project path cannot be empty."
+	elif _path_input != null and FileAccess.file_exists(path_text):
+		is_valid = false
+		err_msg = "A project already exists at this path. Choose a new file name."
 
 	if _error_label != null:
 		_error_label.text = err_msg
@@ -102,6 +107,11 @@ func _validate_inputs() -> bool:
 	if ok_btn != null:
 		ok_btn.disabled = not is_valid
 	return is_valid
+
+
+func show_creation_error(message: String) -> void:
+	if _error_label != null: _error_label.text = message
+	popup_centered()
 
 
 func _on_confirmed() -> void:

@@ -63,8 +63,21 @@ func set_panel_visible(panel_id: String, is_visible: bool) -> void:
 	if _panels.has(panel_id):
 		var p := _panels[panel_id] as Control
 		if p != null:
-			p.visible = is_visible
+			if p.get_parent() is TabContainer:
+				var tabs := p.get_parent() as TabContainer
+				tabs.set_tab_hidden(p.get_index(), not is_visible)
+				_sync_region_visibility(tabs)
+			else:
+				p.visible = is_visible
 			panel_visibility_changed.emit(panel_id, is_visible)
+
+
+func is_panel_visible(panel_id: String) -> bool:
+	var panel := get_panel(panel_id)
+	if panel == null: return false
+	if panel.get_parent() is TabContainer:
+		return not (panel.get_parent() as TabContainer).is_tab_hidden(panel.get_index())
+	return panel.visible
 
 
 func activate_panel(panel_id: String) -> bool:
@@ -72,8 +85,19 @@ func activate_panel(panel_id: String) -> bool:
 	if panel == null or not panel.get_parent() is TabContainer:
 		return false
 	var tabs := panel.get_parent() as TabContainer
+	tabs.visible = true
+	tabs.set_tab_hidden(panel.get_index(), false)
 	tabs.current_tab = panel.get_index()
 	return true
+
+
+func _sync_region_visibility(tabs: TabContainer) -> void:
+	var has_visible_tab := false
+	for index in tabs.get_tab_count():
+		if not tabs.is_tab_hidden(index):
+			has_visible_tab = true
+			break
+	tabs.visible = has_visible_tab
 
 func get_active_preset_name() -> String:
 	return _active_preset
@@ -152,7 +176,7 @@ func _on_panel_region_changed(panel_id: String, new_region: String) -> void:
 func _apply_default_preset() -> void:
 	for pid in _panels:
 		set_panel_visible(pid, true)
-	activate_panel("panel_viewport")
+	activate_panel("panel_project_hub")
 
 func _apply_character_creator_preset() -> void:
 	for pid in _panels:

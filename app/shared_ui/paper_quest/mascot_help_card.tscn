@@ -1,0 +1,48 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://app/shared_ui/paper_quest/mascot_help_card.gd" id="1_card"]
+[ext_resource type="Script" path="res://app/shared_ui/paper_quest/paper_quest_mascot.gd" id="2_mascot"]
+
+[node name="MascotHelpCard" type="PanelContainer"]
+custom_minimum_size = Vector2(208, 126)
+theme_type_variation = &"GuidePanel"
+script = ExtResource("1_card")
+
+[node name="Margin" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_override_constants/margin_left = 12
+theme_override_constants/margin_top = 12
+theme_override_constants/margin_right = 12
+theme_override_constants/margin_bottom = 12
+
+[node name="Row" type="HBoxContainer" parent="Margin"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Mascot" type="Control" parent="Margin/Row"]
+custom_minimum_size = Vector2(86, 86)
+layout_mode = 2
+script = ExtResource("2_mascot")
+
+[node name="Copy" type="VBoxContainer" parent="Margin/Row"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+
+[node name="Title" type="Label" parent="Margin/Row/Copy"]
+layout_mode = 2
+theme_type_variation = &"SectionLabel"
+text = "Pip's guide"
+
+[node name="Message" type="Label" parent="Margin/Row/Copy"]
+layout_mode = 2
+size_flags_vertical = 3
+text = "Choose a workspace to continue your quest."
+autowrap_mode = 2
+
+[node name="Dismiss" type="Button" parent="Margin/Row/Copy"]
+custom_minimum_size = Vector2(84, 32)
+layout_mode = 2
+size_flags_horizontal = 8
+theme_type_variation = &"GhostButton"
+text = "Got it"

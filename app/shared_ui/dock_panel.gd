@@ -3,8 +3,6 @@
 class_name DockPanel
 extends PanelContainer
 
-const StudioSurfaceScript = preload("res://app/shared_ui/studio_surface.gd")
-
 signal dock_region_changed(panel_id: String, new_region: String)
 signal collapse_toggled(panel_id: String, is_collapsed: bool)
 signal closed(panel_id: String)
@@ -32,6 +30,12 @@ func _init() -> void:
 
 func _ready() -> void:
 	_build_layout_if_needed()
+	# The surrounding TabContainer already names the active tool. Keep only a
+	# compact collapse affordance so the title is not repeated inside the panel.
+	if get_parent() is TabContainer and _header_bar != null:
+		_title_label.text = ""
+		_header_bar.custom_minimum_size.y = 28
+		_collapse_button.custom_minimum_size = Vector2(28, 28)
 	_sync_tab_title()
 
 func set_panel_title(p_title: String) -> void:
@@ -73,12 +77,15 @@ func add_content(node: Control) -> void:
 		container.add_child(node)
 
 func serialize_state() -> Dictionary:
+	var panel_visible := visible
+	if get_parent() is TabContainer:
+		panel_visible = not (get_parent() as TabContainer).is_tab_hidden(get_index())
 	return {
 		"panel_id": panel_id,
 		"panel_title": panel_title,
 		"region": _region_to_string(current_region),
 		"collapsed": _is_collapsed,
-		"visible": visible
+		"visible": panel_visible
 	}
 
 func deserialize_state(data: Dictionary) -> void:
@@ -91,7 +98,15 @@ func deserialize_state(data: Dictionary) -> void:
 		if should_collapse != _is_collapsed:
 			toggle_collapse()
 	if data.has("visible"):
-		visible = data["visible"] as bool
+		if get_parent() is TabContainer:
+			var tabs := get_parent() as TabContainer
+			tabs.set_tab_hidden(get_index(), not (data["visible"] as bool))
+			var has_visible_tab := false
+			for index in tabs.get_tab_count():
+				if not tabs.is_tab_hidden(index): has_visible_tab = true; break
+			tabs.visible = has_visible_tab
+		else:
+			visible = data["visible"] as bool
 
 func _build_layout_if_needed() -> void:
 	if get_child_count() > 0 and _content_container != null:
@@ -99,48 +114,61 @@ func _build_layout_if_needed() -> void:
 
 	var main_box := VBoxContainer.new()
 	main_box.name = "MainVBox"
+	main_box.add_theme_constant_override("separation", 8)
 	add_child(main_box)
 
 	_header_bar = HBoxContainer.new()
 	_header_bar.name = "HeaderBar"
+	_header_bar.custom_minimum_size.y = 40
 	main_box.add_child(_header_bar)
 
 	_title_label = Label.new()
 	_title_label.name = "TitleLabel"
 	_title_label.text = panel_title
+	_title_label.theme_type_variation = &"SectionLabel"
 	_title_label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	_header_bar.add_child(_title_label)
 
 	_collapse_button = Button.new()
 	_collapse_button.name = "CollapseButton"
 	_collapse_button.text = "-"
-	_collapse_button.custom_minimum_size = Vector2(24, 24)
+	_collapse_button.tooltip_text = "Collapse / Expand Panel"
+	_collapse_button.custom_minimum_size = Vector2(28, 28)
+	_collapse_button.theme_type_variation = &"GhostButton"
 	_collapse_button.pressed.connect(toggle_collapse)
 	_header_bar.add_child(_collapse_button)
 
 	_content_container = MarginContainer.new()
 	_content_container.name = "ContentContainer"
+	_content_container.add_theme_constant_override("margin_left", 6)
+	_content_container.add_theme_constant_override("margin_top", 6)
+	_content_container.add_theme_constant_override("margin_right", 6)
+	_content_container.add_theme_constant_override("margin_bottom", 6)
 	_content_container.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_content_container.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	main_box.add_child(_content_container)
-	_add_default_surface_if_needed()
+	_add_context_state_if_needed()
 
 
-func _add_default_surface_if_needed() -> void:
-	var modes := {
-		"panel_assets": "assets",
-		"panel_hierarchy": "hierarchy",
-		"panel_viewport": "viewport",
-		"panel_inspector": "inspector",
-		"panel_timeline": "timeline",
+func _add_context_state_if_needed() -> void:
+	var messages := {
+		"panel_hierarchy": "No rig selected\nChoose a character rig to inspect its hierarchy.",
+		"panel_viewport": "No canvas document selected\nOpen a rig or animation to edit it here.",
+		"panel_inspector": "Nothing selected\nSelect an authored object to inspect its properties.",
+		"panel_timeline": "No animation selected\nOpen or create an animation to edit its timeline.",
 	}
-	if not modes.has(panel_id):
-		return
-	var surface := StudioSurfaceScript.new() as Control
-	surface.set("surface_mode", modes[panel_id])
-	surface.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-	surface.size_flags_vertical = Control.SIZE_EXPAND_FILL
-	_content_container.add_child(surface)
+	if not messages.has(panel_id): return
+	var state := CenterContainer.new()
+	state.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	state.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	var label := Label.new()
+	label.text = messages[panel_id]
+	label.custom_minimum_size.x = 150.0
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	label.theme_type_variation = &"MutedLabel"
+	state.add_child(label)
+	_content_container.add_child(state)
 
 
 func _sync_tab_title() -> void:

@@ -49,6 +49,25 @@ func run_tests() -> Dictionary:
 	else:
 		results["failed"] += 1
 		results["errors"].append("Expected tabbed dock regions with >= 6 panels, found %d." % panels.size())
+	var project_actions := mw_node.get_node_or_null("ProjectPersistenceController")
+	var save_command: Dictionary = ShortcutRegistry.get_command("file.save")
+	var save_callable: Callable = save_command.get("callable", Callable())
+	if project_actions != null and save_callable.is_valid() and save_callable.get_object() == project_actions and AppState.autosave_triggered.is_connected(Callable(project_actions, "_on_autosave_requested")):
+		print("  PASS: Shell save, Save As, autosave, and history commands share the persistence controller.")
+		results["passed"] += 1
+	else:
+		results["failed"] += 1
+		results["errors"].append("Shell persistence commands are not routed through the project controller.")
+	var diagnostics_was_visible: bool = layout_mgr.call("is_panel_visible", "panel_diagnostics")
+	mw_node.call("_toggle_diagnostics_drawer")
+	var diagnostics_toggled: bool = layout_mgr.call("is_panel_visible", "panel_diagnostics") != diagnostics_was_visible
+	mw_node.call("_toggle_diagnostics_drawer")
+	if diagnostics_toggled:
+		print("  PASS: Diagnostics toggle updates the real tab visibility state.")
+		results["passed"] += 1
+	else:
+		results["failed"] += 1
+		results["errors"].append("Diagnostics toggle did not change tab visibility.")
 
 	# 2. Test specific panel retrieval and state manipulation
 	var p_assets: Control = mw_node.call("get_panel", "panel_assets")

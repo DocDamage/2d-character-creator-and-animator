@@ -1,7 +1,6 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=2 format=3]
 
 [ext_resource type="Script" path="res://animation/authoring/animation_composition_panel.gd" id="1_script"]
-[ext_resource type="Script" path="res://app/shared_ui/studio_surface.gd" id="2_surface"]
 
 [node name="AnimationCompositionPanel" type="Control"]
 layout_mode = 3
@@ -38,71 +37,27 @@ theme_override_constants/separation = 2
 
 [node name="Eyebrow" type="Label" parent="Margin/Root/Header/TitleGroup"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.560784, 0.611765, 0.698039, 1)
-theme_override_font_sizes/font_size = 11
+theme_type_variation = &"SectionLabel"
 text = "ANIMATION STUDIO"
 
 [node name="Title" type="Label" parent="Margin/Root/Header/TitleGroup"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 18
-text = "Walk_8dir Composition"
+text = "Animation Composition"
 
 [node name="Hint" type="Label" parent="Margin/Root/Header/TitleGroup"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.560784, 0.611765, 0.698039, 1)
-theme_override_font_sizes/font_size = 12
+theme_type_variation = &"MutedLabel"
 text = "Layered blends, state transitions, and rule graph"
 
 [node name="FrameLabel" type="Label" parent="Margin/Root/Header"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.560784, 0.611765, 0.698039, 1)
-text = "Frame 12 / 24"
-
-[node name="ToolRow" type="HBoxContainer" parent="Margin/Root"]
-layout_mode = 2
-theme_override_constants/separation = 6
-
-[node name="Select" type="Button" parent="Margin/Root/ToolRow"]
-layout_mode = 2
-theme_type_variation = &"PrimaryButton"
-text = "Select"
-
-[node name="IK" type="Button" parent="Margin/Root/ToolRow"]
-layout_mode = 2
-text = "IK"
-
-[node name="Mesh" type="Button" parent="Margin/Root/ToolRow"]
-layout_mode = 2
-text = "Mesh"
-
-[node name="Onion" type="Button" parent="Margin/Root/ToolRow"]
-layout_mode = 2
-text = "Onion"
-
-[node name="Curves" type="Button" parent="Margin/Root/ToolRow"]
-layout_mode = 2
-text = "Curves"
-
-[node name="ToolSpacer" type="Control" parent="Margin/Root/ToolRow"]
-layout_mode = 2
-size_flags_horizontal = 3
-
-[node name="AutoKey" type="Button" parent="Margin/Root/ToolRow"]
-layout_mode = 2
-theme_type_variation = &"PrimaryButton"
-text = "Auto-key"
-
-[node name="PreviewSurface" type="Control" parent="Margin/Root"]
-layout_mode = 2
-custom_minimum_size = Vector2(0, 220)
-size_flags_vertical = 3
-script = ExtResource("2_surface")
-surface_mode = "animation"
+theme_type_variation = &"MutedLabel"
+text = "No composition bound"
 
 [node name="GraphLabel" type="Label" parent="Margin/Root"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.560784, 0.611765, 0.698039, 1)
-theme_override_font_sizes/font_size = 11
+theme_type_variation = &"SectionLabel"
 text = "COMPOSITION GRAPH"
 
 [node name="Graph" type="GraphEdit" parent="Margin/Root"]
@@ -135,6 +90,5 @@ bbcode_enabled = false
 
 [node name="Status" type="Label" parent="Margin/Root"]
 layout_mode = 2
-theme_override_colors/font_color = Color(0.321569, 0.8, 0.501961, 1)
 theme_override_font_sizes/font_size = 12
 autowrap_mode = 2
