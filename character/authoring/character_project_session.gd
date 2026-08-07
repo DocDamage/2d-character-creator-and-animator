@@ -15,6 +15,7 @@ const ImageImporterScript = preload("res://core/assets/image_importer.gd")
 const RecoveryJournalScript = preload("res://core/documents/recovery_journal.gd")
 const MissingFileRepairScript = preload("res://core/assets/missing_file_repair.gd")
 const AssetReportsScript = preload("res://core/assets/asset_reports.gd")
+const AssetImportPreflightScript = preload("res://core/assets/asset_import_preflight.gd")
 const RigSchemaScript = preload("res://rigging/bones/rig_schema.gd")
 const BoneSchemaScript = preload("res://rigging/bones/bone_schema.gd")
 const BoneManagerScript = preload("res://rigging/bones/bone_manager.gd")
@@ -22,6 +23,8 @@ const AnimationClipScript = preload("res://animation/clips/clip_schema.gd")
 const TrackDefinitionScript = preload("res://animation/tracks/track_schema.gd")
 const SnapshotServiceScript = preload("res://core/documents/project_snapshot_service.gd")
 const ReadinessValidatorScript = preload("res://quality/readiness/project_readiness_validator.gd")
+const ProjectScaleAdvisorScript = preload("res://quality/performance/project_scale_advisor.gd")
+const ProductionDataScript = preload("res://production/production_project_data.gd")
 
 signal session_changed(description: String)
 signal project_saved(path: String)
@@ -43,6 +46,7 @@ var last_autosave_unix: int = 0
 var _restoring_document := false
 var _snapshot_service = SnapshotServiceScript.new()
 var _readiness_validator = ReadinessValidatorScript.new()
+var _scale_advisor = ProjectScaleAdvisorScript.new()
 
 func _ready() -> void:
 	if asset_registry.get_parent() == null: add_child(asset_registry)
@@ -68,6 +72,9 @@ func import_part(source_path: String, slot_id: String, display_name: String = ""
 	if is_read_only(): return _failure("Bundled samples are read-only. Use Save As before importing artwork.")
 	if model == null or not slot_registry.has_slot(slot_id):
 		return _failure("Choose a valid layer slot before importing art.")
+	var preflight: Dictionary = preflight_artwork_import([source_path], slot_id)
+	if not bool(preflight.get("success", false)):
+		return {"success": false, "errors": _issue_messages(preflight.get("errors", [])), "preflight": preflight, "repair_actions": []}
 	var inspection := ImageImporterScript.inspect_image(source_path)
 	if not inspection.get("valid", false): return _failure(str(inspection.get("error", "Image import failed.")))
 	var part_id: String = IDService.generate_id("prt")
@@ -83,14 +90,19 @@ func import_part(source_path: String, slot_id: String, display_name: String = ""
 	part.supported_body_type_ids = [model.assembly.body_type_id]
 	part.metadata = {"source": "imported", "layer_index": _slot_order.find(slot_id)}
 	if not part_registry.register_part(part): return _failure("The imported image could not be added as a character part.")
+	var asset_metadata := {
+		"character_part_id": part_id,
+		"slot_id": slot_id,
+		"provenance": AssetImportPreflightScript.provenance_from_inspection(source_path, inspection),
+	}
 	asset_registry.update_asset(part.asset_id, {
 		"tags": ["character_part", slot_id],
-		"metadata": {"character_part_id": part_id, "slot_id": slot_id},
+		"metadata": asset_metadata,
 	})
 	var equip_report: Dictionary = model.equip_part(part_id)
 	if not equip_report.get("success", false): return equip_report
 	_sync_manifest()
-	return {"success": true, "errors": [], "part_id": part_id, "asset_id": part.asset_id, "path": copied_path, "duplicate_asset_ids": duplicate_asset_ids}
+	return {"success": true, "errors": [], "part_id": part_id, "asset_id": part.asset_id, "path": copied_path, "duplicate_asset_ids": duplicate_asset_ids, "preflight": preflight}
 
 
 func set_character_name(next_name: String) -> bool:
@@ -116,6 +128,25 @@ func get_canvas_settings() -> Dictionary:
 		"height": clampi(int(canvas.get("height", 512)), 16, 8192),
 		"pixel_scale": clampf(float(canvas.get("pixel_scale", 1.0)), 0.25, 16.0),
 	}
+
+
+func get_production_suite_data() -> Dictionary:
+	return ProductionDataScript.from_manifest(manifest)
+
+
+func get_manifest_copy() -> Dictionary:
+	_sync_manifest()
+	return manifest.duplicate(true)
+
+
+func set_production_suite_data(data: Dictionary, description: String = "Updated Production Suite Settings") -> Dictionary:
+	if is_read_only(): return _failure("Bundled samples are read-only. Use Save As before changing production settings.")
+	var normalized := ProductionDataScript.normalize(data)
+	if normalized == get_production_suite_data(): return {"success": true, "changed": false, "errors": []}
+	var before := _capture_document_snapshot()
+	manifest = ProductionDataScript.apply_to_manifest(manifest, normalized)
+	var changed := _commit_document_edit(before, description)
+	return {"success": changed, "changed": changed, "errors": [] if changed else ["Production settings were unchanged."]}
 
 
 func get_workflow_state() -> Dictionary:
@@ -221,14 +252,23 @@ func import_files_by_slot(paths: Array, explicit_slot_id: String = "") -> Dictio
 	var plan := map_files_to_slots(paths)
 	var imported: Array = []
 	var errors: Array = []
+	var seen_paths: Dictionary = {}
 	for row in plan.mapped:
+		var source_path := str((row as Dictionary).get("path", ""))
+		var normalized := source_path.replace("\\", "/").simplify_path().to_lower()
+		if seen_paths.has(normalized): continue
+		seen_paths[normalized] = true
 		var slot := explicit_slot_id if not explicit_slot_id.is_empty() else str((row as Dictionary).get("slot_id", ""))
-		var result := import_part(str((row as Dictionary).get("path", "")), slot, str((row as Dictionary).get("display_name", "")))
+		var result := import_part(source_path, slot, str((row as Dictionary).get("display_name", "")))
 		if result.get("success", false): imported.append(result)
 		else: errors.append_array(result.get("errors", []))
 	if not explicit_slot_id.is_empty():
 		for row in plan.unmatched:
-			var result := import_part(str((row as Dictionary).get("path", "")), explicit_slot_id)
+			var unmatched_path := str((row as Dictionary).get("path", ""))
+			var unmatched_normalized := unmatched_path.replace("\\", "/").simplify_path().to_lower()
+			if seen_paths.has(unmatched_normalized): continue
+			seen_paths[unmatched_normalized] = true
+			var result := import_part(unmatched_path, explicit_slot_id)
 			if result.get("success", false): imported.append(result)
 			else: errors.append_array(result.get("errors", []))
 	return {"success": not imported.is_empty() and errors.is_empty(), "imported": imported, "unmatched": plan.unmatched, "errors": errors}
@@ -253,7 +293,9 @@ func import_audio_asset(source_path: String, display_name: String = "") -> Dicti
 	var hash := HashingContext.new()
 	hash.start(HashingContext.HASH_SHA256)
 	hash.update(bytes)
-	var asset: Dictionary = asset_registry.register_asset(copied_path, AssetRegistryScript.CATEGORY_AUDIO, {"checksum": hash.finish().hex_encode(), "metadata": {"source": "imported_audio"}})
+	var checksum := hash.finish().hex_encode()
+	var audio_provenance := {"source_filename": source_path.get_file(), "source_checksum": checksum, "source_format": extension, "imported_at": Time.get_unix_time_from_system(), "author": "", "license": "", "source_reference": ""}
+	var asset: Dictionary = asset_registry.register_asset(copied_path, AssetRegistryScript.CATEGORY_AUDIO, {"checksum": checksum, "metadata": {"source": "imported_audio", "provenance": audio_provenance}})
 	if asset.is_empty(): return _failure("The audio file could not be registered.")
 	if not display_name.strip_edges().is_empty(): asset_registry.update_asset(str(asset.get("asset_id", "")), {"name": display_name.strip_edges()})
 	_commit_document_edit(before, "Imported Audio " + (display_name.strip_edges() if not display_name.strip_edges().is_empty() else source_path.get_file().get_basename()))
@@ -295,6 +337,9 @@ func replace_layer_art(part_id: String, source_path: String) -> Dictionary:
 	if model == null or is_read_only(): return _failure("Use an editable project before replacing a layer.")
 	var part = part_registry.get_part(part_id)
 	if part == null: return _failure("Choose a layer to replace.")
+	var preflight: Dictionary = preflight_artwork_import([source_path], part.slot_id)
+	if not bool(preflight.get("success", false)):
+		return {"success": false, "errors": _issue_messages(preflight.get("errors", [])), "preflight": preflight, "repair_actions": []}
 	var inspection := ImageImporterScript.inspect_image(source_path)
 	if not inspection.get("valid", false): return _failure(str(inspection.get("error", "Image import failed.")))
 	var before := _capture_document_snapshot()
@@ -304,10 +349,10 @@ func replace_layer_art(part_id: String, source_path: String) -> Dictionary:
 	if new_asset.is_empty() or not new_asset.has("asset_id"): return _failure("The replacement artwork could not be registered.")
 	var old_asset_id: String = part.asset_id
 	part.asset_id = str(new_asset.get("asset_id", ""))
-	asset_registry.update_asset(part.asset_id, {"tags": ["character_part", part.slot_id], "metadata": {"character_part_id": part_id, "slot_id": part.slot_id}})
+	asset_registry.update_asset(part.asset_id, {"tags": ["character_part", part.slot_id], "metadata": {"character_part_id": part_id, "slot_id": part.slot_id, "provenance": AssetImportPreflightScript.provenance_from_inspection(source_path, inspection)}})
 	if not _is_asset_referenced(old_asset_id): asset_registry.unregister_asset(old_asset_id)
 	_commit_document_edit(before, "Replaced %s Layer Artwork" % part.display_name)
-	return {"success": true, "errors": [], "asset_id": part.asset_id, "path": copied_path}
+	return {"success": true, "errors": [], "asset_id": part.asset_id, "path": copied_path, "preflight": preflight}
 
 
 func delete_layer(part_id: String) -> Dictionary:
@@ -335,24 +380,71 @@ func repair_missing_artwork(search_folder: String) -> Dictionary:
 	var candidates: Array = []
 	_collect_image_files(search_folder, candidates)
 	if candidates.is_empty(): return _failure("No supported artwork was found in the repair folder.")
+	var plan: Dictionary = MissingFileRepairScript.plan_deterministic_repairs(asset_registry, candidates, [AssetRegistryScript.CATEGORY_SOURCE_ART])
 	var before := _capture_document_snapshot()
 	var repaired := 0
-	for asset in MissingFileRepairScript.find_missing_assets(asset_registry):
-		var missing_path := str((asset as Dictionary).get("path", ""))
-		var filename := missing_path.get_file().to_lower()
-		for candidate in candidates:
-			if str(candidate).get_file().to_lower() == filename and MissingFileRepairScript.relocate_asset(asset_registry, str((asset as Dictionary).get("asset_id", "")), str(candidate)):
-				repaired += 1
-				break
-	if repaired == 0: return _failure("No missing artwork matched files in the selected folder.")
+	for raw_repair in plan.get("repairs", []):
+		var repair: Dictionary = raw_repair
+		var asset_id := str(repair.get("asset_id", ""))
+		var copied_path := _copy_asset_into_project(str(repair.get("candidate_path", "")), "repair_" + asset_id, "repaired_artwork")
+		if not copied_path.is_empty() and MissingFileRepairScript.relocate_asset(asset_registry, asset_id, copied_path):
+			repaired += 1
+	if repaired == 0:
+		var ambiguous: Array = plan.get("ambiguous", [])
+		var unresolved: Array = plan.get("unresolved", [])
+		var message := "%d missing artwork file%s have more than one filename match; choose a replacement manually." % [ambiguous.size(), "s" if ambiguous.size() != 1 else ""] if not ambiguous.is_empty() else "No unambiguous missing artwork could be repaired from the selected folder."
+		if not unresolved.is_empty(): message += " %d file%s were not found." % [unresolved.size(), "s" if unresolved.size() != 1 else ""]
+		return {"success": false, "errors": [message], "ambiguous": ambiguous, "unresolved": unresolved, "repair_actions": []}
 	_commit_document_edit(before, "Repaired %d Missing Artwork File%s" % [repaired, "s" if repaired != 1 else ""])
-	return {"success": true, "errors": [], "repaired": repaired}
+	return {"success": true, "errors": [], "repaired": repaired, "ambiguous": plan.get("ambiguous", []), "unresolved": plan.get("unresolved", []), "planned": plan.get("repairs", [])}
 
 
 func get_asset_health_report() -> Dictionary:
 	var referenced: Array = []
 	for part in part_registry.list_parts(): referenced.append(part.asset_id)
-	return AssetReportsScript.generate_report(asset_registry, referenced)
+	var report: Dictionary = AssetReportsScript.generate_report(asset_registry, referenced)
+	report["preflight"] = get_import_preflight_report()
+	return report
+
+
+## Preflight remains read-only so the file picker, drag-and-drop, and folder
+## import paths can all show the same result before copying artwork.
+func preflight_artwork_import(paths: Array, slot_id: String = "") -> Dictionary:
+	var report: Dictionary = AssetImportPreflightScript.inspect_paths(paths, asset_registry, {"canvas": get_canvas_settings()})
+	if not slot_id.is_empty() and not slot_registry.has_slot(slot_id):
+		var issue := {"id": "invalid_slot", "severity": "error", "message": "Choose a valid layer slot before importing artwork.", "slot_id": slot_id}
+		report.errors.append(issue)
+		report["error_count"] = (report.get("errors", []) as Array).size()
+		report["success"] = false
+	return report
+
+
+func get_import_preflight_report() -> Dictionary:
+	return AssetImportPreflightScript.audit_registry(asset_registry, {"canvas": get_canvas_settings()})
+
+
+func get_asset_provenance(asset_id: String) -> Dictionary:
+	var asset: Dictionary = asset_registry.get_asset(asset_id)
+	return (asset.get("metadata", {}) as Dictionary).get("provenance", {}) as Dictionary
+
+
+func set_asset_provenance(asset_id: String, updates: Dictionary) -> bool:
+	if is_read_only() or asset_id.is_empty(): return false
+	var asset: Dictionary = asset_registry.get_asset(asset_id)
+	if asset.is_empty(): return false
+	var metadata: Dictionary = (asset.get("metadata", {}) as Dictionary).duplicate(true)
+	var existing: Dictionary = metadata.get("provenance", {}) as Dictionary
+	var next: Dictionary = AssetImportPreflightScript.merge_provenance(existing, updates)
+	if next == existing: return false
+	var before := _capture_document_snapshot()
+	metadata["provenance"] = next
+	asset_registry.update_asset(asset_id, {"metadata": metadata})
+	_commit_document_edit(before, "Updated Asset Provenance")
+	return true
+
+
+func get_project_scale_report(options: Dictionary = {}) -> Dictionary:
+	return _scale_advisor.analyze(self, options)
 
 
 func save_project() -> Dictionary:
@@ -1714,3 +1806,13 @@ func _on_model_changed(description: String) -> void:
 
 func _failure(message: String) -> Dictionary:
 	return {"success": false, "errors": [message], "repair_actions": []}
+
+
+func _issue_messages(issues: Array) -> Array:
+	var messages: Array = []
+	for raw_issue in issues:
+		if raw_issue is Dictionary:
+			messages.append(str((raw_issue as Dictionary).get("message", "Import check failed.")))
+		else:
+			messages.append(str(raw_issue))
+	return messages if not messages.is_empty() else ["Import check failed."]

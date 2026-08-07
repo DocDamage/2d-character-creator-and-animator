@@ -4,6 +4,8 @@ extends Control
 const SAMPLE_PROJECT_PATH := "res://samples/humanoid_modular.chrproj"
 const STARTUP_SCENE_PATH := "res://app/bootstrap/startup.tscn"
 const WorkflowWizardScript = preload("res://app/bootstrap/project_workflow_wizard.gd")
+const ProjectScaleAdvisorScript = preload("res://quality/performance/project_scale_advisor.gd")
+const SupportBundleExporterScript = preload("res://quality/recovery/support_bundle_exporter.gd")
 
 @onready var _project_name: Label = %ProjectName
 @onready var _project_path: Label = %ProjectPath
@@ -41,6 +43,14 @@ var _appearance_list: ItemList
 var _appearance_status: Label
 var _appearance_generate_count: SpinBox
 var _readiness_status: Label
+var _asset_provenance_list: ItemList
+var _asset_author_input: LineEdit
+var _asset_license_input: LineEdit
+var _asset_source_input: LineEdit
+var _asset_safety_status: Label
+var _scale_status: Label
+var _support_status: Label
+var _last_support_bundle := ""
 var _wizard = null
 var _generate_appearances_dialog: ConfirmationDialog
 var _preview_controller = null
@@ -535,6 +545,87 @@ func _build_authoring_sections() -> void:
 	readiness_box.add_child(_readiness_status)
 	column.add_child(readiness_panel)
 
+	var asset_safety_panel := _make_panel("AssetSafety", "ASSET SAFETY & PROVENANCE")
+	var asset_safety_box := asset_safety_panel.get_node("Margin/VBox") as VBoxContainer
+	var audit_imports := Button.new()
+	audit_imports.name = "AuditImportedAssets"
+	audit_imports.text = "Audit imported files"
+	audit_imports.tooltip_text = "Check missing files, changed artwork, duplicates, transparency, scale, and provenance without changing the project."
+	audit_imports.pressed.connect(_audit_imported_assets)
+	asset_safety_box.add_child(audit_imports)
+	_asset_provenance_list = ItemList.new()
+	_asset_provenance_list.name = "ImportedAssetList"
+	_asset_provenance_list.custom_minimum_size = Vector2(0, 88)
+	_asset_provenance_list.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	_asset_provenance_list.item_selected.connect(_inspect_asset_provenance)
+	asset_safety_box.add_child(_asset_provenance_list)
+	_asset_author_input = LineEdit.new()
+	_asset_author_input.name = "AssetAuthor"
+	_asset_author_input.placeholder_text = "Artist / rights holder (optional)"
+	asset_safety_box.add_child(_asset_author_input)
+	_asset_license_input = LineEdit.new()
+	_asset_license_input.name = "AssetLicense"
+	_asset_license_input.placeholder_text = "License or permission (optional)"
+	asset_safety_box.add_child(_asset_license_input)
+	_asset_source_input = LineEdit.new()
+	_asset_source_input.name = "AssetSourceReference"
+	_asset_source_input.placeholder_text = "Source reference or purchase record (optional)"
+	asset_safety_box.add_child(_asset_source_input)
+	var provenance_actions := HFlowContainer.new()
+	asset_safety_box.add_child(provenance_actions)
+	var save_provenance := Button.new()
+	save_provenance.name = "SaveAssetProvenance"
+	save_provenance.text = "Save art details"
+	save_provenance.pressed.connect(_save_asset_provenance)
+	provenance_actions.add_child(save_provenance)
+	_asset_safety_status = Label.new()
+	_asset_safety_status.name = "AssetSafetyStatus"
+	_asset_safety_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_asset_safety_status.add_theme_font_size_override("font_size", 12)
+	asset_safety_box.add_child(_asset_safety_status)
+	column.add_child(asset_safety_panel)
+
+	var scale_panel := _make_panel("ProjectScale", "SCALE & DELIVERY")
+	var scale_box := scale_panel.get_node("Margin/VBox") as VBoxContainer
+	var analyze_scale := Button.new()
+	analyze_scale.name = "AnalyzeProjectScale"
+	analyze_scale.text = "Analyze project scale"
+	analyze_scale.pressed.connect(_analyze_project_scale)
+	scale_box.add_child(analyze_scale)
+	_scale_status = Label.new()
+	_scale_status.name = "ProjectScaleStatus"
+	_scale_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_scale_status.add_theme_font_size_override("font_size", 12)
+	scale_box.add_child(_scale_status)
+	column.add_child(scale_panel)
+
+	var support_panel := _make_panel("SupportPrivacy", "SUPPORT & PRIVACY")
+	var support_box := support_panel.get_node("Margin/VBox") as VBoxContainer
+	var support_copy := Label.new()
+	support_copy.text = "Create a local support ZIP only if you choose to share it. It contains diagnostics and a redacted project summary—never imported artwork or audio—and nothing is uploaded automatically."
+	support_copy.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	support_copy.add_theme_font_size_override("font_size", 12)
+	support_box.add_child(support_copy)
+	var support_actions := HFlowContainer.new()
+	support_box.add_child(support_actions)
+	var create_support_bundle := Button.new()
+	create_support_bundle.name = "CreateSupportBundle"
+	create_support_bundle.text = "Create local support bundle"
+	create_support_bundle.pressed.connect(_create_support_bundle)
+	support_actions.add_child(create_support_bundle)
+	var reveal_support_bundle := Button.new()
+	reveal_support_bundle.name = "RevealSupportBundle"
+	reveal_support_bundle.text = "Reveal bundle"
+	reveal_support_bundle.disabled = true
+	reveal_support_bundle.pressed.connect(_reveal_support_bundle)
+	support_actions.add_child(reveal_support_bundle)
+	_support_status = Label.new()
+	_support_status.name = "SupportStatus"
+	_support_status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	_support_status.add_theme_font_size_override("font_size", 12)
+	support_box.add_child(_support_status)
+	column.add_child(support_panel)
+
 	_wizard = WorkflowWizardScript.new()
 	_wizard.name = "ProjectWorkflowWizard"
 	_wizard.route_requested.connect(_route_wizard_step)
@@ -576,11 +667,17 @@ func _refresh_authoring_sections() -> void:
 		_snapshot_status.text = "Open an editable project to create portable milestones."
 		_appearance_status.text = "Open a project to save imported-art appearances."
 		_readiness_status.text = "Open a project to validate readiness."
+		if _asset_provenance_list != null: _asset_provenance_list.clear()
+		if _asset_safety_status != null: _asset_safety_status.text = "Open a project to audit imported files and record art details."
+		if _scale_status != null: _scale_status.text = "Open a project to estimate live-preview and review-export scale."
+		if _support_status != null: _support_status.text = "Support bundles are created locally and are never uploaded automatically."
 		return
 	var editable: bool = not _session.is_read_only()
-	for control_name in ["CreateSnapshot", "RestoreSnapshot", "DeleteSnapshot", "SaveAppearance", "RenameAppearance", "ApplyAppearance", "DuplicateAppearance", "DeleteAppearance", "GenerateAppearances", "AutoRepairAll"]:
+	for control_name in ["CreateSnapshot", "RestoreSnapshot", "DeleteSnapshot", "SaveAppearance", "RenameAppearance", "ApplyAppearance", "DuplicateAppearance", "DeleteAppearance", "GenerateAppearances", "AutoRepairAll", "SaveAssetProvenance"]:
 		var control := find_child(control_name, true, false) as BaseButton
 		if control != null: control.disabled = not editable
+	for provenance_input in [_asset_author_input, _asset_license_input, _asset_source_input]:
+		if provenance_input != null: provenance_input.editable = editable
 	if not editable:
 		_snapshot_status.text = "Bundled sample is read-only. Use Save As before creating, restoring, or deleting snapshots."
 		_appearance_status.text = "Bundled sample is read-only. Use Save As before changing Appearance Sets."
@@ -599,6 +696,9 @@ func _refresh_authoring_sections() -> void:
 	_appearance_status.text = "Uses only existing imported parts and palette values." if _appearance_list.item_count > 0 else "Save the current imported assembly as a named appearance."
 	var report: Dictionary = _session.get_readiness_report()
 	_readiness_status.text = "%d blocking issue%s · %d warning%s" % [(report.get("errors", []) as Array).size(), "s" if (report.get("errors", []) as Array).size() != 1 else "", (report.get("warnings", []) as Array).size(), "s" if (report.get("warnings", []) as Array).size() != 1 else ""]
+	_refresh_asset_safety()
+	_refresh_project_scale()
+	if _support_status != null and _support_status.text.is_empty(): _support_status.text = "Nothing is uploaded automatically. Create a local ZIP only when you want to share diagnostics."
 
 
 func _selected_snapshot_id() -> String:
@@ -744,6 +844,104 @@ func _auto_repair_all() -> void:
 	else:
 		_readiness_status.text = str(report.get("errors", ["Auto Repair failed."])[0])
 	_refresh_authoring_sections()
+
+
+func _selected_provenance_asset_id() -> String:
+	var selected := _asset_provenance_list.get_selected_items() if _asset_provenance_list != null else PackedInt32Array()
+	return str(_asset_provenance_list.get_item_metadata(selected[0])) if not selected.is_empty() else ""
+
+
+func _refresh_asset_safety() -> void:
+	if _asset_provenance_list == null or _asset_safety_status == null:
+		return
+	var selected_id := _selected_provenance_asset_id()
+	_asset_provenance_list.clear()
+	if _session == null or not is_instance_valid(_session):
+		return
+	var assets: Array = _session.asset_registry.list_assets()
+	assets.sort_custom(func(a: Dictionary, b: Dictionary): return str(a.get("name", "")).naturalnocasecmp_to(str(b.get("name", ""))) < 0)
+	for raw_asset in assets:
+		var asset: Dictionary = raw_asset
+		var path := str(asset.get("path", ""))
+		var label := str(asset.get("name", "Imported asset")) + " · " + str(asset.get("category", "source_art"))
+		if path.is_empty() or not FileAccess.file_exists(path): label = "⚠ Missing · " + label
+		var index := _asset_provenance_list.add_item(label)
+		_asset_provenance_list.set_item_metadata(index, str(asset.get("asset_id", "")))
+		if str(asset.get("asset_id", "")) == selected_id: _asset_provenance_list.select(index)
+	var audit: Dictionary = _session.get_import_preflight_report()
+	var errors := int(audit.get("error_count", 0))
+	var warnings := int(audit.get("warning_count", 0))
+	_asset_safety_status.text = "Import audit: %d blocking issue%s · %d warning%s. Record art details for assets you plan to hand off." % [errors, "s" if errors != 1 else "", warnings, "s" if warnings != 1 else ""]
+	if not selected_id.is_empty():
+		for index in range(_asset_provenance_list.item_count):
+			if str(_asset_provenance_list.get_item_metadata(index)) == selected_id:
+				_inspect_asset_provenance(index)
+				break
+	else:
+		_asset_author_input.clear()
+		_asset_license_input.clear()
+		_asset_source_input.clear()
+
+
+func _inspect_asset_provenance(index: int) -> void:
+	if _session == null or _asset_provenance_list == null or index < 0: return
+	var asset_id := str(_asset_provenance_list.get_item_metadata(index))
+	var provenance: Dictionary = _session.get_asset_provenance(asset_id)
+	_asset_author_input.text = str(provenance.get("author", ""))
+	_asset_license_input.text = str(provenance.get("license", ""))
+	_asset_source_input.text = str(provenance.get("source_reference", ""))
+
+
+func _save_asset_provenance() -> void:
+	if _session == null: return
+	var asset_id := _selected_provenance_asset_id()
+	if asset_id.is_empty():
+		_asset_safety_status.text = "Select an imported asset before recording its art details."
+		return
+	var changed: bool = bool(_session.set_asset_provenance(asset_id, {"author": _asset_author_input.text, "license": _asset_license_input.text, "source_reference": _asset_source_input.text}))
+	_asset_safety_status.text = "Saved art details for the selected asset." if changed else "Art details were unchanged or this project is read-only."
+	_refresh_authoring_sections()
+
+
+func _audit_imported_assets() -> void:
+	if _session == null: return
+	var report: Dictionary = _session.get_import_preflight_report()
+	var errors := int(report.get("error_count", 0))
+	var warnings := int(report.get("warning_count", 0))
+	var first: Dictionary = (report.get("errors", [])[0] as Dictionary) if not (report.get("errors", []) as Array).is_empty() else ((report.get("warnings", [])[0] as Dictionary) if not (report.get("warnings", []) as Array).is_empty() else {})
+	_asset_safety_status.text = "Import audit: %d blocking issue%s · %d warning%s%s" % [errors, "s" if errors != 1 else "", warnings, "s" if warnings != 1 else "", " · " + str(first.get("message", "")) if not first.is_empty() else " · all imported files look good"]
+
+
+func _refresh_project_scale() -> void:
+	if _scale_status == null: return
+	if _session == null or not is_instance_valid(_session): return
+	var report: Dictionary = _session.get_project_scale_report()
+	_scale_status.text = ProjectScaleAdvisorScript.format_summary(report)
+
+
+func _analyze_project_scale() -> void:
+	if _session == null: return
+	var report: Dictionary = _session.get_project_scale_report()
+	var recommendations: Array = report.get("recommendations", []) as Array
+	_scale_status.text = ProjectScaleAdvisorScript.format_summary(report) + (" · " + str(recommendations[0]) if not recommendations.is_empty() else "")
+
+
+func _create_support_bundle() -> void:
+	var report: Dictionary = SupportBundleExporterScript.new().create_bundle(_session)
+	if bool(report.get("success", false)):
+		_last_support_bundle = str(report.get("zip", ""))
+		_support_status.text = "Created a local support ZIP. It contains no imported artwork or audio and was not uploaded."
+		var reveal := find_child("RevealSupportBundle", true, false) as BaseButton
+		if reveal != null: reveal.disabled = _last_support_bundle.is_empty()
+	else:
+		_support_status.text = str(report.get("errors", ["Could not create the local support bundle."])[0])
+
+
+func _reveal_support_bundle() -> void:
+	if _last_support_bundle.is_empty(): return
+	var absolute := ProjectSettings.globalize_path(_last_support_bundle) if _last_support_bundle.begins_with("res://") or _last_support_bundle.begins_with("user://") else _last_support_bundle
+	if OS.shell_open(absolute.get_base_dir()) != OK:
+		_support_status.text = "Could not open the support-bundle folder."
 
 
 func _route_wizard_step(workspace_id: String, panel_id: String) -> void:

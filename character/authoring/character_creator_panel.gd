@@ -14,6 +14,7 @@ signal layer_selected(part_id: String)
 @onready var import_button: Button = $Margin/Root/Content/Picker/PickerMargin/PickerVBox/Import
 @onready var import_folder_button: Button = $Margin/Root/Content/Picker/PickerMargin/PickerVBox/ImportFolder
 @onready var repair_missing_button: Button = $Margin/Root/Content/Picker/PickerMargin/PickerVBox/RepairMissing
+@onready var audit_imports_button: Button = $Margin/Root/Content/Picker/PickerMargin/PickerVBox/AuditImports
 @onready var equip_button: Button = $Margin/Root/Content/Picker/PickerMargin/PickerVBox/EditActions/Equip
 @onready var unequip_button: Button = $Margin/Root/Content/Picker/PickerMargin/PickerVBox/EditActions/Unequip
 @onready var preview: Control = $Margin/Root/Content/PreviewCard/PreviewMargin/PreviewVBox/Preview
@@ -65,6 +66,7 @@ func _ready() -> void:
 	import_button.pressed.connect(_on_import_pressed)
 	import_folder_button.pressed.connect(func(): folder_dialog.popup_centered_ratio(0.72))
 	repair_missing_button.pressed.connect(func(): repair_dialog.popup_centered_ratio(0.72))
+	audit_imports_button.pressed.connect(_on_audit_imports_pressed)
 	equip_button.pressed.connect(_on_equip_pressed)
 	unequip_button.pressed.connect(_on_unequip_pressed)
 	undo_button.pressed.connect(undo_edit)
@@ -170,7 +172,9 @@ func import_part(path: String, slot_id: String = "") -> Dictionary:
 		_select_part(str(report.part_id))
 		_refresh_preview()
 		var duplicates: Array = report.get("duplicate_asset_ids", [])
-		_refresh_status("Imported and equipped %s%s." % [path.get_file(), " · duplicate artwork detected" if not duplicates.is_empty() else ""])
+		var preflight: Dictionary = report.get("preflight", {}) as Dictionary
+		var warning_count := int(preflight.get("warning_count", 0))
+		_refresh_status("Imported and equipped %s%s%s." % [path.get_file(), " · duplicate artwork detected" if not duplicates.is_empty() else "", " · %d import warning%s" % [warning_count, "s" if warning_count != 1 else ""] if warning_count > 0 else ""])
 	else:
 		_refresh_status(str(report.get("errors", ["Image import failed."])[0]))
 	return report
@@ -321,9 +325,27 @@ func _on_repair_folder_selected(path: String) -> void:
 		refresh_parts()
 		refresh_layers()
 		_refresh_preview()
-		_refresh_status("Repaired %d missing artwork file%s." % [int(report.get("repaired", 0)), "s" if int(report.get("repaired", 0)) != 1 else ""])
+		var ambiguous := (report.get("ambiguous", []) as Array).size()
+		var unresolved := (report.get("unresolved", []) as Array).size()
+		_refresh_status("Repaired %d missing artwork file%s%s%s." % [int(report.get("repaired", 0)), "s" if int(report.get("repaired", 0)) != 1 else "", " · %d need your choice" % ambiguous if ambiguous > 0 else "", " · %d still unresolved" % unresolved if unresolved > 0 else ""])
 	else:
 		_refresh_status(str(report.get("errors", ["Artwork could not be repaired."])[0]))
+
+
+func _on_audit_imports_pressed() -> void:
+	if session == null:
+		return
+	var report: Dictionary = session.get_import_preflight_report()
+	var errors := int(report.get("error_count", 0))
+	var warnings := int(report.get("warning_count", 0))
+	if errors > 0:
+		var first_error: Dictionary = (report.get("errors", [])[0] as Dictionary) if not (report.get("errors", []) as Array).is_empty() else {}
+		_refresh_status("Artwork check found %d blocking issue%s and %d warning%s. %s" % [errors, "s" if errors != 1 else "", warnings, "s" if warnings != 1 else "", str(first_error.get("message", "Repair the listed artwork before export."))])
+	elif warnings > 0:
+		var first_warning: Dictionary = (report.get("warnings", [])[0] as Dictionary) if not (report.get("warnings", []) as Array).is_empty() else {}
+		_refresh_status("Artwork check passed with %d warning%s. %s" % [warnings, "s" if warnings != 1 else "", str(first_warning.get("message", "Review import details before handoff."))])
+	else:
+		_refresh_status("Artwork check passed. Imported files are present and ready.")
 
 
 func _on_preview_files_dropped(paths: Array) -> void:
@@ -660,7 +682,7 @@ func _set_character_name(value: String) -> void:
 func _set_editing_enabled(enabled: bool) -> void:
 	name_input.editable = enabled
 	search_input.editable = enabled
-	for button in [apply_button, slot_select, import_button, import_folder_button, repair_missing_button, equip_button, unequip_button, undo_button, redo_button, apply_template_button, apply_canvas_button, layer_move_up, layer_move_down, layer_visibility, layer_lock, layer_solo, layer_duplicate, layer_replace, layer_delete]: button.disabled = not enabled
+	for button in [apply_button, slot_select, import_button, import_folder_button, repair_missing_button, audit_imports_button, equip_button, unequip_button, undo_button, redo_button, apply_template_button, apply_canvas_button, layer_move_up, layer_move_down, layer_visibility, layer_lock, layer_solo, layer_duplicate, layer_replace, layer_delete]: button.disabled = not enabled
 	for input in [template_select, canvas_width, canvas_height, pixel_scale, pos_x, pos_y, scale_x, scale_y, rotation_input, pivot_x, pivot_y, opacity, tint]: _set_control_enabled(input, enabled)
 	part_list.mouse_filter = Control.MOUSE_FILTER_STOP if enabled else Control.MOUSE_FILTER_IGNORE
 	part_list.focus_mode = Control.FOCUS_ALL if enabled else Control.FOCUS_NONE

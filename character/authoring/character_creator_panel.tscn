@@ -192,6 +192,12 @@ focus_mode = 2
 text = "Repair Missing Artwork…"
 tooltip_text = "Search a folder for missing layer files"
 
+[node name="AuditImports" type="Button" parent="Margin/Root/Content/Picker/PickerMargin/PickerVBox"]
+layout_mode = 2
+focus_mode = 2
+text = "Check Imported Artwork"
+tooltip_text = "Audit imported files for missing artwork, transparency, duplicates, scale, and provenance"
+
 [node name="Search" type="LineEdit" parent="Margin/Root/Content/Picker/PickerMargin/PickerVBox"]
 layout_mode = 2
 focus_mode = 2

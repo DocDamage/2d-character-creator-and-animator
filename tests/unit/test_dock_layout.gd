@@ -10,12 +10,9 @@ const BlendStackScript = preload("res://animation/blending/animation_blend_stack
 const StateMachineModelScript = preload("res://animation/state_machine/state_machine_authoring_model.gd")
 const RuleGraphModelScript = preload("res://animation/rules/rule_graph_authoring_model.gd")
 const ProjectFactoryScript = preload("res://character/authoring/character_project_factory.gd")
-
 func run_tests() -> Dictionary:
 	var results := {"passed": 0, "failed": 0, "errors": []}
-
 	print("[TEST 6] Main window instantiation & dock layout management...")
-
 	var mw_packed := ResourceLoader.load(MAIN_WINDOW_SCENE_PATH) as PackedScene
 	if mw_packed == null:
 		results["failed"] += 1
@@ -201,7 +198,16 @@ func run_tests() -> Dictionary:
 		results["failed"] += 1
 		results["errors"].append("Quality & Recovery dock does not expose focusable controls.")
 
-	# 2j. Verify the four core authoring docks are real editors rather than shell placeholders.
+	# 2j. Production delivery workflows must be real docks, not hidden services.
+	var production_specs := [["panel_runtime_delivery", "RuntimeDeliveryPanel", "RuntimePreviewOutput"], ["panel_motion_library", "MotionLibraryPanel", "MotionLibraryOutput"], ["panel_pipeline_collaboration", "PipelineCollaborationPanel", "PipelineCollaborationOutput"], ["panel_presentation", "PresentationPanel", "PresentationOutput"]]
+	var production_docks_ok := true
+	for spec in production_specs:
+		var dock: Control = mw_node.call("get_panel", str(spec[0])) as Control; var panel: Control = dock.call("get_content_container").get_node_or_null(str(spec[1])) as Control if dock != null else null
+		production_docks_ok = production_docks_ok and panel != null and panel.has_method("bind_session") and panel.get_node_or_null(str(spec[2])) is RichTextLabel
+	if production_docks_ok:
+		print("  PASS: Runtime, motion, pipeline, and presentation production workflows are surfaced as live docks."); results["passed"] += 1
+	else: results["failed"] += 1; results["errors"].append("Production delivery workflows are not fully surfaced in the application shell.")
+	# 2k. Verify the four core authoring docks are real editors rather than shell-only panels.
 	var p_hierarchy: Control = mw_node.call("get_panel", "panel_hierarchy") as Control
 	var p_viewport: Control = mw_node.call("get_panel", "panel_viewport") as Control
 	var p_inspector: Control = mw_node.call("get_panel", "panel_inspector") as Control
@@ -220,7 +226,7 @@ func run_tests() -> Dictionary:
 		results["passed"] += 1
 	else:
 		results["failed"] += 1
-		results["errors"].append("Core authoring docks still expose shell placeholders instead of real editors: %s" % str([hierarchy_ok, viewport_ok, inspector_ok, timeline_ok, mw_node.call("get_document_selection") != null]))
+		results["errors"].append("Core authoring docks still expose shell-only panels instead of real editors: %s" % str([hierarchy_ok, viewport_ok, inspector_ok, timeline_ok, mw_node.call("get_document_selection") != null]))
 
 	# 2k. Bind a real project and verify the four editors share its rig/clip selection.
 	var authoring_path := "user://dock_layout_authoring_%s.chrproj" % IDService.generate_short("ui")

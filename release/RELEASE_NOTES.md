@@ -28,6 +28,22 @@ Startup diagnostics in exported templates now validate packaged runtime
 resources rather than development-only folders such as `docs` and
 `editor_plugins`.
 
+## Release hardening and artist safeguards
+
+Imported artwork now has a non-destructive preflight/audit for blank layers,
+duplicates, oversized files, changed-on-disk content, and optional provenance.
+Repairs use checksum or a unique filename only, copy repaired artwork back into
+the project for portability, and leave ambiguous candidates for the artist.
+
+The Project Hub now surfaces scale advice, optional asset author/license/source
+details, and a local opt-in support bundle that excludes imported artwork and
+audio. Review-package estimates include scale advisories.
+
+Portable Windows ZIPs now include version and SHA-256 manifests. The release
+tooling verifies EXE/PCK payloads, includes an NSIS installer template, and
+requires HTTPS for public update feeds. Update checks never download or install
+anything automatically.
+
 New Project, Open Project, Open Sample, and Continue Last now enter the main
 editor workspace after loading or creating the selected project.
 

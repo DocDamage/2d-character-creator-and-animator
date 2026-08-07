@@ -1,0 +1,10 @@
+{
+  "version": "0.1.0-dev",
+  "channel": "stable",
+  "product_name": "Paper Quest Character Studio",
+  "company_name": "Paper Quest Studio",
+  "portable_artifact": "PaperQuestCharacterStudio-portable.zip",
+  "installer_artifact": "PaperQuestCharacterStudio-setup.exe",
+  "public_release_requires_code_signing": true,
+  "update_feed_requires_https": true
+}

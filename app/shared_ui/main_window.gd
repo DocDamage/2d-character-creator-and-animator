@@ -20,6 +20,10 @@ const AuthoringInspectorScript = preload("res://app/shared_ui/authoring_inspecto
 const AnimationTimelineEditorScript = preload("res://animation/timeline/animation_timeline_editor.gd")
 const AnimationPreviewControllerScript = preload("res://animation/preview/animation_preview_controller.gd")
 const ReviewPackagePanelScript = preload("res://export/review/review_package_panel.gd")
+const RuntimeDeliveryPanelScript = preload("res://app/production/runtime_delivery_panel.gd")
+const MotionLibraryPanelScript = preload("res://app/production/motion_library_panel.gd")
+const PipelineCollaborationPanelScript = preload("res://app/production/pipeline_collaboration_panel.gd")
+const PresentationPanelScript = preload("res://app/production/presentation_panel.gd")
 @onready var dock_layout_manager: Node = $DockLayoutManager
 @onready var status_message_label: Label = %StatusMessageLabel
 @onready var status_info_label: Label = %StatusInfoLabel
@@ -217,6 +221,9 @@ func _on_project_session_ready(session) -> void:
 		if hub.has_method("bind_preview_controller"): hub.call("bind_preview_controller", animation_preview_controller)
 	var review_panel := _get_authoring_dock_content("panel_review_package", "ReviewPackagePanel")
 	if review_panel != null and review_panel.has_method("bind_session"): review_panel.call("bind_session", _authoring_session)
+	for info in [["panel_runtime_delivery", "RuntimeDeliveryPanel"], ["panel_motion_library", "MotionLibraryPanel"], ["panel_pipeline_collaboration", "PipelineCollaborationPanel"], ["panel_presentation", "PresentationPanel"]]:
+		var production_panel := _get_authoring_dock_content(str(info[0]), str(info[1]))
+		if production_panel != null and production_panel.has_method("bind_session"): production_panel.call("bind_session", _authoring_session)
 	if document_selection != null: document_selection.clear()
 	if _authoring_session != null:
 		bind_pose_rig(_authoring_session.get_active_rig())
@@ -239,6 +246,9 @@ func _on_authoring_project_closed() -> void:
 	if hub != null and hub.has_method("bind_session"): hub.call("bind_session", null)
 	var review_panel := _get_authoring_dock_content("panel_review_package", "ReviewPackagePanel")
 	if review_panel != null and review_panel.has_method("bind_session"): review_panel.call("bind_session", null)
+	for info in [["panel_runtime_delivery", "RuntimeDeliveryPanel"], ["panel_motion_library", "MotionLibraryPanel"], ["panel_pipeline_collaboration", "PipelineCollaborationPanel"], ["panel_presentation", "PresentationPanel"]]:
+		var production_panel := _get_authoring_dock_content(str(info[0]), str(info[1]))
+		if production_panel != null and production_panel.has_method("bind_session"): production_panel.call("bind_session", null)
 	if document_selection != null: document_selection.clear()
 
 
@@ -264,7 +274,7 @@ func _setup_default_panels() -> void:
 		["panel_hierarchy", "Hierarchy & Rig", DockPanelScript.DockRegion.LEFT, "LEFT"], ["panel_pose_library", "Saved Poses", DockPanelScript.DockRegion.LEFT, "LEFT"], ["panel_retarget_preview", "Retarget Preview", DockPanelScript.DockRegion.RIGHT, "RIGHT"],
 		["panel_viewport", "2D Canvas Viewport", DockPanelScript.DockRegion.CENTER, "CENTER"],
 		["panel_project_hub", "Project Play Hub", DockPanelScript.DockRegion.CENTER, "CENTER"],
-		["panel_facing_grid", "Facing Grid Directions", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_weapon_wizard", "Weapon Authoring Wizard", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_character_creator", "Character Creator", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_media_authoring", "Media Authoring", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_animation_composition", "Animation Composition", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_batch_export", "Batch Export", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_quality_dashboard", "Quality & Recovery", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_review_package", "Review Package", DockPanelScript.DockRegion.CENTER, "CENTER"],
+		["panel_facing_grid", "Facing Grid Directions", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_weapon_wizard", "Weapon Authoring Wizard", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_character_creator", "Character Creator", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_media_authoring", "Media Authoring", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_animation_composition", "Animation Composition", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_motion_library", "Motion Library & Polish", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_runtime_delivery", "Runtime Preview & QA", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_pipeline_collaboration", "Pipeline & Collaboration", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_presentation", "Presentation & Approval", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_batch_export", "Batch Export", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_quality_dashboard", "Quality & Recovery", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_review_package", "Review Package", DockPanelScript.DockRegion.CENTER, "CENTER"],
 		["panel_inspector", "Inspector & Properties", DockPanelScript.DockRegion.RIGHT, "RIGHT"],
 		["panel_timeline", "Animation Timeline", DockPanelScript.DockRegion.BOTTOM, "BOTTOM"],
 		["panel_diagnostics", "Diagnostics & Logs", DockPanelScript.DockRegion.BOTTOM, "BOTTOM"]
@@ -309,6 +319,22 @@ func _create_dock_panel(pid: String, title: String, region: int) -> Control:
 	elif pid == "panel_project_hub" and ProjectHubPanelScene != null: p.call("add_content", ProjectHubPanelScene.instantiate() as Control)
 	elif pid == "panel_media_authoring" and MediaAuthoringPanelScene != null: p.call("add_content", MediaAuthoringPanelScene.instantiate() as Control)
 	elif pid == "panel_animation_composition" and AnimationCompositionPanelScene != null: p.call("add_content", AnimationCompositionPanelScene.instantiate() as Control)
+	elif pid == "panel_motion_library":
+		var motion_library := MotionLibraryPanelScript.new() as Control
+		motion_library.name = "MotionLibraryPanel"
+		p.call("add_content", motion_library)
+	elif pid == "panel_runtime_delivery":
+		var runtime_delivery := RuntimeDeliveryPanelScript.new() as Control
+		runtime_delivery.name = "RuntimeDeliveryPanel"
+		p.call("add_content", runtime_delivery)
+	elif pid == "panel_pipeline_collaboration":
+		var pipeline_collaboration := PipelineCollaborationPanelScript.new() as Control
+		pipeline_collaboration.name = "PipelineCollaborationPanel"
+		p.call("add_content", pipeline_collaboration)
+	elif pid == "panel_presentation":
+		var presentation := PresentationPanelScript.new() as Control
+		presentation.name = "PresentationPanel"
+		p.call("add_content", presentation)
 	elif pid == "panel_batch_export" and BatchExportPanelScene != null: p.call("add_content", BatchExportPanelScene.instantiate() as Control)
 	elif pid == "panel_quality_dashboard" and QualityDashboardPanelScene != null: p.call("add_content", QualityDashboardPanelScene.instantiate() as Control)
 	elif pid == "panel_review_package":
@@ -360,6 +386,10 @@ func _setup_shortcut_commands() -> void:
 	ShortcutRegistry.register_command("workspace.switch_assets", "Workspace: Switch to Project Assets", "Workspace", "", Callable(self, "_switch_ws").bind("project_assets"), ["workspace", "assets"])
 	ShortcutRegistry.register_command("workspace.switch_character", "Workspace: Switch to Character Creator", "Workspace", "", Callable(self, "_switch_ws").bind("character_creator"), ["workspace", "character"])
 	ShortcutRegistry.register_command("workspace.switch_animation", "Workspace: Switch to Animation Studio", "Workspace", "", Callable(self, "_switch_ws").bind("animation_studio"), ["workspace", "animation"])
+	ShortcutRegistry.register_command("runtime.open_preview", "Runtime: Open Preview & QA", "Runtime", "", Callable(self, "_open_production_panel").bind("panel_runtime_delivery"), ["runtime", "preview", "qa", "export"])
+	ShortcutRegistry.register_command("animation.open_motion_library", "Animation: Open Motion Library", "Animation", "", Callable(self, "_open_production_panel").bind("panel_motion_library"), ["motion", "library", "retarget", "secondary"])
+	ShortcutRegistry.register_command("pipeline.open_collaboration", "Pipeline: Open Collaboration", "Pipeline", "", Callable(self, "_open_production_panel").bind("panel_pipeline_collaboration"), ["git", "snapshot", "watch", "asset", "pack"])
+	ShortcutRegistry.register_command("presentation.open_approval", "Presentation: Open Approval Package", "Presentation", "", Callable(self, "_open_production_panel").bind("panel_presentation"), ["turntable", "viseme", "outfit", "approval"])
 	ShortcutRegistry.register_command("view.toggle_diagnostics", "View: Toggle Diagnostics Drawer", "View", "Ctrl+Shift+D", _toggle_diagnostics_drawer, ["diagnostics", "drawer", "logs"])
 	ShortcutRegistry.register_command("view.toggle_theme", "View: Toggle Studio/Classic Appearance", "View", "Ctrl+Shift+T", _cmd_toggle_theme, ["theme", "obsidian", "classic", "appearance"])
 	ShortcutRegistry.register_command("view.set_dpi_scale", "View: Cycle DPI Scale", "View", "Ctrl+Shift+U", _cmd_cycle_dpi_scale, ["dpi", "scale", "ui", "display"])
@@ -372,7 +402,7 @@ func _setup_focus_framework() -> void:
 		return
 	if menu_bar != null:
 		FocusService.register_focus_group("menu_bar", menu_bar)
-	for pid in ["panel_assets", "panel_hierarchy", "panel_viewport", "panel_project_hub", "panel_facing_grid", "panel_weapon_wizard", "panel_character_creator", "panel_media_authoring", "panel_animation_composition", "panel_batch_export", "panel_quality_dashboard", "panel_review_package", "panel_inspector", "panel_timeline", "panel_diagnostics"]:
+	for pid in ["panel_assets", "panel_hierarchy", "panel_viewport", "panel_project_hub", "panel_facing_grid", "panel_weapon_wizard", "panel_character_creator", "panel_media_authoring", "panel_animation_composition", "panel_motion_library", "panel_runtime_delivery", "panel_pipeline_collaboration", "panel_presentation", "panel_batch_export", "panel_quality_dashboard", "panel_review_package", "panel_inspector", "panel_timeline", "panel_diagnostics"]:
 		var p := get_panel(pid)
 		if p != null:
 			FocusService.register_focus_group(pid, p)
@@ -437,6 +467,14 @@ func _on_close_project_choice(choice: int) -> void:
 func _switch_ws(ws_id: String) -> void:
 	if WorkspaceManager != null:
 		WorkspaceManager.call("switch_workspace", ws_id)
+
+
+func _open_production_panel(panel_id: String) -> void:
+	if WorkspaceManager != null: WorkspaceManager.call("switch_workspace", "preview_export" if panel_id != "panel_motion_library" else "animation_studio")
+	var manager := get_dock_layout_manager()
+	if manager != null:
+		manager.call("set_panel_visible", panel_id, true)
+		manager.call("activate_panel", panel_id)
 
 func _on_preset_option_selected(index: int) -> void:
 	if preset_option_button != null:

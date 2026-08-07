@@ -22,7 +22,8 @@ func get_estimate(session) -> Dictionary:
 		frames += int(ceil(float(clip.get("duration", 1.0)) * maxf(1.0, float(clip.get("fps", 24.0))))) + 1
 	var canvas: Dictionary = session.get_canvas_settings()
 	var pixels := int(canvas.get("width", 512)) * int(canvas.get("height", 512))
-	return {"items": clips.size() * appearance_count, "frames": frames * appearance_count, "estimated_bytes": frames * appearance_count * pixels * 2, "estimated_seconds": float(frames * appearance_count) * 0.04}
+	var scale: Dictionary = session.get_project_scale_report() if session.has_method("get_project_scale_report") else {}
+	return {"items": clips.size() * appearance_count, "frames": frames * appearance_count, "estimated_bytes": frames * appearance_count * pixels * 2, "estimated_seconds": float(frames * appearance_count) * 0.04, "scale": scale}
 
 
 func export_package(session, output_folder: String = "", options: Dictionary = {}) -> Dictionary:

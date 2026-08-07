@@ -97,7 +97,9 @@ func _refresh() -> void:
 		_export_button.disabled = true
 		return
 	var estimate: Dictionary = _exporter.get_estimate(_session)
-	_estimate_label.text = "%d clip/appearance item%s · %d frame%s · approximately %s · approximately %.0f seconds" % [int(estimate.get("items", 0)), "s" if int(estimate.get("items", 0)) != 1 else "", int(estimate.get("frames", 0)), "s" if int(estimate.get("frames", 0)) != 1 else "", _format_bytes(int(estimate.get("estimated_bytes", 0))), float(estimate.get("estimated_seconds", 0.0))]
+	var scale: Dictionary = estimate.get("scale", {}) as Dictionary
+	var advisories := (scale.get("issues", []) as Array).size()
+	_estimate_label.text = "%d clip/appearance item%s · %d frame%s · approximately %s · approximately %.0f seconds%s" % [int(estimate.get("items", 0)), "s" if int(estimate.get("items", 0)) != 1 else "", int(estimate.get("frames", 0)), "s" if int(estimate.get("frames", 0)) != 1 else "", _format_bytes(int(estimate.get("estimated_bytes", 0))), float(estimate.get("estimated_seconds", 0.0)), " · %d scale advisor%s" % [advisories, "ies" if advisories != 1 else "y"] if advisories > 0 else ""]
 	var report: Dictionary = _session.get_readiness_report({"require_clips": true})
 	_status_label.text = "Resolve %d blocking issue%s before export." % [(report.get("errors", []) as Array).size(), "s" if (report.get("errors", []) as Array).size() != 1 else ""] if not bool(report.get("can_export", false)) else "Ready to render. Warnings will need confirmation."
 	_export_button.disabled = false

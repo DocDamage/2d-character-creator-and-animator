@@ -9,6 +9,7 @@ extends RefCounted
 const TrackDefinitionScript = preload("res://animation/tracks/track_schema.gd")
 const TrackFactoryScript = preload("res://animation/tracks/track_factory.gd")
 const RigSchemaScript = preload("res://rigging/bones/rig_schema.gd")
+const ProjectScaleAdvisorScript = preload("res://quality/performance/project_scale_advisor.gd")
 
 
 func validate(session, options: Dictionary = {}) -> Dictionary:
@@ -154,6 +155,18 @@ func _validate_assets(session, warnings: Array) -> void:
 		warnings.append(_issue("duplicate_assets", "warning", "%d duplicate imported-asset group%s detected." % [int(report.get("duplicate_groups", 0)), "s" if int(report.get("duplicate_groups", 0)) != 1 else ""], "assets"))
 	if int(report.get("unused_count", 0)) > 0:
 		warnings.append(_issue("unused_assets", "warning", "%d imported asset%s are currently unused." % [int(report.get("unused_count", 0)), "s" if int(report.get("unused_count", 0)) != 1 else ""], "assets"))
+	var preflight: Dictionary = report.get("preflight", {}) as Dictionary
+	var preflight_errors: Array = preflight.get("errors", []) as Array
+	var preflight_warnings: Array = preflight.get("warnings", []) as Array
+	if not preflight_errors.is_empty() or not preflight_warnings.is_empty():
+		# Missing referenced art and audio remain blocking errors above.  Other
+		# import-audit findings are preserved as warnings so unused source files
+		# never stop a legitimate export.
+		warnings.append(_issue("import_preflight", "warning", "Import audit found %d issue%s. Review artwork size, transparency, provenance, and changed-on-disk files before handoff." % [preflight_errors.size() + preflight_warnings.size(), "s" if preflight_errors.size() + preflight_warnings.size() != 1 else ""], "assets", {"error_count": preflight_errors.size(), "warning_count": preflight_warnings.size()}))
+	var scale: Dictionary = session.get_project_scale_report()
+	for raw_issue in scale.get("issues", []):
+		var scale_issue: Dictionary = raw_issue
+		warnings.append(_issue("scale_" + str(scale_issue.get("id", "advisory")), "warning", str(scale_issue.get("message", "Project scale needs review.")), "performance", {"scale_context": scale_issue}))
 
 
 func _validate_metadata(session, warnings: Array) -> void:
