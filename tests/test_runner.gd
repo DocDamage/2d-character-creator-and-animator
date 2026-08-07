@@ -40,6 +40,7 @@ const TestAuthoringCompletionScript = preload("res://tests/integration/test_auth
 const TestReleaseHardeningScript = preload("res://tests/integration/test_release_hardening.gd")
 const TestProductionDeliveryScript = preload("res://tests/integration/test_production_delivery.gd")
 const TestLpcPhase01Script = preload("res://tests/integration/test_lpc_phase_0_1.gd")
+const TestLpcPhase2Script = preload("res://tests/integration/test_lpc_phase_2.gd")
 func _ready() -> void:
 	print("=== Running Automated Test Suite ===")
 	print("")
@@ -302,6 +303,9 @@ func _ready() -> void:
 	# 44. Exercise the locked LPC catalog, strict reference raster path, and direct-start project workflow.
 	var r44 := _exec_sub(TestLpcPhase01Script.new(), pass_count, fail_count)
 	pass_count = r44[0]; fail_count = r44[1]
+	# 45. Exercise the focused LPC creator and exact native frame export path.
+	var r45 := _exec_sub(TestLpcPhase2Script.new(), pass_count, fail_count)
+	pass_count = r45[0]; fail_count = r45[1]
 	print("")
 	print("=== Test Suite Finished: %d PASS, %d FAIL ===" % [pass_count, fail_count])
 	get_tree().quit(0 if fail_count == 0 else 1)

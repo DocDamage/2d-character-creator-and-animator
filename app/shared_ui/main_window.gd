@@ -24,6 +24,9 @@ const RuntimeDeliveryPanelScript = preload("res://app/production/runtime_deliver
 const MotionLibraryPanelScript = preload("res://app/production/motion_library_panel.gd")
 const PipelineCollaborationPanelScript = preload("res://app/production/pipeline_collaboration_panel.gd")
 const PresentationPanelScript = preload("res://app/production/presentation_panel.gd")
+const LpcCreatorPanelScript = preload("res://lpc/ui/lpc_creator_panel.gd")
+const LpcProjectStoreScript = preload("res://lpc/project/lpc_project_store.gd")
+const LpcCatalogBuilderScript = preload("res://lpc/catalog/lpc_catalog_builder.gd")
 @onready var dock_layout_manager: Node = $DockLayoutManager
 @onready var status_message_label: Label = %StatusMessageLabel
 @onready var status_info_label: Label = %StatusInfoLabel
@@ -56,6 +59,7 @@ func _ready() -> void:
 	_setup_document_selection()
 	_setup_dock_regions()
 	_setup_default_panels()
+	call_deferred("_bind_lpc_creator_if_open")
 	_setup_document_editor_bindings()
 	_setup_workspace_manager()
 	_setup_menu_header()
@@ -207,6 +211,29 @@ func _get_character_creator() -> Control:
 	var panel := get_panel("panel_character_creator")
 	return panel.get_node_or_null("MainVBox/ContentContainer/CharacterCreatorPanel") as Control if panel != null else null
 
+func _get_lpc_creator() -> Control:
+	var panel := get_panel("panel_lpc_creator")
+	return panel.get_node_or_null("MainVBox/ContentContainer/LpcCreatorPanel") as Control if panel != null else null
+
+func bind_lpc_creator_context(catalog: Dictionary, profile: Dictionary, manifest: Dictionary = {}, project_path: String = "") -> Dictionary:
+	var creator := _get_lpc_creator()
+	return creator.call("bind_context", catalog, profile, manifest, project_path) as Dictionary if creator != null else {"success": false, "errors": ["The LPC Creator panel is unavailable."]}
+
+func _bind_lpc_creator_if_open() -> void:
+	if AppState == null or not AppState.is_project_loaded(): return
+	var project_path := AppState.get_project_path()
+	var opened := LpcProjectStoreScript.open(project_path, false)
+	if not bool(opened.get("success", false)): return
+	var profile: Dictionary = opened.get("profile", {})
+	var catalog_result := LpcCatalogBuilderScript.load_cache(str(profile.get("source_library_root", "")))
+	if not bool(catalog_result.get("success", false)):
+		set_status_message("LPC project opened, but its locked catalog needs rebuilding before editing.")
+		return
+	var bound := bind_lpc_creator_context(catalog_result.get("catalog", {}), profile, opened.get("manifest", {}), project_path)
+	if bool(bound.get("success", false)):
+		get_dock_layout_manager().call("activate_panel", "panel_lpc_creator")
+		set_status_message("LPC Creator ready with locked-source native preview.")
+
 func _get_authoring_dock_content(panel_id: String, content_name: String) -> Control:
 	var panel := get_panel(panel_id)
 	return panel.get_node_or_null("MainVBox/ContentContainer/" + content_name) as Control if panel != null else null
@@ -287,7 +314,7 @@ func _setup_default_panels() -> void:
 		["panel_hierarchy", "Hierarchy & Rig", DockPanelScript.DockRegion.LEFT, "LEFT"], ["panel_pose_library", "Saved Poses", DockPanelScript.DockRegion.LEFT, "LEFT"], ["panel_retarget_preview", "Retarget Preview", DockPanelScript.DockRegion.RIGHT, "RIGHT"],
 		["panel_viewport", "2D Canvas Viewport", DockPanelScript.DockRegion.CENTER, "CENTER"],
 		["panel_project_hub", "Project Play Hub", DockPanelScript.DockRegion.CENTER, "CENTER"],
-		["panel_facing_grid", "Facing Grid Directions", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_weapon_wizard", "Weapon Authoring Wizard", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_character_creator", "Character Creator", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_media_authoring", "Media Authoring", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_animation_composition", "Animation Composition", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_motion_library", "Motion Library & Polish", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_runtime_delivery", "Runtime Preview & QA", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_pipeline_collaboration", "Pipeline & Collaboration", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_presentation", "Presentation & Approval", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_batch_export", "Batch Export", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_quality_dashboard", "Quality & Recovery", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_review_package", "Review Package", DockPanelScript.DockRegion.CENTER, "CENTER"],
+		["panel_facing_grid", "Facing Grid Directions", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_weapon_wizard", "Weapon Authoring Wizard", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_character_creator", "Character Creator", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_lpc_creator", "LPC Creator", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_media_authoring", "Media Authoring", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_animation_composition", "Animation Composition", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_motion_library", "Motion Library & Polish", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_runtime_delivery", "Runtime Preview & QA", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_pipeline_collaboration", "Pipeline & Collaboration", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_presentation", "Presentation & Approval", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_batch_export", "Batch Export", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_quality_dashboard", "Quality & Recovery", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_review_package", "Review Package", DockPanelScript.DockRegion.CENTER, "CENTER"],
 		["panel_inspector", "Inspector & Properties", DockPanelScript.DockRegion.RIGHT, "RIGHT"],
 		["panel_timeline", "Animation Timeline", DockPanelScript.DockRegion.BOTTOM, "BOTTOM"],
 		["panel_diagnostics", "Diagnostics & Logs", DockPanelScript.DockRegion.BOTTOM, "BOTTOM"]
@@ -329,6 +356,10 @@ func _create_dock_panel(pid: String, title: String, region: int) -> Control:
 	elif pid == "panel_weapon_wizard" and WeaponAuthoringWizardScene != null:
 		p.call("add_content", WeaponAuthoringWizardScene.instantiate() as Control)
 	elif pid == "panel_character_creator" and CharacterCreatorPanelScene != null: p.call("add_content", CharacterCreatorPanelScene.instantiate() as Control)
+	elif pid == "panel_lpc_creator":
+		var lpc_creator := LpcCreatorPanelScript.new() as Control
+		lpc_creator.name = "LpcCreatorPanel"
+		p.call("add_content", lpc_creator)
 	elif pid == "panel_project_hub" and ProjectHubPanelScene != null: p.call("add_content", ProjectHubPanelScene.instantiate() as Control)
 	elif pid == "panel_media_authoring" and MediaAuthoringPanelScene != null: p.call("add_content", MediaAuthoringPanelScene.instantiate() as Control)
 	elif pid == "panel_animation_composition" and AnimationCompositionPanelScene != null: p.call("add_content", AnimationCompositionPanelScene.instantiate() as Control)
@@ -415,7 +446,7 @@ func _setup_focus_framework() -> void:
 		return
 	if menu_bar != null:
 		FocusService.register_focus_group("menu_bar", menu_bar)
-	for pid in ["panel_assets", "panel_hierarchy", "panel_viewport", "panel_project_hub", "panel_facing_grid", "panel_weapon_wizard", "panel_character_creator", "panel_media_authoring", "panel_animation_composition", "panel_motion_library", "panel_runtime_delivery", "panel_pipeline_collaboration", "panel_presentation", "panel_batch_export", "panel_quality_dashboard", "panel_review_package", "panel_inspector", "panel_timeline", "panel_diagnostics"]:
+	for pid in ["panel_assets", "panel_hierarchy", "panel_viewport", "panel_project_hub", "panel_facing_grid", "panel_weapon_wizard", "panel_character_creator", "panel_lpc_creator", "panel_media_authoring", "panel_animation_composition", "panel_motion_library", "panel_runtime_delivery", "panel_pipeline_collaboration", "panel_presentation", "panel_batch_export", "panel_quality_dashboard", "panel_review_package", "panel_inspector", "panel_timeline", "panel_diagnostics"]:
 		var p := get_panel(pid)
 		if p != null:
 			FocusService.register_focus_group(pid, p)
