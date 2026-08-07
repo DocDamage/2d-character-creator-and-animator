@@ -103,7 +103,7 @@ None.
 ## Work Performed
 1. Created the complete 86-directory repository structure matching Section 5 of the master plan exactly.
 2. Created `project.godot` — Godot 4.7.1 project file configuring:
-   - Window settings (1920×1080, resizable)
+   - Window settings (1280×720 responsive editor baseline, resizable)
    - Five autoload services (AppState, CommandService, IDService, SerializationService, DiagnosticsService)
    - Input map entries (undo, redo, command palette, canvas pan)
    - Render settings (GL compatibility, nearest-neighbor mipmap)

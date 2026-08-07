@@ -24,8 +24,10 @@ func run_tests() -> int:
 	pass_count += test_asset_reports()
 	pass_count += test_batch_metadata_editor()
 	
-	_thumb_cache.queue_free()
-	_registry.queue_free()
+	# The runner exits in this frame, so these test-only nodes need immediate
+	# teardown rather than deferred deletion.
+	_thumb_cache.free()
+	_registry.free()
 	
 	print("--- Asset Library Tests Finished: %d PASS ---" % pass_count)
 	return pass_count

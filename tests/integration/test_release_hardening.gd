@@ -69,8 +69,9 @@ func run_tests() -> Dictionary:
 	updates.configure_feed("", "stable")
 	var bundled_update: Dictionary = updates.check_bundled_manifest()
 	checks["secure update behavior"] = not bool(insecure_update.get("success", true)) and not bool(bundled_update.get("configured", true)) and "no public update feed" in str(bundled_update.get("message", "")).to_lower()
-	updates.queue_free()
-	if is_instance_valid(session): session.queue_free()
+	updates.free()
+	if is_instance_valid(session): session.free()
+	registry.free()
 	_cleanup(root)
 	if _all_true(checks):
 		print("  PASS: Release hardening preflight, provenance, deterministic repair, scale guidance, local support, packaging, and secure update behavior")

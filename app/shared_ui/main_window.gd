@@ -47,7 +47,11 @@ var _responsive_state: Dictionary = {}
 var document_selection: Node = null
 var _authoring_session = null
 var animation_preview_controller: Node = null
+const MINIMUM_EDITOR_SIZE := Vector2i(1280, 720)
+
+
 func _ready() -> void:
+	_configure_window_constraints()
 	if ThemeService != null: ThemeService.apply_to_window(get_window())
 	_setup_document_selection()
 	_setup_dock_regions()
@@ -84,8 +88,17 @@ func get_document_selection() -> Node: return document_selection
 func _on_dpi_scale_changed(_scale: float) -> void:
 	_apply_responsive_layout()
 
+
+func _configure_window_constraints() -> void:
+	var window := get_window()
+	if window != null:
+		window.min_size = MINIMUM_EDITOR_SIZE
+
+
 func _apply_responsive_layout() -> void:
-	apply_responsive_layout_for_size(get_viewport_rect().size)
+	var window := get_window()
+	var available_size := Vector2(window.size) if window != null and window.size.x > 0 and window.size.y > 0 else get_viewport_rect().size
+	apply_responsive_layout_for_size(available_size)
 
 
 func apply_responsive_layout_for_size(viewport: Vector2, dpi_scale: float = -1.0) -> Dictionary:

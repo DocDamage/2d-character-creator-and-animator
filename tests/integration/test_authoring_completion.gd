@@ -22,6 +22,7 @@ func run_tests() -> Dictionary:
 	var setup: Dictionary = _create_import_project(root, project_path, session)
 	if not bool(setup.get("success", false)):
 		errors.append("Could not prepare authoring-completion test project: " + str(setup.get("errors", [])))
+		session.free()
 		_cleanup(root)
 		return {"passed": 0, "failed": 1, "errors": errors}
 	var body_b: String = str(setup.get("body_b", ""))

@@ -48,9 +48,12 @@ var _snapshot_service = SnapshotServiceScript.new()
 var _readiness_validator = ReadinessValidatorScript.new()
 var _scale_advisor = ProjectScaleAdvisorScript.new()
 
-func _ready() -> void:
-	if asset_registry.get_parent() == null: add_child(asset_registry)
-	if thumbnail_cache.get_parent() == null: add_child(thumbnail_cache)
+func _init() -> void:
+	# These services are part of the session's lifetime even when a session is
+	# used off-tree (for CLI, tests, or background workflows). Owning them from
+	# construction guarantees that freeing the session also frees its services.
+	add_child(asset_registry)
+	add_child(thumbnail_cache)
 
 
 func open_project(path: String) -> Dictionary:

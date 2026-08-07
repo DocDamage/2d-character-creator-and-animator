@@ -207,6 +207,26 @@ func run_tests() -> Dictionary:
 	if production_docks_ok:
 		print("  PASS: Runtime, motion, pipeline, and presentation production workflows are surfaced as live docks."); results["passed"] += 1
 	else: results["failed"] += 1; results["errors"].append("Production delivery workflows are not fully surfaced in the application shell.")
+	# 2j-1. Production panels must expose visible labels/placeholders and readable summaries,
+	# not tooltip-only blank fields or raw JSON as the primary user-facing surface.
+	var runtime_dock: Control = mw_node.call("get_panel", "panel_runtime_delivery") as Control
+	var motion_dock: Control = mw_node.call("get_panel", "panel_motion_library") as Control
+	var pipeline_dock: Control = mw_node.call("get_panel", "panel_pipeline_collaboration") as Control
+	var presentation_dock: Control = mw_node.call("get_panel", "panel_presentation") as Control
+	var runtime_panel: Control = runtime_dock.call("get_content_container").get_node_or_null("RuntimeDeliveryPanel") as Control if runtime_dock != null else null
+	var motion_panel: Control = motion_dock.call("get_content_container").get_node_or_null("MotionLibraryPanel") as Control if motion_dock != null else null
+	var pipeline_panel: Control = pipeline_dock.call("get_content_container").get_node_or_null("PipelineCollaborationPanel") as Control if pipeline_dock != null else null
+	var presentation_panel: Control = presentation_dock.call("get_content_container").get_node_or_null("PresentationPanel") as Control if presentation_dock != null else null
+	var runtime_parameter: LineEdit = runtime_panel.get_node_or_null("RuntimeInputs/StateParameterField/StateParameter") as LineEdit if runtime_panel != null else null
+	var motion_id: LineEdit = motion_panel.get_node_or_null("MotionActions/MotionIdField/MotionId") as LineEdit if motion_panel != null else null
+	var source_path: LineEdit = pipeline_panel.get_node_or_null("WatchSourceControls/SourcePathField/SourcePath") as LineEdit if pipeline_panel != null else null
+	var approval_url: LineEdit = presentation_panel.get_node_or_null("PresentationExportControls/ApprovalUrlField/ApprovalUrl") as LineEdit if presentation_panel != null else null
+	var production_guidance_ok := runtime_parameter != null and not runtime_parameter.placeholder_text.is_empty() and motion_id != null and not motion_id.placeholder_text.is_empty() and source_path != null and not source_path.placeholder_text.is_empty() and approval_url != null and not approval_url.placeholder_text.is_empty()
+	var production_output_ok := runtime_panel != null and (runtime_panel.get_node_or_null("RuntimePreviewOutput") as RichTextLabel).bbcode_enabled and motion_panel != null and (motion_panel.get_node_or_null("MotionLibraryOutput") as RichTextLabel).bbcode_enabled and pipeline_panel != null and (pipeline_panel.get_node_or_null("PipelineCollaborationOutput") as RichTextLabel).bbcode_enabled and presentation_panel != null and (presentation_panel.get_node_or_null("PresentationOutput") as RichTextLabel).bbcode_enabled
+	if production_guidance_ok and production_output_ok:
+		print("  PASS: Production panels expose visible input guidance and readable rich-text summaries."); results["passed"] += 1
+	else:
+		results["failed"] += 1; results["errors"].append("Production panels are missing visible input guidance or readable rich-text summaries.")
 	# 2k. Verify the four core authoring docks are real editors rather than shell-only panels.
 	var p_hierarchy: Control = mw_node.call("get_panel", "panel_hierarchy") as Control
 	var p_viewport: Control = mw_node.call("get_panel", "panel_viewport") as Control

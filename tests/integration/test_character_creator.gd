@@ -16,12 +16,27 @@ const CreatorPanelScene = preload("res://character/authoring/character_creator_p
 
 func run_tests() -> int:
 	var passes := 0
+	passes += test_off_tree_session_owns_asset_services()
 	passes += test_creator_edits_are_browseable_reversible_and_weapon_safe()
 	passes += test_seeded_npc_batch_has_one_hundred_unique_valid_assemblies()
 	passes += test_manual_panel_imports_real_art_and_persists_it()
 	passes += test_import_wizard_layer_controls_and_document_history()
 	passes += test_project_backed_rig_and_timeline_history()
 	return passes
+
+
+func test_off_tree_session_owns_asset_services() -> int:
+	var session = ProjectSessionScript.new()
+	var registry: Node = session.asset_registry
+	var thumbnail_cache: Node = session.thumbnail_cache
+	var attached := registry.get_parent() == session and thumbnail_cache.get_parent() == session
+	session.free()
+	var released := not is_instance_valid(registry) and not is_instance_valid(thumbnail_cache)
+	if attached and released:
+		print("  PASS: Off-tree project sessions own and release their asset services")
+		return 1
+	printerr("  FAIL: Off-tree project session did not release its asset services")
+	return 0
 
 
 func test_project_backed_rig_and_timeline_history() -> int:

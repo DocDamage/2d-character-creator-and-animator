@@ -26,6 +26,7 @@ func run_all_tests() -> bool:
 	test_paper_quest_native_components()
 	test_command_palette_shortcuts()
 	test_main_window_theme_integration()
+	test_editor_window_scaling()
 	test_responsive_layout_matrix()
 	
 	ThemeService.set_appearance_mode(ThemeService.AppearanceMode.OBSIDIAN)
@@ -238,6 +239,16 @@ func test_main_window_theme_integration() -> void:
 	win.call("_cmd_cycle_dpi_scale")
 	_assert((win.call("get_status_message") as String).contains("DPI scale set to:"), "MainWindow status updated on _cmd_cycle_dpi_scale.")
 	
+	win.queue_free()
+
+
+func test_editor_window_scaling() -> void:
+	var stretch_mode := str(ProjectSettings.get_setting("display/window/stretch/mode", ""))
+	_assert(stretch_mode == "disabled", "Editor shell keeps UI at its authored size instead of shrinking the canvas at smaller windows.")
+	var win := MainWindowScene.instantiate() as Control
+	add_child(win)
+	var window := win.get_window()
+	_assert(window != null and window.min_size.x >= 1280 and window.min_size.y >= 720, "Editor shell prevents resizing below the supported 1280×720 minimum.")
 	win.queue_free()
 
 

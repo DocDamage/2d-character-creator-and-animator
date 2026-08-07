@@ -28,6 +28,8 @@ func _ready() -> void:
 	size_flags_vertical = Control.SIZE_EXPAND_FILL
 	_build()
 	_refresh()
+	get_viewport().size_changed.connect(_apply_output_height)
+	call_deferred("_apply_output_height")
 
 
 func bind_session(session) -> void:
@@ -40,30 +42,47 @@ func bind_session(session) -> void:
 func _build() -> void:
 	var title := Label.new(); title.text = "Game Runtime Preview & Delivery"; title.add_theme_font_size_override("font_size", 18); add_child(title)
 	var hint := Label.new(); hint.text = "The preview, QA recorder, and exported packages consume the same deterministic runtime contract."; hint.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART; add_child(hint)
-	var runtime_row := HFlowContainer.new(); add_child(runtime_row)
+	var runtime_row := HFlowContainer.new(); runtime_row.name = "RuntimeControls"; add_child(runtime_row)
 	_profile = OptionButton.new(); _profile.name = "RuntimeProfile"; _profile.add_item("Godot"); _profile.add_item("Unity"); _profile.add_item("Unreal"); _profile.item_selected.connect(_on_profile_selected); runtime_row.add_child(_profile)
-	_time = SpinBox.new(); _time.name = "RuntimeTime"; _time.step = 1.0 / 30.0; _time.max_value = 3600.0; runtime_row.add_child(_time)
+	runtime_row.remove_child(_profile); _add_labeled_control(runtime_row, "Runtime", _profile, 118.0)
+	_time = SpinBox.new(); _time.name = "RuntimeTime"; _time.step = 1.0 / 30.0; _time.max_value = 3600.0; _time.tooltip_text = "Preview time in seconds"; _add_labeled_control(runtime_row, "Time (seconds)", _time, 118.0)
 	var preview_button := Button.new(); preview_button.text = "Preview frame"; preview_button.pressed.connect(_preview_frame); runtime_row.add_child(preview_button)
 	var tick_button := Button.new(); tick_button.text = "Advance runtime"; tick_button.pressed.connect(_tick); runtime_row.add_child(tick_button)
-	var input_row := HFlowContainer.new(); add_child(input_row)
-	_parameter = LineEdit.new(); _parameter.tooltip_text = "State parameter"; _parameter.custom_minimum_size.x = 132; input_row.add_child(_parameter)
-	_parameter_value = LineEdit.new(); _parameter_value.tooltip_text = "Value"; _parameter_value.custom_minimum_size.x = 84; input_row.add_child(_parameter_value)
+	runtime_row.remove_child(preview_button); _add_labeled_control(runtime_row, "Preview", preview_button, 128.0)
+	runtime_row.remove_child(tick_button); _add_labeled_control(runtime_row, "Playback", tick_button, 138.0)
+	var input_row := HFlowContainer.new(); input_row.name = "RuntimeInputs"; add_child(input_row)
+	_parameter = _new_text_input("StateParameter", "e.g. is_grounded", "State parameter"); _add_labeled_control(input_row, "State parameter", _parameter, 170.0)
+	_parameter_value = _new_text_input("StateParameterValue", "true, 1, idle", "State parameter value"); _add_labeled_control(input_row, "Value", _parameter_value, 130.0)
 	var parameter_button := Button.new(); parameter_button.text = "Apply parameter"; parameter_button.pressed.connect(_apply_parameter); input_row.add_child(parameter_button)
-	_equipment_slot = LineEdit.new(); _equipment_slot.tooltip_text = "Equipment slot"; _equipment_slot.custom_minimum_size.x = 112; input_row.add_child(_equipment_slot)
-	_equipment_item = LineEdit.new(); _equipment_item.tooltip_text = "Item ID"; _equipment_item.custom_minimum_size.x = 92; input_row.add_child(_equipment_item)
+	input_row.remove_child(parameter_button); _add_labeled_control(input_row, "Runtime state", parameter_button, 148.0)
+	_equipment_slot = _new_text_input("EquipmentSlot", "e.g. main_hand", "Equipment slot"); _add_labeled_control(input_row, "Equipment slot", _equipment_slot, 155.0)
+	_equipment_item = _new_text_input("EquipmentItem", "Item ID", "Equipment item ID"); _add_labeled_control(input_row, "Item ID", _equipment_item, 130.0)
 	var equipment_button := Button.new(); equipment_button.text = "Swap equipment"; equipment_button.pressed.connect(_apply_equipment); input_row.add_child(equipment_button)
-	var export_row := HFlowContainer.new(); add_child(export_row)
-	_output_path = LineEdit.new(); _output_path.name = "RuntimeOutputPath"; _output_path.tooltip_text = "Runtime package output folder"; _output_path.size_flags_horizontal = Control.SIZE_EXPAND_FILL; export_row.add_child(_output_path)
+	input_row.remove_child(equipment_button); _add_labeled_control(input_row, "Equipment", equipment_button, 145.0)
+	var export_row := HFlowContainer.new(); export_row.name = "RuntimeExport"; add_child(export_row)
+	_output_path = _new_text_input("RuntimeOutputPath", "Choose a destination folder", "Runtime package output folder"); _output_path.size_flags_horizontal = Control.SIZE_EXPAND_FILL; _add_labeled_control(export_row, "Output folder", _output_path, 360.0)
 	var export_button := Button.new(); export_button.text = "Export engine packages"; export_button.pressed.connect(_export); export_row.add_child(export_button)
 	var qa_button := Button.new(); qa_button.text = "Run runtime QA"; qa_button.pressed.connect(_run_qa); export_row.add_child(qa_button)
 	_reveal = Button.new(); _reveal.text = "Reveal output"; _reveal.disabled = true; _reveal.pressed.connect(func(): if not _last_folder.is_empty(): OS.shell_open(_absolute(_last_folder))); export_row.add_child(_reveal)
-	_output = RichTextLabel.new(); _output.name = "RuntimePreviewOutput"; _output.custom_minimum_size = Vector2(0, 220); _output.size_flags_vertical = Control.SIZE_EXPAND_FILL; _output.bbcode_enabled = false; add_child(_output)
+	export_row.remove_child(export_button); _add_labeled_control(export_row, "Package", export_button, 172.0)
+	export_row.remove_child(qa_button); _add_labeled_control(export_row, "Validation", qa_button, 145.0)
+	export_row.remove_child(_reveal); _add_labeled_control(export_row, "Folder", _reveal, 130.0)
+	var output_title := Label.new(); output_title.text = "RUNTIME SNAPSHOT"; output_title.theme_type_variation = &"SectionLabel"; add_child(output_title)
+	_output = RichTextLabel.new(); _output.name = "RuntimePreviewOutput"; _output.custom_minimum_size = Vector2(0, 220); _output.size_flags_vertical = Control.SIZE_EXPAND_FILL; _output.bbcode_enabled = true; add_child(_output)
 	_status = Label.new(); _status.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART; add_child(_status)
+
+
+func _apply_output_height() -> void:
+	if _output == null:
+		return
+	var editor_window := get_window()
+	var compact := editor_window != null and editor_window.size.y <= 760
+	_output.custom_minimum_size.y = 112.0 if compact else 220.0
 
 
 func _refresh() -> void:
 	if _session == null or not is_instance_valid(_session):
-		_status.text = "Open a project to preview the exact runtime contract."; _output.text = "No project selected."; return
+		_status.text = "Open a project to preview the exact runtime contract."; _output.text = "[b]No project selected[/b]\nOpen an editable project to inspect playback, game events, and package readiness."; return
 	var contract := _contract()
 	var validation: Dictionary = ContractBuilderScript.validate(contract)
 	_select_profile(str(contract.get("active_profile_id", "godot")))
@@ -124,7 +143,7 @@ func _contract() -> Dictionary:
 
 
 func _show(value: Dictionary, message: String) -> void:
-	_output.text = JSON.stringify(value, "\t", true, false)
+	_output.text = _format_runtime_frame(value) if value.has("state") else _format_operation_result(value, message)
 	_status.text = message
 
 
@@ -141,6 +160,68 @@ func _select_profile(profile_id: String) -> void:
 	for index in range(_profile.item_count):
 		if _profile_id(index) == profile_id: _profile.select(index); return
 func _profile_id(index: int) -> String: return ["godot", "unity", "unreal"][clampi(index, 0, 2)]
+
+
+func _new_text_input(control_name: String, placeholder: String, hint: String) -> LineEdit:
+	var input := LineEdit.new()
+	input.name = control_name
+	input.placeholder_text = placeholder
+	input.tooltip_text = hint
+	input.focus_mode = Control.FOCUS_ALL
+	return input
+
+
+func _add_labeled_control(parent: Container, label_text: String, control: Control, minimum_width: float) -> void:
+	var field := VBoxContainer.new()
+	field.name = control.name + "Field"
+	field.custom_minimum_size = Vector2(minimum_width, 0)
+	var label := Label.new()
+	label.name = "FieldLabel"
+	label.text = label_text
+	label.theme_type_variation = &"CaptionLabel"
+	field.add_child(label)
+	control.custom_minimum_size = Vector2(maxf(control.custom_minimum_size.x, minimum_width), maxf(control.custom_minimum_size.y, 40.0))
+	control.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	field.add_child(control)
+	parent.add_child(field)
+
+
+func _format_runtime_frame(frame: Dictionary) -> String:
+	var state: Dictionary = frame.get("state", {}) as Dictionary
+	var equipment: Dictionary = frame.get("equipment", {}) as Dictionary
+	return "[b]Runtime snapshot[/b]\nThe preview is evaluating the same contract used for export.\n\n[b]Playback[/b]\nProfile: %s\nTime: %.3fs\nActive clip: %s\nState: %s\n\n[b]Gameplay[/b]\nEvents: %d  •  Hitboxes: %d  •  Hurtboxes: %d\nAction points: %d  •  Equipment slots: %d\nRule actions: %d  •  Secondary effects: %d" % [
+		_profile_id(_profile.selected).capitalize(),
+		float(frame.get("clip_time", _time.value)),
+		_display_value(frame.get("clip_id", "")),
+		_display_value(state.get("state_id", "")),
+		(frame.get("events", []) as Array).size(),
+		(frame.get("hitboxes", []) as Array).size(),
+		(frame.get("hurtboxes", []) as Array).size(),
+		(frame.get("action_points", []) as Array).size(),
+		equipment.size(),
+		(frame.get("rule_actions", []) as Array).size(),
+		(frame.get("secondary_motion", {}).get("event_effects", []) as Array).size(),
+	]
+
+
+func _format_operation_result(report: Dictionary, message: String) -> String:
+	var success := bool(report.get("success", false))
+	var lines := ["[b]Latest runtime action[/b]", message, "", "Result: " + ("Complete" if success else "Needs attention")]
+	for key in ["root", "folder", "package", "output_directory"]:
+		var path := str(report.get(key, "")).strip_edges()
+		if not path.is_empty():
+			lines.append("Output: " + path)
+			break
+	var errors: Array = report.get("errors", []) as Array
+	if not errors.is_empty(): lines.append("Details: " + str(errors[0]))
+	return "\n".join(lines)
+
+
+func _display_value(value: Variant) -> String:
+	var text := str(value).strip_edges()
+	return text if not text.is_empty() else "—"
+
+
 func _coerce(value: String) -> Variant:
 	var text := value.strip_edges()
 	if text.to_lower() in ["true", "false"]: return text.to_lower() == "true"

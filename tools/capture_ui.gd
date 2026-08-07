@@ -7,9 +7,13 @@ var _project_path := ""
 var _workspace_id := ""
 var _appearance_id := ""
 var _window_size := Vector2i(1440, 960)
+const CAPTURE_SCENE := "res://tools/capture_ui.tscn"
 
 func _ready() -> void:
 	_parse_arguments()
+	if _requires_windowed_capture():
+		_run_windowed_capture()
+		return
 	get_window().mode = Window.MODE_WINDOWED
 	get_window().size = _window_size
 	if ThemeService != null and not _appearance_id.is_empty():
@@ -28,7 +32,14 @@ func _ready() -> void:
 		WorkspaceManager.switch_workspace(_workspace_id)
 	await get_tree().process_frame
 	await get_tree().process_frame
-	var image := get_viewport().get_texture().get_image()
+	var texture := get_viewport().get_texture()
+	if texture == null:
+		_fail_capture("The active renderer did not provide a viewport texture.")
+		return
+	var image := texture.get_image()
+	if image == null or image.is_empty():
+		_fail_capture("The active renderer returned an empty viewport image.")
+		return
 	var absolute_path := ProjectSettings.globalize_path(_output_path)
 	DirAccess.make_dir_recursive_absolute(absolute_path.get_base_dir())
 	var result := image.save_png(absolute_path)
@@ -38,6 +49,36 @@ func _ready() -> void:
 		return
 	print("Saved UI capture: " + absolute_path)
 	get_tree().quit()
+
+
+func _requires_windowed_capture() -> bool:
+	return OS.has_feature("headless") or DisplayServer.get_name().to_lower().contains("headless")
+
+
+func _run_windowed_capture() -> void:
+	var output: Array = []
+	var arguments := PackedStringArray([
+		"--path", ProjectSettings.globalize_path("res://"),
+		"--scene", CAPTURE_SCENE,
+		"--",
+	])
+	# Rebuild only this tool's parsed arguments instead of forwarding the host
+	# process arguments. On Windows, forwarding can retain --headless on the
+	# child even when it is filtered from the visible user-argument list.
+	arguments.append_array(PackedStringArray(["--scene", _scene_path, "--output", _output_path]))
+	if not _project_path.is_empty(): arguments.append_array(PackedStringArray(["--project", _project_path]))
+	if not _workspace_id.is_empty(): arguments.append_array(PackedStringArray(["--workspace", _workspace_id]))
+	if not _appearance_id.is_empty(): arguments.append_array(PackedStringArray(["--appearance", _appearance_id]))
+	arguments.append_array(PackedStringArray(["--size", "%dx%d" % [_window_size.x, _window_size.y]]))
+	var exit_code := OS.execute(OS.get_executable_path(), arguments, output, true)
+	for line in output:
+		print(str(line))
+	get_tree().quit(exit_code)
+
+
+func _fail_capture(reason: String) -> void:
+	printerr("Could not capture UI: " + reason)
+	get_tree().quit(1)
 
 func _parse_arguments() -> void:
 	var args := OS.get_cmdline_user_args()
