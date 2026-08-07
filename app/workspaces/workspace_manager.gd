@@ -202,6 +202,9 @@ func _focus_workspace_primary_panel(workspace_id: String) -> void:
 		WORKSPACE_PREVIEW_EXPORT:
 			_dock_layout_manager.call("set_panel_visible", "panel_batch_export", true)
 			_dock_layout_manager.call("set_panel_visible", "panel_quality_dashboard", true)
-			primary_panel = "panel_batch_export"
+			_dock_layout_manager.call("set_panel_visible", "panel_runtime_delivery", true)
+			_dock_layout_manager.call("set_panel_visible", "panel_pipeline_collaboration", true)
+			_dock_layout_manager.call("set_panel_visible", "panel_presentation", true)
+			primary_panel = "panel_runtime_delivery"
 	if _dock_layout_manager.has_method("activate_panel"):
 		_dock_layout_manager.call("activate_panel", primary_panel)

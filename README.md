@@ -14,3 +14,9 @@ Godot 4.7.1 desktop character-creation and animation studio with modular charact
 - Figma file: `https://www.figma.com/design/OWBAoX5TObGOwIZv10loHG`
 
 The repository design package includes code-readable tokens, component and screen mappings, an interactive HTML prototype, and an editable SVG overview so implementation does not depend on screenshots alone.
+
+## Production delivery
+
+See [Production delivery workflows](docs/guides/PRODUCTION_DELIVERY_WORKFLOWS.md)
+for runtime packages, animation productivity, automation, collaboration, QA,
+and presentation delivery.

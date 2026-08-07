@@ -15,12 +15,7 @@ grow_vertical = 2
 script = ExtResource("1_script")
 
 [node name="Margin" type="MarginContainer" parent="."]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
+layout_mode = 0
 theme_override_constants/margin_left = 12
 theme_override_constants/margin_top = 12
 theme_override_constants/margin_right = 12
@@ -248,7 +243,7 @@ theme_override_constants/separation = 12
 
 [node name="Health" type="PanelContainer" parent="Margin/Root/Content/Right"]
 layout_mode = 2
-size_flags_vertical = 3
+size_flags_vertical = 0
 theme_type_variation = &"PaperPanel"
 
 [node name="Margin" type="MarginContainer" parent="Margin/Root/Content/Right/Health"]
@@ -280,7 +275,7 @@ autowrap_mode = 2
 
 [node name="Autosave" type="PanelContainer" parent="Margin/Root/Content/Right"]
 layout_mode = 2
-size_flags_vertical = 3
+size_flags_vertical = 0
 theme_type_variation = &"PaperPanel"
 
 [node name="Margin" type="MarginContainer" parent="Margin/Root/Content/Right/Autosave"]

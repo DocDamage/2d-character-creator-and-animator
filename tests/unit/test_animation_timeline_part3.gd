@@ -13,6 +13,7 @@ const MarkerRegionScript = preload("res://animation/timeline/marker_region.gd")
 const MarkerDataScript = preload("res://animation/timeline/marker_data.gd")
 const RegionDataScript = preload("res://animation/timeline/region_data.gd")
 const TimelinePersistenceScript = preload("res://animation/timeline/timeline_persistence.gd")
+const AnimationPreviewEvaluatorScript = preload("res://animation/preview/animation_preview_evaluator.gd")
 
 
 func run_part3_tests() -> int:
@@ -21,6 +22,8 @@ func run_part3_tests() -> int:
 	passes += test_anm011_z_order_track()
 	passes += test_anm012_playback_clock_loop()
 	passes += test_anm012_playback_clock_ping_pong()
+	passes += test_anm012_playback_clock_large_delta_and_invalid_region()
+	passes += test_anm_rotation_paths()
 	passes += test_anm013_markers_and_regions()
 	passes += test_anm014_persistence_roundtrip()
 	passes += test_anm014_persistence_validation()
@@ -77,6 +80,50 @@ func test_anm012_playback_clock_ping_pong() -> int:
 		print("  PASS: ANM-012 PlaybackClock ping-pong reverses direction")
 		return 1
 	printerr("  FAIL: ANM-012 PlaybackClock ping-pong: dir=%d, t=%f" % [clock._ping_pong_direction, clock.current_time])
+	return 0
+
+
+func test_anm012_playback_clock_large_delta_and_invalid_region() -> int:
+	var looping = PlaybackClockScript.new(1.0)
+	looping.loop_mode = PlaybackClockScript.LoopMode.LOOP
+	looping.play()
+	looping.advance(3.25)
+	var ping_pong = PlaybackClockScript.new(1.0)
+	ping_pong.loop_mode = PlaybackClockScript.LoopMode.PING_PONG
+	ping_pong.play()
+	ping_pong.advance(1.25)
+	var invalid_region = PlaybackClockScript.new(1.0)
+	invalid_region.loop_mode = PlaybackClockScript.LoopMode.LOOP
+	invalid_region.loop_start = 0.5
+	invalid_region.loop_end = 0.5
+	invalid_region.play()
+	invalid_region.advance(0.25)
+	if is_equal_approx(looping.current_time, 0.25) and is_equal_approx(ping_pong.current_time, 0.75) and ping_pong._ping_pong_direction == -1 and is_equal_approx(invalid_region.current_time, 0.25):
+		print("  PASS: ANM-012 PlaybackClock preserves travel across hitches and safely repairs a degenerate loop range")
+		return 1
+	printerr("  FAIL: ANM-012 advanced playback: loop=%f ping=%f invalid=%f" % [looping.current_time, ping_pong.current_time, invalid_region.current_time])
+	return 0
+
+
+func test_anm_rotation_paths() -> int:
+	var evaluator = AnimationPreviewEvaluatorScript.new()
+	var shortest_track := {
+		"track_type": TrackSchemaScript.TrackType.TRANSFORM_ROTATION,
+		"property_path": "layer:body.rotation_degrees",
+		"keys": [{"time": 0.0, "value": 170.0, "interpolation": TrackSchemaScript.Interpolation.LINEAR}, {"time": 1.0, "value": -170.0, "interpolation": TrackSchemaScript.Interpolation.LINEAR}]
+	}
+	var continuous_track := {
+		"track_type": TrackSchemaScript.TrackType.TRANSFORM_ROTATION,
+		"property_path": "layer:body.rotation_degrees",
+		"rotation_mode": "continuous",
+		"keys": [{"time": 0.0, "value": 0.0, "interpolation": TrackSchemaScript.Interpolation.LINEAR}, {"time": 1.0, "value": 360.0, "interpolation": TrackSchemaScript.Interpolation.LINEAR}]
+	}
+	var shortest := float(evaluator.call("_evaluate_track_value", shortest_track, 0.5, false))
+	var continuous := float(evaluator.call("_evaluate_track_value", continuous_track, 0.5, false))
+	if absf(absf(shortest) - 180.0) < 0.01 and is_equal_approx(continuous, 180.0):
+		print("  PASS: CRV-004 rotation tracks avoid accidental spins while preserving intentional continuous turns")
+		return 1
+	printerr("  FAIL: rotation path interpolation: shortest=%f continuous=%f" % [shortest, continuous])
 	return 0
 
 

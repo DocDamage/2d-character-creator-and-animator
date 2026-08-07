@@ -24,6 +24,7 @@ var _header_bar: HBoxContainer = null
 var _title_label: Label = null
 var _content_container: MarginContainer = null
 var _collapse_button: Button = null
+var _context_state: Control = null
 
 func _init() -> void:
 	custom_minimum_size = Vector2(180, 120)
@@ -74,6 +75,10 @@ func get_content_container() -> MarginContainer:
 func add_content(node: Control) -> void:
 	var container := get_content_container()
 	if container != null and node != null:
+		if _context_state != null and is_instance_valid(_context_state):
+			container.remove_child(_context_state)
+			_context_state.queue_free()
+			_context_state = null
 		container.add_child(node)
 
 func serialize_state() -> Dictionary:
@@ -159,6 +164,7 @@ func _add_context_state_if_needed() -> void:
 	}
 	if not messages.has(panel_id): return
 	var state := CenterContainer.new()
+	_context_state = state
 	state.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	state.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	var label := Label.new()

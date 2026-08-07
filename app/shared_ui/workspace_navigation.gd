@@ -101,7 +101,9 @@ func _build_overflow_menu() -> void:
 
 
 func _apply_responsive_navigation() -> void:
-	apply_responsive_navigation_for_width(get_viewport_rect().size.x)
+	var window := get_window()
+	var available_width := float(window.size.x) if window != null and window.size.x > 0 else get_viewport_rect().size.x
+	apply_responsive_navigation_for_width(available_width)
 
 
 func apply_responsive_navigation_for_width(viewport_width: float, dpi_scale: float = -1.0) -> Dictionary:

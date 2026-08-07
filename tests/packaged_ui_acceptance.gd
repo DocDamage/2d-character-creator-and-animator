@@ -101,7 +101,7 @@ func _test_workspace_shell() -> void:
 	await get_tree().process_frame
 	await get_tree().process_frame
 	var layout_manager: Node = main_window.get_dock_layout_manager()
-	_check(layout_manager != null and layout_manager.get_registered_panels().size() == 16, "Shell registers all 16 dock panels")
+	_check(layout_manager != null and layout_manager.get_registered_panels().size() == 17, "Shell registers all 17 dock panels")
 	var diagnostics_before: bool = layout_manager.call("is_panel_visible", "panel_diagnostics")
 	main_window.call("_toggle_diagnostics_drawer")
 	var diagnostics_changed: bool = layout_manager.call("is_panel_visible", "panel_diagnostics") != diagnostics_before

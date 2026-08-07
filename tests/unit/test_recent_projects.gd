@@ -283,6 +283,7 @@ func _test_project_management_actions(results: Dictionary) -> void:
 	var manifest := ProjectFactoryScript.create_manifest("Recent Hero", "blank")
 	var registry = AssetRegistryScript.new()
 	var asset: Dictionary = ImageImporterScript.import_image(source_path, registry)
+	registry.free()
 	if not asset.is_empty():
 		manifest.objects.assets[asset.get("asset_id", "")] = asset
 	var project_saved := SerializationService.save_project(manifest, project_path)

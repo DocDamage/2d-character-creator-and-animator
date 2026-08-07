@@ -26,7 +26,11 @@ func evaluate(p_rig: Dictionary, _delta: float) -> void:
 	var bones: Dictionary = p_rig.get("bones", {})
 	if not bones.has(owner_bone_id):
 		return
-		
-	var bone: Dictionary = bones[owner_bone_id]
-	var current_pos: Vector2 = bone.get("local_position", Vector2.ZERO)
-	bone["local_position"] = current_pos.lerp(pinned_position, influence)
+
+	# Contacts are authored in canvas/world coordinates.  Converting that target
+	# back through the parent avoids feet snapping to the wrong place whenever a
+	# character root is translated, rotated, or scaled.
+	var manager := BoneManager.new()
+	manager.initialize(p_rig)
+	var current_position := manager.get_global_transform(owner_bone_id).origin
+	manager.set_global_position(owner_bone_id, current_position.lerp(pinned_position, clampf(influence, 0.0, 1.0)))

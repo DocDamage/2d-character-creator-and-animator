@@ -27,6 +27,13 @@ var interpolation: int = 1  # LINEAR by default
 ## Optional per-key easing weight (0.0-1.0), for SMOOTH mode only.
 var easing: float = 0.5
 
+## Optional cubic Bézier handles, expressed in normalized segment space.
+## `out_handle` belongs to the segment beginning at this key and
+## `in_handle` belongs to the segment ending at this key.  They are optional
+## on disk for backwards compatibility with every existing project.
+var out_handle: Vector2 = Vector2(0.25, 0.0)
+var in_handle: Vector2 = Vector2(-0.25, 0.0)
+
 
 func _init(p_id: String = "", p_time: float = 0.0, p_value: Variant = 0.0) -> void:
 	key_id = p_id
@@ -42,7 +49,9 @@ func to_dict() -> Dictionary:
 		"time": time,
 		"value": value,
 		"interpolation": interpolation,
-		"easing": easing
+		"easing": easing,
+		"out_handle": [out_handle.x, out_handle.y],
+		"in_handle": [in_handle.x, in_handle.y]
 	}
 
 
@@ -53,6 +62,8 @@ func from_dict(d: Dictionary) -> KeyframeData:
 	value = d.get("value", 0.0)
 	interpolation = int(d.get("interpolation", 1))
 	easing = float(d.get("easing", 0.5))
+	out_handle = _handle_from_value(d.get("out_handle", [0.25, 0.0]), Vector2(0.25, 0.0))
+	in_handle = _handle_from_value(d.get("in_handle", [-0.25, 0.0]), Vector2(-0.25, 0.0))
 	return self
 
 
@@ -64,3 +75,12 @@ func validate() -> Array:
 	if time < 0.0:
 		errors.append("key time must be >= 0")
 	return errors
+
+
+func _handle_from_value(raw: Variant, fallback: Vector2) -> Vector2:
+	if raw is Vector2:
+		return raw as Vector2
+	if raw is Array and (raw as Array).size() >= 2:
+		var values: Array = raw
+		return Vector2(float(values[0]), float(values[1]))
+	return fallback

@@ -9,12 +9,10 @@ const DockPanelScript = preload("res://app/shared_ui/dock_panel.gd")
 const BlendStackScript = preload("res://animation/blending/animation_blend_stack.gd")
 const StateMachineModelScript = preload("res://animation/state_machine/state_machine_authoring_model.gd")
 const RuleGraphModelScript = preload("res://animation/rules/rule_graph_authoring_model.gd")
-
+const ProjectFactoryScript = preload("res://character/authoring/character_project_factory.gd")
 func run_tests() -> Dictionary:
 	var results := {"passed": 0, "failed": 0, "errors": []}
-
 	print("[TEST 6] Main window instantiation & dock layout management...")
-
 	var mw_packed := ResourceLoader.load(MAIN_WINDOW_SCENE_PATH) as PackedScene
 	if mw_packed == null:
 		results["failed"] += 1
@@ -199,6 +197,86 @@ func run_tests() -> Dictionary:
 	else:
 		results["failed"] += 1
 		results["errors"].append("Quality & Recovery dock does not expose focusable controls.")
+
+	# 2j. Production delivery workflows must be real docks, not hidden services.
+	var production_specs := [["panel_runtime_delivery", "RuntimeDeliveryPanel", "RuntimePreviewOutput"], ["panel_motion_library", "MotionLibraryPanel", "MotionLibraryOutput"], ["panel_pipeline_collaboration", "PipelineCollaborationPanel", "PipelineCollaborationOutput"], ["panel_presentation", "PresentationPanel", "PresentationOutput"]]
+	var production_docks_ok := true
+	for spec in production_specs:
+		var dock: Control = mw_node.call("get_panel", str(spec[0])) as Control; var panel: Control = dock.call("get_content_container").get_node_or_null(str(spec[1])) as Control if dock != null else null
+		production_docks_ok = production_docks_ok and panel != null and panel.has_method("bind_session") and panel.get_node_or_null(str(spec[2])) is RichTextLabel
+	if production_docks_ok:
+		print("  PASS: Runtime, motion, pipeline, and presentation production workflows are surfaced as live docks."); results["passed"] += 1
+	else: results["failed"] += 1; results["errors"].append("Production delivery workflows are not fully surfaced in the application shell.")
+	# 2j-1. Production panels must expose visible labels/placeholders and readable summaries,
+	# not tooltip-only blank fields or raw JSON as the primary user-facing surface.
+	var runtime_dock: Control = mw_node.call("get_panel", "panel_runtime_delivery") as Control
+	var motion_dock: Control = mw_node.call("get_panel", "panel_motion_library") as Control
+	var pipeline_dock: Control = mw_node.call("get_panel", "panel_pipeline_collaboration") as Control
+	var presentation_dock: Control = mw_node.call("get_panel", "panel_presentation") as Control
+	var runtime_panel: Control = runtime_dock.call("get_content_container").get_node_or_null("RuntimeDeliveryPanel") as Control if runtime_dock != null else null
+	var motion_panel: Control = motion_dock.call("get_content_container").get_node_or_null("MotionLibraryPanel") as Control if motion_dock != null else null
+	var pipeline_panel: Control = pipeline_dock.call("get_content_container").get_node_or_null("PipelineCollaborationPanel") as Control if pipeline_dock != null else null
+	var presentation_panel: Control = presentation_dock.call("get_content_container").get_node_or_null("PresentationPanel") as Control if presentation_dock != null else null
+	var runtime_parameter: LineEdit = runtime_panel.get_node_or_null("RuntimeInputs/StateParameterField/StateParameter") as LineEdit if runtime_panel != null else null
+	var motion_id: LineEdit = motion_panel.get_node_or_null("MotionActions/MotionIdField/MotionId") as LineEdit if motion_panel != null else null
+	var source_path: LineEdit = pipeline_panel.get_node_or_null("WatchSourceControls/SourcePathField/SourcePath") as LineEdit if pipeline_panel != null else null
+	var approval_url: LineEdit = presentation_panel.get_node_or_null("PresentationExportControls/ApprovalUrlField/ApprovalUrl") as LineEdit if presentation_panel != null else null
+	var production_guidance_ok := runtime_parameter != null and not runtime_parameter.placeholder_text.is_empty() and motion_id != null and not motion_id.placeholder_text.is_empty() and source_path != null and not source_path.placeholder_text.is_empty() and approval_url != null and not approval_url.placeholder_text.is_empty()
+	var production_output_ok := runtime_panel != null and (runtime_panel.get_node_or_null("RuntimePreviewOutput") as RichTextLabel).bbcode_enabled and motion_panel != null and (motion_panel.get_node_or_null("MotionLibraryOutput") as RichTextLabel).bbcode_enabled and pipeline_panel != null and (pipeline_panel.get_node_or_null("PipelineCollaborationOutput") as RichTextLabel).bbcode_enabled and presentation_panel != null and (presentation_panel.get_node_or_null("PresentationOutput") as RichTextLabel).bbcode_enabled
+	if production_guidance_ok and production_output_ok:
+		print("  PASS: Production panels expose visible input guidance and readable rich-text summaries."); results["passed"] += 1
+	else:
+		results["failed"] += 1; results["errors"].append("Production panels are missing visible input guidance or readable rich-text summaries.")
+	# 2k. Verify the four core authoring docks are real editors rather than shell-only panels.
+	var p_hierarchy: Control = mw_node.call("get_panel", "panel_hierarchy") as Control
+	var p_viewport: Control = mw_node.call("get_panel", "panel_viewport") as Control
+	var p_inspector: Control = mw_node.call("get_panel", "panel_inspector") as Control
+	var p_timeline: Control = mw_node.call("get_panel", "panel_timeline") as Control
+	var hierarchy_editor: Control = p_hierarchy.call("get_content_container").get_node_or_null("RigHierarchyEditor") as Control if p_hierarchy != null else null
+	var viewport_editor: Control = p_viewport.call("get_content_container").get_node_or_null("AuthoringCanvasViewport") as Control if p_viewport != null else null
+	var inspector_editor: Control = p_inspector.call("get_content_container").get_node_or_null("AuthoringInspector") as Control if p_inspector != null else null
+	var timeline_editor: Control = p_timeline.call("get_content_container").get_node_or_null("AnimationTimelineEditor") as Control if p_timeline != null else null
+	var hierarchy_ok := hierarchy_editor != null and hierarchy_editor.has_method("bind_session") and hierarchy_editor.get_node_or_null("RigTree") is Tree
+	var viewport_ok := viewport_editor != null and viewport_editor.has_method("get_preview") and viewport_editor.get_node_or_null("CharacterCanvas") != null
+	var inspector_ok := inspector_editor != null and inspector_editor.has_method("get_properties_container") and inspector_editor.get_node_or_null("PropertyScroll") is ScrollContainer
+	var timeline_ok := timeline_editor != null and timeline_editor.has_method("get_timeline_canvas") and timeline_editor.get_node_or_null("TimelineTrackCanvas") != null
+	var core_editors_ok := hierarchy_ok and viewport_ok and inspector_ok and timeline_ok and mw_node.call("get_document_selection") != null
+	if core_editors_ok:
+		print("  PASS: Hierarchy, Canvas, Inspector, and Timeline docks expose interactive authoring controls.")
+		results["passed"] += 1
+	else:
+		results["failed"] += 1
+		results["errors"].append("Core authoring docks still expose shell-only panels instead of real editors: %s" % str([hierarchy_ok, viewport_ok, inspector_ok, timeline_ok, mw_node.call("get_document_selection") != null]))
+
+	# 2k. Bind a real project and verify the four editors share its rig/clip selection.
+	var authoring_path := "user://dock_layout_authoring_%s.chrproj" % IDService.generate_short("ui")
+	var authoring_created := SerializationService.save_project(ProjectFactoryScript.create_manifest("Dock Authoring"), authoring_path)
+	AppState.open_project(authoring_path)
+	var bound_creator: Control = mw_node.call("_get_character_creator") as Control
+	var authoring_session: Variant = bound_creator.call("get_session") if bound_creator != null else null
+	var rig_report: Dictionary = authoring_session.create_rig("Dock Rig") if authoring_session != null else {}
+	var rig_id := str(rig_report.get("rig_id", ""))
+	var bone_report: Dictionary = authoring_session.create_rig_bone(rig_id, "Root") if authoring_session != null else {}
+	var bone_id := str(bone_report.get("bone_id", ""))
+	var clip_report: Dictionary = authoring_session.create_animation_clip("Dock Idle") if authoring_session != null else {}
+	var clip_id := str(clip_report.get("clip_id", ""))
+	var track_report: Dictionary = authoring_session.add_animation_track(clip_id, bone_id, "bone:%s.transform" % bone_id, "Root Transform") if authoring_session != null else {}
+	var shared_selection: Node = mw_node.call("get_document_selection") as Node
+	if shared_selection != null: shared_selection.call("select", "bone", bone_id, {"rig_id": rig_id, "source": "test"})
+	var hierarchy_bound: bool = hierarchy_editor != null and hierarchy_editor.call("get_hierarchy_tree").get_root() != null
+	var canvas_bound: bool = viewport_editor != null and (viewport_editor.call("get_preview").get("_rig") as Dictionary).get("id", "") == rig_id
+	var inspector_bound: bool = inspector_editor != null and inspector_editor.call("get_properties_container").find_child("PositionX", true, false) != null
+	if shared_selection != null: shared_selection.call("select", "animation_clip", clip_id, {"source": "test"})
+	var timeline_clip: Dictionary = timeline_editor.call("get_timeline_canvas").get("_clip") as Dictionary if timeline_editor != null else {}
+	var timeline_bound: bool = str(timeline_clip.get("clip_id", "")) == clip_id and track_report.get("success", false)
+	AppState.close_project()
+	DirAccess.remove_absolute(ProjectSettings.globalize_path(authoring_path))
+	if authoring_created and authoring_session != null and rig_report.get("success", false) and bone_report.get("success", false) and clip_report.get("success", false) and hierarchy_bound and canvas_bound and inspector_bound and timeline_bound:
+		print("  PASS: Core authoring docks bind one live project, selection, rig, and animation clip.")
+		results["passed"] += 1
+	else:
+		results["failed"] += 1
+		results["errors"].append("Core authoring dock binding failed: %s" % str([authoring_created, authoring_session != null, rig_report, bone_report, clip_report, track_report, hierarchy_bound, canvas_bound, inspector_bound, timeline_bound]))
 
 	# 3. Test layout preset switching
 	var initial_preset: String = layout_mgr.call("get_active_preset_name")

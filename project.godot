@@ -1,0 +1,58 @@
+; Engine configuration file for Godot 4.7.1
+; Modular 2D Character Creator and Animation Studio
+
+[application]
+
+config/name="Paper Quest Character Studio"
+config/description="Production 2D character creation and animation studio with modular skeletal and pixel-safe pipelines."
+config/version="0.1.0-dev"
+config/icon="res://app/icon.svg"
+run/low_processor_mode=false
+run/main_scene="app/bootstrap/startup.tscn"
+
+[autoload]
+
+AppState="*res://app/application_state/app_state.gd"
+CommandService="*res://app/commands/command_service.gd"
+ShortcutRegistry="*res://app/commands/shortcut_registry.gd"
+WorkspaceManager="*res://app/workspaces/workspace_manager.gd"
+IDService="*res://core/ids/id_service.gd"
+SerializationService="*res://core/serialization/serialization_service.gd"
+DiagnosticsService="*res://core/diagnostics/diagnostics_service.gd"
+ThemeService="*res://app/shared_ui/theme_service.gd"
+FocusService="*res://app/shared_ui/focus_service.gd"
+RecentProjectsService="*res://app/bootstrap/recent_projects_service.gd"
+FirstRunService="*res://app/bootstrap/first_run_service.gd"
+UpdateService="*res://app/bootstrap/update_service.gd"
+
+[display]
+
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/size/mode=2
+window/stretch/mode="disabled"
+window/dpi/allow_hidpi=true
+
+[editor_plugins]
+
+enabled=PackedStringArray()
+
+[gui]
+
+theme/custom="res://app/shared_ui/default_theme.tres"
+theme/use_hidpi=true
+
+[input]
+
+ui_undo={ "deadzone": 0.0, "events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":true,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":90,"key_label":0,"unicode":122,"location":0,"echo":false,"script":null) ] }
+ui_redo={ "deadzone": 0.0, "events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":true,"ctrl_pressed":true,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":90,"key_label":0,"unicode":122,"location":0,"echo":false,"script":null) ] }
+cmd_palette={ "deadzone": 0.0, "events": [Object(InputEventKey,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":true,"ctrl_pressed":false,"meta_pressed":false,"pressed":false,"keycode":0,"physical_keycode":4194328,"key_label":0,"unicode":0,"location":0,"echo":false,"script":null) ] }
+canvas_pan={ "deadzone": 0.2, "events": [Object(InputEventMouseButton,"resource_local_to_scene":false,"resource_name":"","device":-1,"window_id":0,"alt_pressed":false,"shift_pressed":false,"ctrl_pressed":false,"meta_pressed":false,"button_mask":0,"position":Vector2(0, 0),"global_position":Vector2(0, 0),"factor":1.0,"button_index":3,"canceled":false,"pressed":false,"double_click":false,"script":null) ] }
+
+[rendering]
+
+renderer/rendering_method="gl_compatibility"
+textures/canvas_textures/default_texture_filter=0
+2d/snap/snap_2d_transforms_to_pixel=false
+2d/snap/snap_2d_vertices_to_pixel=false
+quality/2d/use_nearest_mipmap_filter=true

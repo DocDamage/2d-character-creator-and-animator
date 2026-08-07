@@ -24,8 +24,9 @@ enum TrackType {
 	SCRIPT_PARAMETER
 }
 
-## Interpolation modes (Bezier deferred to Milestone 8 CRV tasks).
-enum Interpolation { STEPPED, LINEAR, SMOOTH }
+## Interpolation modes.  The first three values are deliberately stable so
+## projects created before Bézier support retain their original behaviour.
+enum Interpolation { STEPPED, LINEAR, SMOOTH, BEZIER }
 
 ## Stable unique identifier.
 var track_id: String = ""
@@ -51,6 +52,10 @@ var color: Color = Color.WHITE
 ## Human-readable display label (optional override).
 var display_name: String = ""
 
+## How rotation tracks travel between keys.  "shortest" avoids accidental
+## full turns; the remaining modes preserve an intentional spin direction.
+var rotation_mode: String = "shortest"
+
 
 func _init(p_id: String = "", p_obj: String = "", p_path: String = "") -> void:
 	track_id = p_id
@@ -71,6 +76,7 @@ func to_dict() -> Dictionary:
 		"locked": locked,
 		"color": {"r": color.r, "g": color.g, "b": color.b, "a": color.a},
 		"display_name": display_name,
+		"rotation_mode": rotation_mode,
 		"keys": keys.duplicate(true)
 	}
 
@@ -93,6 +99,7 @@ func from_dict(d: Dictionary) -> TrackDefinition:
 			float(cd.get("a", 1.0))
 		)
 	display_name = d.get("display_name", "")
+	rotation_mode = str(d.get("rotation_mode", "shortest")).to_lower()
 	keys = (d.get("keys", []) as Array).duplicate(true)
 	return self
 
@@ -106,6 +113,8 @@ func validate() -> Array:
 		errors.append("object_id is required")
 	if property_path.is_empty():
 		errors.append("property_path is required")
+	if rotation_mode not in ["shortest", "continuous", "clockwise", "counter_clockwise"]:
+		errors.append("rotation_mode is invalid")
 	return errors
 
 

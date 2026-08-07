@@ -2,6 +2,7 @@
 .godot/
 *.import
 *.godot
+!/project.godot
 .mono/
 *.translation
 

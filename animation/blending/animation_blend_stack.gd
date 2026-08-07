@@ -119,9 +119,17 @@ func _blend_transform(base: Variant, layer: Variant, weight: float, mode: String
 	for key in ["position", "rotation", "scale"]:
 		if not to.has(key): continue
 		if key == "position" or key == "scale":
-			var from_value := _vector(from.get(key, [0.0, 0.0]))
+			var from_value := _vector(from.get(key, [1.0, 1.0] if key == "scale" else [0.0, 0.0]))
 			var to_value := _vector(to[key])
-			var value := from_value + to_value * weight if mode == "additive" else from_value.lerp(to_value, weight)
+			var value: Vector2
+			if mode == "additive" and key == "scale":
+				# Additive scale is a multiplicative ratio around one, not a
+				# positional offset.  A 1.1 scale at 50% influence therefore
+				# produces 1.05 instead of the visibly incorrect 1.5.
+				var ratio := Vector2.ONE.lerp(to_value, weight)
+				value = Vector2(from_value.x * ratio.x, from_value.y * ratio.y)
+			else:
+				value = from_value + to_value * weight if mode == "additive" else from_value.lerp(to_value, weight)
 			result[key] = [value.x, value.y]
 		else:
 			var from_rotation := float(from.get(key, 0.0))

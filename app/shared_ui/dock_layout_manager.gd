@@ -192,7 +192,7 @@ func _apply_rigging_preset() -> void:
 
 func _apply_animation_preset() -> void:
 	for pid in _panels:
-		var is_animation: bool = pid in ["panel_hierarchy", "panel_viewport", "panel_facing_grid", "panel_media_authoring", "panel_animation_composition", "panel_inspector", "panel_timeline", "panel_diagnostics"]
+		var is_animation: bool = pid in ["panel_hierarchy", "panel_viewport", "panel_facing_grid", "panel_media_authoring", "panel_animation_composition", "panel_motion_library", "panel_inspector", "panel_timeline", "panel_diagnostics"]
 		set_panel_visible(pid, is_animation)
 	activate_panel("panel_animation_composition")
 
