@@ -99,7 +99,7 @@ for CLI examples, review packages, asset packs, and runtime export contracts.
 
 ## Direct-start LPC creation
 
-Phases 0–3 of the dedicated **direct-start LPC creator** are implemented.
+Phases 0–4 of the dedicated **direct-start LPC creator** are implemented.
 On a normal desktop launch, the LPC chooser lets a creator locate a locked
 local source library, rebuild its deterministic catalog, choose a license
 policy and compatible body family, create a project, or resume the latest
@@ -126,6 +126,11 @@ project derivatives; supports atomic pencil/eraser/fill/selection operations,
 PNG round-tripping, timed per-layer or whole-character cels, reference layers,
 and onion-skin state; and preserves derivative ancestry without modifying the
 locked source library.
+The **Animate · Hybrid Clips** workspace persists validated typed tracks for
+native source frames, custom cels, transforms, visibility, z-order, palettes,
+rig/IK and mesh-control state, events, and facing. Its shared evaluator powers
+verified preview and hybrid PNG exports, reporting missing stable references
+instead of silently retargeting them.
 
 Read the complete
 [Direct-Start LPC Creator plan](DIRECT_START_LPC_CREATOR_PLAN.md) for scope,
@@ -138,6 +143,7 @@ Run the focused phase-0/1 acceptance check with:
 godot --headless --path . --scene tests/lpc_phase01_runner.tscn
 godot --headless --path . --scene tests/lpc_phase2_runner.tscn
 godot --headless --path . --scene tests/lpc_phase3_runner.tscn
+godot --headless --path . --scene tests/lpc_phase4_runner.tscn
 ```
 
 ## Documentation

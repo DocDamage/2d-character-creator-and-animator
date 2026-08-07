@@ -42,6 +42,7 @@ const TestProductionDeliveryScript = preload("res://tests/integration/test_produ
 const TestLpcPhase01Script = preload("res://tests/integration/test_lpc_phase_0_1.gd")
 const TestLpcPhase2Script = preload("res://tests/integration/test_lpc_phase_2.gd")
 const TestLpcPhase3Script = preload("res://tests/integration/test_lpc_phase_3.gd")
+const TestLpcPhase4Script = preload("res://tests/integration/test_lpc_phase_4.gd")
 func _ready() -> void:
 	print("=== Running Automated Test Suite ===")
 	print("")
@@ -310,6 +311,9 @@ func _ready() -> void:
 	# 46. Exercise project-owned LPC pixel edits, cels, onion state, and derivative persistence.
 	var r46 := _exec_sub(TestLpcPhase3Script.new(), pass_count, fail_count)
 	pass_count = r46[0]; fail_count = r46[1]
+	# 47. Exercise typed LPC hybrid tracks, persistence, diagnostics, and frame export.
+	var r47 := _exec_sub(TestLpcPhase4Script.new(), pass_count, fail_count)
+	pass_count = r47[0]; fail_count = r47[1]
 	print("")
 	print("=== Test Suite Finished: %d PASS, %d FAIL ===" % [pass_count, fail_count])
 	get_tree().quit(0 if fail_count == 0 else 1)

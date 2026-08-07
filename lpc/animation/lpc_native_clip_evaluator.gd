@@ -59,6 +59,10 @@ static func frame_count(catalog: Dictionary, profile: Dictionary, animation_id: 
 	return ((layout.get("animations", {}) as Dictionary).get(resolved, {}) as Dictionary).get("cycle", []).size()
 
 
+static func frame_for_layer(catalog: Dictionary, profile: Dictionary, layer: Dictionary, animation_id: String, direction_id: String, playhead: float) -> Dictionary:
+	return _frame_for_layer(catalog, profile, layer, animation_id, direction_id, playhead)
+
+
 static func _frame_for_layer(catalog: Dictionary, profile: Dictionary, layer: Dictionary, animation_id: String, direction_id: String, playhead: float) -> Dictionary:
 	var asset: Dictionary = layer.get("asset", {})
 	var layout: Dictionary = (catalog.get("layouts", {}) as Dictionary).get(str(asset.get("layout_id", "")), {})
