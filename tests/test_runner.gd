@@ -44,6 +44,8 @@ const TestLpcPhase2Script = preload("res://tests/integration/test_lpc_phase_2.gd
 const TestLpcPhase3Script = preload("res://tests/integration/test_lpc_phase_3.gd")
 const TestLpcPhase4Script = preload("res://tests/integration/test_lpc_phase_4.gd")
 const TestLpcPhase5Script = preload("res://tests/integration/test_lpc_phase_5.gd")
+const TestLpcPhase6Script = preload("res://tests/integration/test_lpc_phase_6.gd")
+const TestLpcPhase7Script = preload("res://tests/integration/test_lpc_phase_7.gd")
 func _ready() -> void:
 	print("=== Running Automated Test Suite ===")
 	print("")
@@ -318,6 +320,12 @@ func _ready() -> void:
 	# 48. Exercise strict frame-bound LPC deformation, deterministic bake, persistence, and export parity.
 	var r48 := _exec_sub(TestLpcPhase5Script.new(), pass_count, fail_count)
 	pass_count = r48[0]; fail_count = r48[1]
+	# 49. Exercise direction-specific cutout rigs, rigid pose/IK, gap repair, and hybrid playback.
+	var r49 := _exec_sub(TestLpcPhase6Script.new(), pass_count, fail_count)
+	pass_count = r49[0]; fail_count = r49[1]
+	# 50. Exercise weighted meshes, true cages, diagonal completion, portable runtime delivery, and clean consumer replay.
+	var r50 := _exec_sub(TestLpcPhase7Script.new(), pass_count, fail_count)
+	pass_count = r50[0]; fail_count = r50[1]
 	print("")
 	print("=== Test Suite Finished: %d PASS, %d FAIL ===" % [pass_count, fail_count])
 	get_tree().quit(0 if fail_count == 0 else 1)

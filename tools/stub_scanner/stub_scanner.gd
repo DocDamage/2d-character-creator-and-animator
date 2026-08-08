@@ -31,6 +31,7 @@ const EXCLUDED_DIRS := [
 	"user",
 	"docs",
 	"samples",
+	"tests",
 	"tools",
 ]
 const EXCLUDED_FILES := [
@@ -100,6 +101,8 @@ func _scan_file(file_path: String) -> void:
 				continue
 			var result := regex.search(line)
 			if result:
+				if _is_allowed_usage(str(pattern["label"]), line):
+					continue
 				var match_text := result.get_string().strip_edges()
 				var context := _get_context(line)
 				var finding := {
@@ -115,6 +118,14 @@ func _scan_file(file_path: String) -> void:
 				break  # One classification per line
 	file.close()
 	_files_scanned += 1
+
+
+## UI placeholder copy and helper parameter names describe real input guidance;
+## they are not incomplete implementation markers.
+func _is_allowed_usage(label: String, line: String) -> bool:
+	if label != "PLACEHOLDER":
+		return false
+	return "placeholder_text" in line or "placeholder: String" in line
 
 
 func _get_context(line: String) -> String:

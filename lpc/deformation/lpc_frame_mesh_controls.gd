@@ -3,6 +3,7 @@ class_name LpcFrameMeshControls
 extends RefCounted
 
 const MeshScript = preload("res://lpc/deformation/lpc_frame_mesh.gd")
+const CageScript = preload("res://lpc/rig/lpc_cage_deformation.gd")
 
 
 static func evaluate(mesh: Dictionary, override_state: Dictionary = {}) -> Dictionary:
@@ -14,10 +15,14 @@ static func evaluate(mesh: Dictionary, override_state: Dictionary = {}) -> Dicti
 		state[key] = override_state[key]
 	var vertices: Array[Vector2] = []
 	for point in rest: vertices.append(point)
-	_apply_lattice(vertices, rest, state.get("lattice", {}))
-	_apply_radial_offsets(vertices, rest, state.get("pins", []), "pin")
-	_apply_radial_offsets(vertices, rest, state.get("soft_drags", []), "soft_drag")
-	_apply_vertex_offsets(vertices, state.get("vertex_offsets", {}))
+	for stage in state.get("evaluation_order", ["cage", "lattice", "pins", "soft_drags", "bones", "vertex_offsets"]):
+		match str(stage):
+			"cage": _apply_cage(vertices, state.get("cage", {}))
+			"lattice": _apply_lattice(vertices, rest, state.get("lattice", {}))
+			"pins": _apply_radial_offsets(vertices, rest, state.get("pins", []), "pin")
+			"soft_drags": _apply_radial_offsets(vertices, rest, state.get("soft_drags", []), "soft_drag")
+			"bones": _apply_vertex_offsets(vertices, state.get("bone_offsets", {}))
+			"vertex_offsets": _apply_vertex_offsets(vertices, state.get("vertex_offsets", {}))
 	for raw_index in mesh.get("locked_vertices", []):
 		var index := int(raw_index)
 		if index >= 0 and index < vertices.size(): vertices[index] = rest[index]
@@ -57,6 +62,28 @@ static func set_lattice(mesh: Dictionary, lattice: Dictionary) -> Dictionary:
 	var result := mesh.duplicate(true)
 	var state := MeshScript.default_control_state(result.get("control_state", {}))
 	state["lattice"] = lattice.duplicate(true)
+	result["control_state"] = state
+	return result
+
+
+static func set_cage(mesh: Dictionary, cage: Dictionary) -> Dictionary:
+	var result := mesh.duplicate(true)
+	var state := MeshScript.default_control_state(result.get("control_state", {}))
+	state["cage"] = cage.duplicate(true)
+	result["control_state"] = state
+	return result
+
+
+static func set_evaluation_order(mesh: Dictionary, order: Array) -> Dictionary:
+	var result := mesh.duplicate(true)
+	var state := MeshScript.default_control_state(result.get("control_state", {}))
+	var valid := ["cage", "lattice", "pins", "soft_drags", "bones", "vertex_offsets"]
+	var normalized: Array = []
+	for stage in order:
+		if str(stage) in valid and str(stage) not in normalized: normalized.append(str(stage))
+	for stage in valid:
+		if stage not in normalized: normalized.append(stage)
+	state["evaluation_order"] = normalized
 	result["control_state"] = state
 	return result
 
@@ -109,6 +136,13 @@ static func _apply_lattice(vertices: Array[Vector2], rest: Array[Vector2], raw_l
 		var c := _lattice_offset(offsets, left, bottom)
 		var d := _lattice_offset(offsets, right, bottom)
 		vertices[index] += a.lerp(b, tx).lerp(c.lerp(d, tx), ty)
+
+
+static func _apply_cage(vertices: Array[Vector2], raw_cage: Variant) -> void:
+	if not raw_cage is Dictionary or (raw_cage as Dictionary).is_empty(): return
+	if not CageScript.validate(raw_cage as Dictionary).is_empty(): return
+	var deformed := CageScript.deform_positions(raw_cage as Dictionary, vertices)
+	for index in range(vertices.size()): vertices[index] = deformed[index]
 
 
 static func _apply_radial_offsets(vertices: Array[Vector2], rest: Array[Vector2], raw_controls: Variant, expected_type: String) -> void:

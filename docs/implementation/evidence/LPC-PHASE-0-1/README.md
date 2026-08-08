@@ -30,3 +30,15 @@ The separately imported legacy Character Creator 2D artwork is intentionally
 not treated as LPC source art. Its copy-only provenance, checksums, and
 unreviewed license status are recorded in
 `assets/imported/character_creator_2d/IMPORT_MANIFEST.json`.
+
+## Task ID
+
+`LPC-PHASE-0-1`
+
+## Status
+
+AUTOMATED_VERIFICATION_COMPLETE; human visual and clean-machine release acceptance remain pending.
+
+## Evidence
+
+The focused acceptance runner and the full 556-assertion regression suite pass under Godot 4.7.1.

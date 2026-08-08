@@ -30,6 +30,8 @@ const LpcCatalogBuilderScript = preload("res://lpc/catalog/lpc_catalog_builder.g
 const LpcPixelEditorPanelScript = preload("res://lpc/ui/lpc_pixel_editor_panel.gd")
 const LpcAnimationPanelScript = preload("res://lpc/ui/lpc_animation_panel.gd")
 const LpcDeformPanelScript = preload("res://lpc/ui/lpc_deform_panel.gd")
+const LpcRigPanelScript = preload("res://lpc/ui/lpc_rig_panel.gd")
+const LpcDeliveryPanelScript = preload("res://lpc/ui/lpc_delivery_panel.gd")
 @onready var dock_layout_manager: Node = $DockLayoutManager
 @onready var status_message_label: Label = %StatusMessageLabel
 @onready var status_info_label: Label = %StatusInfoLabel
@@ -230,6 +232,14 @@ func _get_lpc_deform() -> Control:
 	var panel := get_panel("panel_lpc_deform")
 	return panel.get_node_or_null("MainVBox/ContentContainer/LpcDeformPanel") as Control if panel != null else null
 
+func _get_lpc_rig() -> Control:
+	var panel := get_panel("panel_lpc_rig")
+	return panel.get_node_or_null("MainVBox/ContentContainer/LpcRigPanel") as Control if panel != null else null
+
+func _get_lpc_delivery() -> Control:
+	var panel := get_panel("panel_lpc_delivery")
+	return panel.get_node_or_null("MainVBox/ContentContainer/LpcDeliveryPanel") as Control if panel != null else null
+
 func bind_lpc_creator_context(catalog: Dictionary, profile: Dictionary, manifest: Dictionary = {}, project_path: String = "") -> Dictionary:
 	var creator := _get_lpc_creator()
 	if creator == null: return {"success": false, "errors": ["The LPC Creator panel is unavailable."]}
@@ -254,25 +264,59 @@ func bind_lpc_deform_context(catalog: Dictionary, profile: Dictionary, manifest:
 	if deform.has_signal("profile_saved") and not deform.profile_saved.is_connected(_on_lpc_deform_profile_saved): deform.profile_saved.connect(_on_lpc_deform_profile_saved.bind(catalog))
 	return deform.call("bind_context", catalog, profile, manifest, project_path) as Dictionary
 
+func bind_lpc_rig_context(catalog: Dictionary, profile: Dictionary, manifest: Dictionary = {}, project_path: String = "") -> Dictionary:
+	var rig := _get_lpc_rig()
+	if rig == null: return {"success": false, "errors": ["The LPC Rig panel is unavailable."]}
+	if rig.has_signal("profile_saved") and not rig.profile_saved.is_connected(_on_lpc_rig_profile_saved): rig.profile_saved.connect(_on_lpc_rig_profile_saved.bind(catalog))
+	return rig.call("bind_context", catalog, profile, manifest, project_path) as Dictionary
+
+func bind_lpc_delivery_context(catalog: Dictionary, profile: Dictionary, manifest: Dictionary = {}, project_path: String = "") -> Dictionary:
+	var delivery := _get_lpc_delivery()
+	if delivery == null: return {"success": false, "errors": ["The LPC Delivery panel is unavailable."]}
+	if delivery.has_signal("profile_saved") and not delivery.profile_saved.is_connected(_on_lpc_delivery_profile_saved): delivery.profile_saved.connect(_on_lpc_delivery_profile_saved.bind(catalog))
+	return delivery.call("bind_context", catalog, profile, manifest, project_path) as Dictionary
+
 func _on_lpc_creator_profile_changed(profile: Dictionary, manifest: Dictionary, project_path: String, catalog: Dictionary) -> void:
 	bind_lpc_pixel_editor_context(catalog, profile, manifest, project_path)
 	bind_lpc_animation_context(catalog, profile, manifest, project_path)
 	bind_lpc_deform_context(catalog, profile, manifest, project_path)
+	bind_lpc_rig_context(catalog, profile, manifest, project_path)
+	bind_lpc_delivery_context(catalog, profile, manifest, project_path)
 
 func _on_lpc_pixel_profile_saved(profile: Dictionary, manifest: Dictionary, project_path: String, catalog: Dictionary) -> void:
 	bind_lpc_creator_context(catalog, profile, manifest, project_path)
 	bind_lpc_animation_context(catalog, profile, manifest, project_path)
 	bind_lpc_deform_context(catalog, profile, manifest, project_path)
+	bind_lpc_rig_context(catalog, profile, manifest, project_path)
+	bind_lpc_delivery_context(catalog, profile, manifest, project_path)
 
 func _on_lpc_animation_profile_saved(profile: Dictionary, manifest: Dictionary, project_path: String, catalog: Dictionary) -> void:
 	bind_lpc_creator_context(catalog, profile, manifest, project_path)
 	bind_lpc_pixel_editor_context(catalog, profile, manifest, project_path)
 	bind_lpc_deform_context(catalog, profile, manifest, project_path)
+	bind_lpc_rig_context(catalog, profile, manifest, project_path)
+	bind_lpc_delivery_context(catalog, profile, manifest, project_path)
 
 func _on_lpc_deform_profile_saved(profile: Dictionary, manifest: Dictionary, project_path: String, catalog: Dictionary) -> void:
 	bind_lpc_creator_context(catalog, profile, manifest, project_path)
 	bind_lpc_pixel_editor_context(catalog, profile, manifest, project_path)
 	bind_lpc_animation_context(catalog, profile, manifest, project_path)
+	bind_lpc_rig_context(catalog, profile, manifest, project_path)
+	bind_lpc_delivery_context(catalog, profile, manifest, project_path)
+
+func _on_lpc_rig_profile_saved(profile: Dictionary, manifest: Dictionary, project_path: String, catalog: Dictionary) -> void:
+	bind_lpc_creator_context(catalog, profile, manifest, project_path)
+	bind_lpc_pixel_editor_context(catalog, profile, manifest, project_path)
+	bind_lpc_animation_context(catalog, profile, manifest, project_path)
+	bind_lpc_deform_context(catalog, profile, manifest, project_path)
+	bind_lpc_delivery_context(catalog, profile, manifest, project_path)
+
+func _on_lpc_delivery_profile_saved(profile: Dictionary, manifest: Dictionary, project_path: String, catalog: Dictionary) -> void:
+	bind_lpc_creator_context(catalog, profile, manifest, project_path)
+	bind_lpc_pixel_editor_context(catalog, profile, manifest, project_path)
+	bind_lpc_animation_context(catalog, profile, manifest, project_path)
+	bind_lpc_deform_context(catalog, profile, manifest, project_path)
+	bind_lpc_rig_context(catalog, profile, manifest, project_path)
 
 func _bind_lpc_creator_if_open() -> void:
 	if AppState == null or not AppState.is_project_loaded(): return
@@ -289,6 +333,8 @@ func _bind_lpc_creator_if_open() -> void:
 		bind_lpc_pixel_editor_context(catalog_result.get("catalog", {}), profile, opened.get("manifest", {}), project_path)
 		bind_lpc_animation_context(catalog_result.get("catalog", {}), profile, opened.get("manifest", {}), project_path)
 		bind_lpc_deform_context(catalog_result.get("catalog", {}), profile, opened.get("manifest", {}), project_path)
+		bind_lpc_rig_context(catalog_result.get("catalog", {}), profile, opened.get("manifest", {}), project_path)
+		bind_lpc_delivery_context(catalog_result.get("catalog", {}), profile, opened.get("manifest", {}), project_path)
 		get_dock_layout_manager().call("activate_panel", "panel_lpc_creator")
 		set_status_message("LPC Creator ready with locked-source native preview.")
 
@@ -372,7 +418,7 @@ func _setup_default_panels() -> void:
 		["panel_hierarchy", "Hierarchy & Rig", DockPanelScript.DockRegion.LEFT, "LEFT"], ["panel_pose_library", "Saved Poses", DockPanelScript.DockRegion.LEFT, "LEFT"], ["panel_retarget_preview", "Retarget Preview", DockPanelScript.DockRegion.RIGHT, "RIGHT"],
 		["panel_viewport", "2D Canvas Viewport", DockPanelScript.DockRegion.CENTER, "CENTER"],
 		["panel_project_hub", "Project Play Hub", DockPanelScript.DockRegion.CENTER, "CENTER"],
-		["panel_facing_grid", "Facing Grid Directions", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_weapon_wizard", "Weapon Authoring Wizard", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_character_creator", "Character Creator", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_lpc_creator", "LPC Creator", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_lpc_pixel_editor", "Pixel & Cels", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_lpc_animation", "Animate · Hybrid Clips", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_lpc_deform", "Deform · Strict Frame Warp", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_media_authoring", "Media Authoring", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_animation_composition", "Animation Composition", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_motion_library", "Motion Library & Polish", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_runtime_delivery", "Runtime Preview & QA", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_pipeline_collaboration", "Pipeline & Collaboration", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_presentation", "Presentation & Approval", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_batch_export", "Batch Export", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_quality_dashboard", "Quality & Recovery", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_review_package", "Review Package", DockPanelScript.DockRegion.CENTER, "CENTER"],
+		["panel_facing_grid", "Facing Grid Directions", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_weapon_wizard", "Weapon Authoring Wizard", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_character_creator", "Character Creator", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_lpc_creator", "LPC Creator", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_lpc_pixel_editor", "Pixel & Cels", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_lpc_animation", "Animate · Hybrid Clips", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_lpc_deform", "Deform · Strict Frame Warp", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_lpc_rig", "Rig · Cutouts & Weights", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_lpc_delivery", "Deliver · LPC Runtime", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_media_authoring", "Media Authoring", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_animation_composition", "Animation Composition", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_motion_library", "Motion Library & Polish", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_runtime_delivery", "Runtime Preview & QA", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_pipeline_collaboration", "Pipeline & Collaboration", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_presentation", "Presentation & Approval", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_batch_export", "Batch Export", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_quality_dashboard", "Quality & Recovery", DockPanelScript.DockRegion.CENTER, "CENTER"], ["panel_review_package", "Review Package", DockPanelScript.DockRegion.CENTER, "CENTER"],
 		["panel_inspector", "Inspector & Properties", DockPanelScript.DockRegion.RIGHT, "RIGHT"],
 		["panel_timeline", "Animation Timeline", DockPanelScript.DockRegion.BOTTOM, "BOTTOM"],
 		["panel_diagnostics", "Diagnostics & Logs", DockPanelScript.DockRegion.BOTTOM, "BOTTOM"]
@@ -430,6 +476,14 @@ func _create_dock_panel(pid: String, title: String, region: int) -> Control:
 		var lpc_deform := LpcDeformPanelScript.new() as Control
 		lpc_deform.name = "LpcDeformPanel"
 		p.call("add_content", lpc_deform)
+	elif pid == "panel_lpc_rig":
+		var lpc_rig := LpcRigPanelScript.new() as Control
+		lpc_rig.name = "LpcRigPanel"
+		p.call("add_content", lpc_rig)
+	elif pid == "panel_lpc_delivery":
+		var lpc_delivery := LpcDeliveryPanelScript.new() as Control
+		lpc_delivery.name = "LpcDeliveryPanel"
+		p.call("add_content", lpc_delivery)
 	elif pid == "panel_project_hub" and ProjectHubPanelScene != null: p.call("add_content", ProjectHubPanelScene.instantiate() as Control)
 	elif pid == "panel_media_authoring" and MediaAuthoringPanelScene != null: p.call("add_content", MediaAuthoringPanelScene.instantiate() as Control)
 	elif pid == "panel_animation_composition" and AnimationCompositionPanelScene != null: p.call("add_content", AnimationCompositionPanelScene.instantiate() as Control)
@@ -516,7 +570,7 @@ func _setup_focus_framework() -> void:
 		return
 	if menu_bar != null:
 		FocusService.register_focus_group("menu_bar", menu_bar)
-	for pid in ["panel_assets", "panel_hierarchy", "panel_viewport", "panel_project_hub", "panel_facing_grid", "panel_weapon_wizard", "panel_character_creator", "panel_lpc_creator", "panel_lpc_pixel_editor", "panel_lpc_animation", "panel_lpc_deform", "panel_media_authoring", "panel_animation_composition", "panel_motion_library", "panel_runtime_delivery", "panel_pipeline_collaboration", "panel_presentation", "panel_batch_export", "panel_quality_dashboard", "panel_review_package", "panel_inspector", "panel_timeline", "panel_diagnostics"]:
+	for pid in ["panel_assets", "panel_hierarchy", "panel_viewport", "panel_project_hub", "panel_facing_grid", "panel_weapon_wizard", "panel_character_creator", "panel_lpc_creator", "panel_lpc_pixel_editor", "panel_lpc_animation", "panel_lpc_deform", "panel_lpc_rig", "panel_lpc_delivery", "panel_media_authoring", "panel_animation_composition", "panel_motion_library", "panel_runtime_delivery", "panel_pipeline_collaboration", "panel_presentation", "panel_batch_export", "panel_quality_dashboard", "panel_review_package", "panel_inspector", "panel_timeline", "panel_diagnostics"]:
 		var p := get_panel(pid)
 		if p != null:
 			FocusService.register_focus_group(pid, p)

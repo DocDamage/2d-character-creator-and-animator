@@ -26,3 +26,15 @@ The synthetic test authors all phase-4 track categories, runs native body +
 custom cel + transformed clothing playback, verifies visibility/event timing,
 requires warnings for missing rig/mesh targets, exports three PNG frames,
 saves/reopens, and proves the replay hash is stable.
+
+## Task ID
+
+`LPC-PHASE-4`
+
+## Status
+
+AUTOMATED_VERIFICATION_COMPLETE; human visual and clean-machine release acceptance remain pending.
+
+## Evidence
+
+The focused acceptance runner and the full 556-assertion regression suite pass under Godot 4.7.1.

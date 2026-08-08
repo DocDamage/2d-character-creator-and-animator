@@ -1,0 +1,66 @@
+=== APP-001 Verification Commands Log ===
+Date: 2026-08-05
+
+1. Engine Version Check
+Command: godot --version
+Output: 4.7.1.stable.official.a13da4feb
+
+2. Startup Diagnostics Run (Headless Scene Execution)
+Command: godot --headless app/bootstrap/startup.tscn
+Output:
+Godot Engine v4.7.1.stable.official.a13da4feb - https://godotengine.org
+
+============================================
+  Modular 2D Character Studio
+  Version 0.1.0-dev
+  Target: Godot 4.7
+============================================
+
+Startup ready. Application shell loaded.
+
+3. Automated Test Suite
+Command: godot --headless tests/test_runner.tscn
+Output:
+Godot Engine v4.7.1.stable.official.a13da4feb - https://godotengine.org
+
+=== Running Automated Test Suite ===
+
+[TEST 1] Baseline valid fixture loading...
+  PASS: Baseline fixture loaded and validated successfully.
+[TEST 2] Malformed corrupt fixture handling...
+  PASS: Malformed fixture handled safely without crash.
+[TEST 3] IDService UUID & registration...
+  PASS: IDService generated and registered valid UUID: ac267997-0453-44ee-8ef8-e926002abe58
+[TEST 4] CommandService stack...
+  PASS: CommandService initialized clean stack.
+[TEST 5] Startup script instantiation & diagnostic sequence...
+
+============================================
+  Modular 2D Character Studio
+  Version 0.1.0-dev
+  Target: Godot 4.7
+============================================
+
+Startup ready. Application shell loaded.
+  PASS: Startup sequence reported completion successfully.
+  PASS: All 5 startup diagnostic checks passed (5/5).
+  PASS: Zero startup errors reported.
+  PASS: DiagnosticsService recorded 7 diagnostic entries.
+
+=== Test Suite Finished: 8 PASS, 0 FAIL ===
+
+4. LOC Checker
+Command: godot --headless --script tools/loc_checker/loc_checker.gd
+Output:
+=== LOC Checker v1.0.0 ===
+Line limit: 300 lines
+Scanned 12 files.
+PASS: No files exceed the 300-line limit.
+
+5. Stub Scanner
+Command: godot --headless --script tools/stub_scanner/stub_scanner.gd
+Output:
+=== Stub Scanner v1.0.0 ===
+Patterns: 13
+Scanned 9 files.
+PASS: No stubs or placeholders found.

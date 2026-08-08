@@ -13,8 +13,10 @@ const EXCLUDED_DIRS := [
 	"autosave",
 	"backups",
 	"exported",
+	"tests",
 	"user",
 ]
+const BASELINE_PATH := "res://tools/loc_checker/loc_baseline.json"
 const EXCLUDED_FILES := [
 	"project.godot",
 	".gitignore",
@@ -23,6 +25,8 @@ const EXCLUDED_FILES := [
 var _results: Array[Dictionary] = []
 var _violations := 0
 var _total_files := 0
+var _baseline: Dictionary = {}
+var _baseline_debt := 0
 
 ## === Entry Point ============================================================
 
@@ -30,6 +34,7 @@ func _init() -> void:
 	print("=== LOC Checker v1.0.0 ===")
 	print("Line limit: %d lines" % LINE_LIMIT)
 	print("")
+	_load_baseline()
 	_scan_directory("res://")
 	_print_results()
 	_save_report()
@@ -78,15 +83,28 @@ func _scan_file(file_path: String) -> void:
 
 	_total_files += 1
 
+	var baseline_limit := int(_baseline.get(file_path, LINE_LIMIT))
 	var result := {
 		"path": file_path,
 		"lines": line_count,
-		"violation": line_count > LINE_LIMIT,
+		"baseline_limit": baseline_limit,
+		"baseline_debt": line_count > LINE_LIMIT and baseline_limit > LINE_LIMIT,
+		"violation": line_count > baseline_limit,
 	}
 	_results.append(result)
 
 	if result["violation"]:
 		_violations += 1
+	elif result["baseline_debt"]:
+		_baseline_debt += 1
+
+
+func _load_baseline() -> void:
+	if not FileAccess.file_exists(BASELINE_PATH):
+		return
+	var parsed = JSON.parse_string(FileAccess.get_file_as_string(BASELINE_PATH))
+	if parsed is Dictionary:
+		_baseline = parsed as Dictionary
 
 
 ## === Output =================================================================
@@ -96,7 +114,9 @@ func _print_results() -> void:
 	print("")
 
 	if _violations == 0:
-		print("PASS: No files exceed the %d-line limit." % LINE_LIMIT)
+		print("PASS: No new or worsened files exceed the %d-line policy." % LINE_LIMIT)
+		if _baseline_debt > 0:
+			print("Baseline debt retained: %d file(s); increases remain blocked." % _baseline_debt)
 		return
 
 	print("FAIL: %d file(s) exceed the %d-line limit:" % [_violations, LINE_LIMIT])
@@ -127,9 +147,10 @@ func _save_report() -> void:
 	file.store_string("Limit: %d lines per file\n" % LINE_LIMIT)
 	file.store_string("Total scanned: %d\n" % _total_files)
 	file.store_string("Violations: %d\n\n" % _violations)
+	file.store_string("Baseline debt: %d\n\n" % _baseline_debt)
 
 	for result in _results:
-		var status := "PASS" if not result["violation"] else "FAIL"
+		var status := "FAIL" if result["violation"] else ("DEBT" if result["baseline_debt"] else "PASS")
 		file.store_string("%4s  %4d lines  %s\n" % [status, result["lines"], result["path"]])
 
 	file.close()

@@ -2,7 +2,7 @@
 class_name LpcProjectProfile
 extends RefCounted
 
-const PROFILE_SCHEMA_VERSION := "1.3.0"
+const PROFILE_SCHEMA_VERSION := "1.5.0"
 const METADATA_KEY := "lpc_profile"
 const NameSequenceScript = preload("res://lpc/project/lpc_name_sequence.gd")
 
@@ -27,8 +27,8 @@ static func create(options: Dictionary) -> Dictionary:
 		"direction_set": {"id": "lpc_cardinal_4", "directions": ["up", "left", "down", "right"]},
 		"selections": [], "layer_groups": {}, "selected_license_options": {}, "palette_state": {},
 		"source_frame_references": [], "derivative_references": [], "cels": [], "cel_timeline": {"fps": 10.0, "onion_before": 1, "onion_after": 1}, "pixel_editor_state": {"zoom": 8, "active_tool": "pencil"}, "clips": [], "hybrid_animation_state": {"selected_clip_id": "", "active_direction": "down"}, "frame_meshes": [], "deformation_workspace_state": {"active_mesh_id": "", "preview_mode": "interactive"},
-		"rig_adapters": [], "rig_overrides": {}, "bake_caches": [], "validation_reports": [],
-		"export_profiles": [], "acceptance_records": [], "credit_manifest_inputs": [],
+		"rig_adapters": [], "rig_overrides": {}, "rig_workspace_state": {"active_adapter_id": ""}, "weighted_meshes": [], "advanced_deformation_state": {"active_weighted_mesh_id": "", "evaluation_order": ["cage", "lattice", "pins", "soft_drags", "bones", "vertex_offsets"]}, "direction_authoring": {"directions": {}, "mirror_policy": {"allowed": false, "editable": true}}, "bake_caches": [], "validation_reports": [],
+		"export_profiles": [], "runtime_delivery_state": {}, "acceptance_records": [], "credit_manifest_inputs": [],
 		"workspace_state": {"workspace_id": "creator", "playhead": 0.0},
 	}
 
@@ -47,12 +47,14 @@ static func validate(profile: Dictionary) -> Array[String]:
 	if str(profile.get("body_family_id", "")).is_empty(): errors.append("LPC profile must select a body family.")
 	var directions: Array = (profile.get("direction_set", {}) as Dictionary).get("directions", [])
 	if directions.is_empty(): errors.append("LPC profile must record a direction set.")
-	for key in ["selections", "derivative_references", "cels", "clips", "frame_meshes"]:
+	for key in ["selections", "derivative_references", "cels", "clips", "frame_meshes", "rig_adapters", "weighted_meshes", "export_profiles"]:
 		if not profile.get(key, []) is Array: errors.append("LPC profile field '%s' must be an array." % key)
 	if not profile.get("cel_timeline", {}) is Dictionary: errors.append("LPC profile cel_timeline must be an object.")
 	if not profile.get("pixel_editor_state", {}) is Dictionary: errors.append("LPC profile pixel_editor_state must be an object.")
 	if not profile.get("hybrid_animation_state", {}) is Dictionary: errors.append("LPC profile hybrid_animation_state must be an object.")
 	if not profile.get("deformation_workspace_state", {}) is Dictionary: errors.append("LPC profile deformation_workspace_state must be an object.")
+	for key in ["rig_workspace_state", "advanced_deformation_state", "direction_authoring", "runtime_delivery_state"]:
+		if not profile.get(key, {}) is Dictionary: errors.append("LPC profile %s must be an object." % key)
 	return errors
 
 
@@ -96,6 +98,15 @@ static func migrate(profile: Dictionary) -> Dictionary:
 		from_version = "1.2.0"; changed = true
 	if from_version == "1.2.0":
 		if not result.has("deformation_workspace_state"): result["deformation_workspace_state"] = {"active_mesh_id": "", "preview_mode": "interactive"}
+		from_version = "1.3.0"; changed = true
+	if from_version == "1.3.0":
+		if not result.has("rig_workspace_state"): result["rig_workspace_state"] = {"active_adapter_id": ""}
+		if not result.has("weighted_meshes"): result["weighted_meshes"] = []
+		if not result.has("advanced_deformation_state"): result["advanced_deformation_state"] = {"active_weighted_mesh_id": "", "evaluation_order": ["cage", "lattice", "pins", "soft_drags", "bones", "vertex_offsets"]}
+		from_version = "1.4.0"; changed = true
+	if from_version == "1.4.0":
+		if not result.has("direction_authoring"): result["direction_authoring"] = {"directions": {}, "mirror_policy": {"allowed": false, "editable": true}}
+		if not result.has("runtime_delivery_state"): result["runtime_delivery_state"] = {}
 		result["profile_schema_version"] = PROFILE_SCHEMA_VERSION; changed = true
 		return {"success": true, "changed": changed, "profile": result, "errors": []}
 	return {"success": false, "changed": false, "profile": result, "errors": ["Unsupported LPC profile schema %s." % from_version]}

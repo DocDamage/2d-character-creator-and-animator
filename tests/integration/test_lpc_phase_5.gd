@@ -108,8 +108,8 @@ func _exercise_strict_warp_workflow() -> Dictionary:
 		errors.append("Changed source binding or flipped triangle was not rejected as a hard strict-bake failure.")
 	if not bool(alpha_result.get("success", false)): errors.append_array(alpha_result.get("errors", []))
 	if not bool(clip_result.get("success", false)): errors.append_array(clip_result.get("errors", []))
-	if not bool(migrated.get("success", false)) or str((migrated.get("profile", {}) as Dictionary).get("profile_schema_version", "")) != "1.3.0":
-		errors.append("LPC profile migration did not add deformation workspace state at schema 1.3.0.")
+	if not bool(migrated.get("success", false)) or str((migrated.get("profile", {}) as Dictionary).get("profile_schema_version", "")) != str(ProjectProfileScript.PROFILE_SCHEMA_VERSION):
+		errors.append("LPC profile migration did not preserve deformation workspace state through the current schema.")
 	if not bool(panel_bound.get("success", false)):
 		errors.append("The reachable Deform · Strict Frame Warp panel could not bind project context.")
 	return {"success": errors.is_empty(), "errors": errors}

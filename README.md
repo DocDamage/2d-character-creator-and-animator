@@ -99,7 +99,7 @@ for CLI examples, review packages, asset packs, and runtime export contracts.
 
 ## Direct-start LPC creation
 
-Phases 0–5 of the dedicated **direct-start LPC creator** are implemented.
+Phases 0–7 of the dedicated **direct-start LPC creator** are implemented.
 On a normal desktop launch, the LPC chooser lets a creator locate a locked
 local source library, rebuild its deterministic catalog, choose a license
 policy and compatible body family, create a project, or resume the latest
@@ -138,6 +138,20 @@ authoritative CPU raster baker writes deterministic nearest-sampled PNGs with
 render snapshots, source/palette/alpha/geometry audits, and replayable export
 manifests; a mesh is rejected rather than silently reused when its source frame
 or topology no longer matches.
+The **Rig · Cutouts, Weights & Directions** workspace converts a selected,
+locked source frame into direction-specific project-owned cutout pieces,
+keeps native frames as an explicit fallback, supports reversible piece/bone/
+anchor editing, rigid posing and hand/weapon IK, gap-patch derivatives, named
+weight initialization, atomic topology-aware painting, true mean-value cages,
+separate radial pins/soft controls, and explicitly authored eight-direction
+completion. The **Deliver · LPC Runtime** workspace exports baked frames,
+validated editable runtime data, or explicit hybrid fallback packages. Each
+hybrid package includes only portable assets and the runtime addon; its clean
+consumer check imports the package after fresh editor restarts, verifies
+directions, clips, equipment state, credits, fallback metadata, and missing
+asset diagnostics. Release-candidate assessment records timing, fixture
+evidence, and the required pending/approved human visual-review state rather
+than treating automated checks as a public-release signoff.
 
 Read the complete
 [Direct-Start LPC Creator plan](DIRECT_START_LPC_CREATOR_PLAN.md) for scope,
@@ -152,6 +166,8 @@ godot --headless --path . --scene tests/lpc_phase2_runner.tscn
 godot --headless --path . --scene tests/lpc_phase3_runner.tscn
 godot --headless --path . --scene tests/lpc_phase4_runner.tscn
 godot --headless --path . --scene tests/lpc_phase5_runner.tscn
+godot --headless --path . --scene tests/lpc_phase6_runner.tscn
+godot --headless --path . --scene tests/lpc_phase7_runner.tscn
 ```
 
 ## Documentation

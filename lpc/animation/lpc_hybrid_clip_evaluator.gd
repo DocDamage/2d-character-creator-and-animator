@@ -13,6 +13,8 @@ const ReferenceRendererScript = preload("res://lpc/render/lpc_reference_renderer
 const SnapshotScript = preload("res://lpc/render/lpc_render_snapshot.gd")
 const LicenseResolverScript = preload("res://lpc/licensing/lpc_license_resolver.gd")
 const StrictFrameBakerScript = preload("res://lpc/deformation/lpc_strict_frame_baker.gd")
+const RigAdapterScript = preload("res://lpc/rig/lpc_rig_adapter.gd")
+const RigEvaluatorScript = preload("res://lpc/rig/lpc_rig_evaluator.gd")
 
 
 static func evaluate(catalog: Dictionary, profile: Dictionary, clip: Dictionary, time: float, previous_time: float = -1.0) -> Dictionary:
@@ -31,7 +33,7 @@ static func evaluate(catalog: Dictionary, profile: Dictionary, clip: Dictionary,
 	for instance_id in state.layers:
 		var layer_state: Dictionary = state.layers[instance_id]
 		if not bool(layer_state.get("visible", true)): continue
-		var rendered := _render_layer(catalog, profile, str(instance_id), layer_state, playhead, str(state.get("direction_id", "down")), state.get("mesh_state", {}))
+		var rendered := _render_layer(catalog, profile, str(instance_id), layer_state, playhead, str(state.get("direction_id", "down")), state.get("mesh_state", {}), state.get("rig_state", {}))
 		if not bool(rendered.get("success", false)):
 			warnings.append_array(rendered.get("warnings", [])); continue
 		var record: Dictionary = rendered.record; records.append(record); credit_assets.append(rendered.asset)
@@ -51,7 +53,8 @@ static func _initial_state(catalog: Dictionary, profile: Dictionary, clip: Dicti
 		if not raw_selection is Dictionary: continue
 		var selection: Dictionary = raw_selection; var instance_id := str(selection.get("instance_id", "")); var asset: Dictionary = assets.get(str(selection.get("asset_id", "")), {})
 		if instance_id.is_empty() or asset.is_empty(): continue
-		layers[instance_id] = {"instance_id": instance_id, "asset_id": str(asset.get("asset_id", "")), "animation_id": str(clip.get("default_animation_id", "walk")), "visible": bool(selection.get("visible", true)), "z": int((asset.get("z_order", {}) as Dictionary).get("default", 0)), "transform": {}, "palette_map": {}, "cel_derivative_id": "", "representation": str(selection.get("representation", "FRAME_NATIVE"))}
+		var override: Dictionary = (profile.get("rig_overrides", {}) as Dictionary).get(instance_id, {})
+		layers[instance_id] = {"instance_id": instance_id, "asset_id": str(asset.get("asset_id", "")), "animation_id": str(clip.get("default_animation_id", "walk")), "visible": bool(selection.get("visible", true)), "z": int((asset.get("z_order", {}) as Dictionary).get("default", 0)), "transform": {}, "palette_map": {}, "cel_derivative_id": "", "representation": str(override.get("representation", selection.get("representation", "FRAME_NATIVE"))), "adapter_instance_id": str(override.get("adapter_instance_id", ""))}
 	return {"layers": layers, "direction_id": str(clip.get("default_direction_id", "down")), "events": [], "rig_state": {}, "mesh_state": {}}
 
 
@@ -92,11 +95,20 @@ static func _apply_track(state: Dictionary, track: Dictionary, time: float, prev
 	state.layers[target_id] = layer
 
 
-static func _render_layer(catalog: Dictionary, profile: Dictionary, instance_id: String, state: Dictionary, time: float, direction_id: String, mesh_state: Dictionary = {}) -> Dictionary:
+static func _render_layer(catalog: Dictionary, profile: Dictionary, instance_id: String, state: Dictionary, time: float, direction_id: String, mesh_state: Dictionary = {}, rig_state: Dictionary = {}) -> Dictionary:
 	var asset: Dictionary = (catalog.get("assets", {}) as Dictionary).get(str(state.get("asset_id", "")), {})
 	if asset.is_empty(): return {"success": false, "warnings": ["Layer '%s' references an unavailable asset." % instance_id]}
 	var frame: Image = null; var frame_record: Dictionary = {}; var derivative_id := str(state.get("cel_derivative_id", ""))
-	if not derivative_id.is_empty():
+	var representation := str(state.get("representation", "FRAME_NATIVE")).to_upper()
+	if representation in ["RIGID_CUTOUT", "WEIGHTED_MESH"]:
+		var rigged := _render_rigged_layer(profile, instance_id, str(state.get("adapter_instance_id", "")), direction_id, rig_state)
+		if bool(rigged.get("success", false)):
+			frame = rigged.image; frame_record = rigged.record
+		else:
+			return {"success": false, "warnings": rigged.get("warnings", ["Rigged LPC layer cannot be evaluated."])}
+	elif representation == "HIDDEN":
+		return {"success": false, "warnings": []}
+	elif not derivative_id.is_empty():
 		var derivative := _derivative(profile, derivative_id); frame = DerivativeStoreScript.load_image(derivative)
 		if frame == null or frame.is_empty(): return {"success": false, "warnings": ["Layer '%s' references missing project-owned cel '%s'." % [instance_id, derivative_id]]}
 		frame_record = {"instance_id": instance_id, "asset_id": asset.get("asset_id", ""), "derivative_id": derivative_id, "mode": "cel", "z": state.get("z", 0)}
@@ -116,6 +128,20 @@ static func _render_layer(catalog: Dictionary, profile: Dictionary, instance_id:
 	frame = TransformRendererScript.render(frame, Vector2i(int(_canvas(profile).width), int(_canvas(profile).height)), state.get("transform", {}))
 	frame_record["instance_id"] = instance_id; frame_record["asset_id"] = asset.get("asset_id", ""); frame_record["z"] = state.get("z", 0); frame_record["transform"] = state.get("transform", {}); frame_record["cel_derivative_id"] = derivative_id
 	return {"success": true, "warnings": layer_warnings, "image": frame, "record": frame_record, "asset": asset}
+
+
+static func _render_rigged_layer(profile: Dictionary, instance_id: String, requested_adapter_id: String, direction_id: String, rig_state: Dictionary) -> Dictionary:
+	var adapter: Dictionary = {}
+	for raw in profile.get("rig_adapters", []):
+		if not raw is Dictionary: continue
+		var candidate: Dictionary = raw
+		if not requested_adapter_id.is_empty() and str(candidate.get("instance_id", "")) == requested_adapter_id: adapter = candidate.duplicate(true); break
+	if adapter.is_empty(): adapter = RigAdapterScript.find_for_layer(profile, instance_id, direction_id)
+	if adapter.is_empty(): return {"success": false, "warnings": ["Layer '%s' has no cutout-rig adapter; choose frame swap or prepare this direction." % instance_id]}
+	if str(adapter.get("direction_id", "")) != direction_id: return {"success": false, "warnings": ["Cutout rig '%s' does not author direction '%s'; native/frame fallback must be explicit." % [adapter.get("instance_id", ""), direction_id]]}
+	var canvas := _canvas(profile); var evaluated := RigEvaluatorScript.evaluate(profile, adapter, rig_state, Vector2i(int(canvas.width), int(canvas.height)))
+	if not bool(evaluated.get("success", false)): return {"success": false, "warnings": evaluated.get("errors", [])}
+	return {"success": true, "image": evaluated.image, "record": {"instance_id": instance_id, "mode": "rigged_cutout", "rig_adapter_id": adapter.get("instance_id", ""), "piece_records": evaluated.get("piece_records", []), "anchors": evaluated.get("anchors", {})}}
 
 
 static func _apply_frame_warp(profile: Dictionary, asset: Dictionary, frame: Image, mesh_state: Dictionary) -> Dictionary:
@@ -159,8 +185,7 @@ static func _derivative(profile: Dictionary, derivative_id: String) -> Dictionar
 	for raw in profile.get("derivative_references", []): if raw is Dictionary and str((raw as Dictionary).get("derivative_id", "")) == derivative_id: return raw
 	return {}
 static func _known_rig_target(profile: Dictionary, target_id: String) -> bool:
-	for raw in profile.get("rig_adapters", []): if raw is Dictionary and (str((raw as Dictionary).get("adapter_id", "")) == target_id or target_id in (raw as Dictionary).get("bone_ids", [])): return true
-	return false
+	return RigAdapterScript.known_target(profile, target_id)
 static func _known_mesh(profile: Dictionary, target_id: String) -> bool:
 	for raw in profile.get("frame_meshes", []): if raw is Dictionary and str((raw as Dictionary).get("mesh_id", "")) == target_id: return true
 	return false

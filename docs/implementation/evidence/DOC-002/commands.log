@@ -1,0 +1,57 @@
+=== DOC-002 Command Execution Log ===
+
+$ godot --headless tests/test_runner.tscn
+...
+[TEST 15] Stable ID Service Workflows (REQ-DOC-002)...
+  PASS: Generated ID begins with specified prefix
+  PASS: Generated ID is automatically registered
+  PASS: Generated ID satisfies format validation
+  PASS: Consecutively generated IDs are distinct
+  PASS: Generated short ID begins with specified prefix
+  PASS: Generated short ID is registered
+  PASS: Generated short ID satisfies format validation
+  PASS: Consecutive short IDs are unique
+  PASS: UUID v4 string has length 36
+  PASS: Generated string passes UUID v4 validation
+  PASS: UUID v4 registered when auto_register is true
+  PASS: UUID v4 without auto_register passes validation
+  PASS: UUID v4 not registered when auto_register is false
+  PASS: Generated 1000 IDs with 0 collisions
+  PASS: All 1000 IDs registered in IDService
+  PASS: New custom ID registers successfully
+  PASS: Registered custom ID is recognized
+  PASS: Duplicate registration rejected
+  PASS: Empty ID registration rejected
+  PASS: Whitespace ID registration rejected
+  PASS: Unregistered ID no longer recognized
+  PASS: Valid UUID string accepted
+  PASS: Invalid string rejected by is_valid_uuid
+  PASS: Non-hex character rejected by is_valid_uuid
+  PASS: Valid identifier accepted by is_valid_id
+  PASS: Empty string rejected by is_valid_id
+  PASS: Space-containing string rejected by is_valid_id
+  PASS: Range reservation for 'slot' succeeded
+  PASS: Reserved count for 'slot' is 50
+  PASS: Invalid range count <= 0 rejected
+  PASS: Reserved count cleared
+  PASS: Counter reset to 10
+  PASS: Deterministic seed produces identical UUID output
+  PASS: Counter reset to 0 by clear_all
+  PASS: Registered IDs cleared by clear_all
+  IDService tests finished: 35 PASS, 0 FAIL
+
+=== Test Suite Finished: 219 PASS, 0 FAIL ===
+
+$ godot --headless --script tools/loc_checker/loc_checker.gd
+Scanned 38 files.
+PASS: No files exceed the 300-line limit.
+
+$ godot --headless --script tools/stub_scanner/stub_scanner.gd
+Scanned 35 files.
+PASS: No stubs or placeholders found.
+
+$ godot --headless --script tools/evidence_checker/evidence_checker.gd
+Evidence bundles checked: 21
+Valid:   21
+Invalid: 0
+PASS: All evidence bundles meet required structure.

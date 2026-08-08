@@ -1,0 +1,2 @@
+godot --headless --path . tests/test_runner.tscn
+PASS (402 PASS, 0 FAIL)

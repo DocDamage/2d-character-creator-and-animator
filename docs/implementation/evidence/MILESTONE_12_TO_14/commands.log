@@ -1,0 +1,12 @@
+# Milestones 12–14 Command Log
+
+```text
+Godot_v4.7.1-stable_win64_console.exe --headless --path . tests/test_runner.tscn
+Result: 446 PASS, 0 FAIL
+
+Godot_v4.7.1-stable_win64_console.exe --headless --path . --script tools/loc_checker/loc_checker.gd
+Result: PASS; 194 files scanned; 0 over 300 lines
+
+Godot_v4.7.1-stable_win64_console.exe --headless --path . --script tools/stub_scanner/stub_scanner.gd
+Result: PASS; 191 production files scanned; 0 findings
+```

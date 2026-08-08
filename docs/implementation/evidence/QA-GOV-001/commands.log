@@ -1,0 +1,26 @@
+=== QA-GOV-001 Command Log ===
+Date: 2026-08-05
+
+1. Check Godot Version:
+$ godot --version
+Output: 4.7.1.stable.official.a13da4feb
+
+2. Execute LOC Checker:
+$ godot --headless --script tools/loc_checker/loc_checker.gd
+Output: Scanned 9 files. PASS: No files exceed the 300-line limit.
+
+3. Execute Stub Scanner:
+$ godot --headless --script tools/stub_scanner/stub_scanner.gd
+Output: Scanned 6 files. PASS: No stubs or placeholders found.
+
+4. Execute Evidence Bundle Checker:
+$ godot --headless --script tools/evidence_checker/evidence_checker.gd
+Output: Evidence bundles checked: 9. Valid: 9, Invalid: 0.
+
+5. Execute Application Shell Bootstrap:
+$ godot --headless app/bootstrap/startup.tscn
+Output: Startup ready. Application shell loaded.
+
+6. Execute Automated Test Suite:
+$ godot --headless tests/test_runner.tscn
+Output: === Test Suite Finished: 4 PASS, 0 FAIL ===

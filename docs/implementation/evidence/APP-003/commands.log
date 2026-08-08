@@ -1,0 +1,22 @@
+# APP-003 Command Log
+
+$ godot --headless tests/test_runner.tscn
+=== Running Automated Test Suite ===
+...
+=== Test Suite Finished: 45 PASS, 0 FAIL ===
+
+$ godot --headless --script tools/loc_checker/loc_checker.gd
+=== LOC Checker v1.0.0 ===
+Scanned 18 files.
+PASS: No files exceed the 300-line limit.
+
+$ godot --headless --script tools/stub_scanner/stub_scanner.gd
+=== Stub Scanner v1.0.0 ===
+Scanned 15 files.
+PASS: No stubs or placeholders found.
+
+$ godot --headless --script tools/evidence_checker/evidence_checker.gd
+=== Evidence Bundle Checker v1.0.0 ===
+Evidence bundles checked: 12
+Valid: 12, Invalid: 0
+PASS: All evidence bundles meet required structure.

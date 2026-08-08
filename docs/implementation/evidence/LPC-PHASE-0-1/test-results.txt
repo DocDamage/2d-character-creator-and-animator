@@ -1,0 +1,5 @@
+Phases 0–1 locked-source catalog and direct-start foundation: PASS
+Focused runner: PASS
+Full regression: 556 PASS, 0 FAIL
+Godot version: 4.7.1.stable.official.a13da4feb
+Human visual approval: PENDING

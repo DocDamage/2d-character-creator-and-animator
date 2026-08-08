@@ -34,3 +34,15 @@ and JSON audit artifacts, checks palette/alpha invariants and crack-free
 coverage, rejects changed-source and flipped-triangle inputs, validates
 alpha-aware islands/holes and manual topology, saves/reopens/autosaves,
 executes a typed mesh-control hybrid track, and proves exported-PNG parity.
+
+## Task ID
+
+`LPC-PHASE-5`
+
+## Status
+
+AUTOMATED_VERIFICATION_COMPLETE; human visual and clean-machine release acceptance remain pending.
+
+## Evidence
+
+The focused acceptance runner and the full 556-assertion regression suite pass under Godot 4.7.1.

@@ -53,6 +53,9 @@ static func default_control_state(value: Variant = {}) -> Dictionary:
 	if not state.has("pins"): state["pins"] = []
 	if not state.has("lattice"): state["lattice"] = {}
 	if not state.has("soft_drags"): state["soft_drags"] = []
+	if not state.has("cage"): state["cage"] = {}
+	if not state.has("bone_offsets"): state["bone_offsets"] = {}
+	if not state.has("evaluation_order"): state["evaluation_order"] = ["cage", "lattice", "pins", "soft_drags", "bones", "vertex_offsets"]
 	return state
 
 

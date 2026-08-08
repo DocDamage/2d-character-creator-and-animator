@@ -6,14 +6,16 @@
 
 ## Status
 
-IN_PROGRESS. The Windows package has been built and launched from a fresh
-Windows temporary folder. The documented interactive smoke workflow on a clean
-Windows machine remains required before this task can be accepted.
+IN_PROGRESS. Fresh portable and embedded Windows candidates pass automated
+build, structure, checksum, startup, regression, and governance verification.
+The documented interactive smoke workflow on a clean Windows machine remains
+required before this task can be accepted.
 
 ## Evidence
 
-- `Modular2DCharacterStudio.exe` is a 64-bit Windows PE artifact with its
-  matching `.pck`; package hashes are retained in `RELEASE-001/test-results.txt`.
+- `PaperQuestCharacterStudio.exe` is a 64-bit Windows PE artifact with its
+  matching `.pck`; the portable ZIP and single-file executable hashes are
+  retained in `test-results.txt`.
 - A copied package launched with `--headless --quit` from a fresh Windows temp
   folder and returned exit status 0, demonstrating no authoring-project path is
   required for startup.
@@ -23,6 +25,7 @@ Windows machine remains required before this task can be accepted.
   created or opened; the regression is covered by the automated suite.
 - Editor docks are grouped into labeled tabs; workspace selection focuses the
   corresponding authoring tab instead of displaying all tools at once.
-- The six samples, manuals, preflight, and clean runtime-consumer fixture pass
+- The 556-assertion suite, seven focused LPC runners, governance gates, six
+  samples, manuals, preflight, and clean runtime-consumer fixture pass
   automated checks; those are necessary evidence but not a substitute for the
   final interactive release smoke sequence.

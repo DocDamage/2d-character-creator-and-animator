@@ -1,0 +1,7 @@
+godot --headless --path . --scene tests/test_runner.tscn
+godot --headless --path . --script tools/loc_checker/loc_checker.gd
+godot --headless --path . --script tools/stub_scanner/stub_scanner.gd
+godot --headless --path . --script tools/evidence_checker/evidence_checker.gd
+godot --headless --path . --export-release "Windows Desktop" release/windows/Modular2DCharacterStudio.exe
+release\windows\Modular2DCharacterStudio.exe --headless --quit
+copy release package to fresh Windows temporary folder; Modular2DCharacterStudio.exe --headless --quit

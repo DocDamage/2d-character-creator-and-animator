@@ -26,3 +26,15 @@ The synthetic test creates a locked catalog, assembles a body, shirt, and
 partially-supported cape, asserts an explicit `walk` conflict, resolves it
 with `hide_for_clip`, verifies native playback, exports the nine-frame walk
 cycle, saves/reopens the project, and proves immutable source hash stability.
+
+## Task ID
+
+`LPC-PHASE-2`
+
+## Status
+
+AUTOMATED_VERIFICATION_COMPLETE; human visual and clean-machine release acceptance remain pending.
+
+## Evidence
+
+The focused acceptance runner and the full 556-assertion regression suite pass under Godot 4.7.1.

@@ -1,5 +1,5 @@
-# BoneBinder -- Automated heat-map and distance-based skinning weight initializer.
-# MSH-005: Binds mesh vertices to skeletal bone hierarchy using inverse distance weights.
+# BoneBinder -- Distance-to-segment skinning weight initializer.
+# MSH-005: This is intentionally not presented as heat/diffusion binding.
 class_name BoneBinder
 extends RefCounted
 
@@ -54,6 +54,11 @@ static func auto_bind_weights(mesh: RefCounted, bones: Array, max_bones_per_vert
 			# Fallback to first bone
 			var bw = MeshDataScript.BoneWeightData.new(raw_weights[0]["bone_id"], 1.0)
 			v.bone_weights.append(bw)
+
+
+## Explicit modern name; retained auto_bind_weights above for existing documents.
+static func distance_segment_bind_weights(mesh: RefCounted, bones: Array, max_bones_per_vertex: int = 4, distance_falloff_power: float = 2.0) -> void:
+	auto_bind_weights(mesh, bones, max_bones_per_vertex, distance_falloff_power)
 
 
 ## Distance from point p to line segment (a, b).

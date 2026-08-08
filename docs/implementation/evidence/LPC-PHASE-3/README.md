@@ -26,3 +26,15 @@ The synthetic acceptance check verifies a two-pixel single-stroke command,
 undo/redo, selection and paste, chained derivative ancestry, two timed cels,
 onion references, no blob creation during autosave, project save/reopen, and
 pixel-identical PNG import/export while the source hash stays unchanged.
+
+## Task ID
+
+`LPC-PHASE-3`
+
+## Status
+
+AUTOMATED_VERIFICATION_COMPLETE; human visual and clean-machine release acceptance remain pending.
+
+## Evidence
+
+The focused acceptance runner and the full 556-assertion regression suite pass under Godot 4.7.1.

@@ -2,7 +2,7 @@
 extends RefCounted
 
 
-func build(owner: Node2D, mapping: Dictionary, add_mesh: Callable) -> Dictionary:
+func build(owner: Node2D, mapping: Dictionary, add_mesh: Callable, bone_lookup: Callable = Callable()) -> Dictionary:
 	_clear_generated(owner)
 	var report := {"animations": 0, "animation_tree": false, "meshes": 0, "sprites": 0, "markers": 0, "collision_shapes": 0, "weapons": (mapping.get("weapons", []) as Array).size()}
 	var player := AnimationPlayer.new()
@@ -26,23 +26,41 @@ func build(owner: Node2D, mapping: Dictionary, add_mesh: Callable) -> Dictionary
 	owner.add_child(tree)
 	report["animation_tree"] = true
 	for mesh in mapping.get("meshes", []) as Array:
-		var node = add_mesh.call(mesh as Dictionary)
-		if node != null: node.add_to_group("modular_runtime_generated"); report["meshes"] += 1
+		var mesh_record := mesh as Dictionary
+		var node = add_mesh.call(mesh_record, _texture(mesh_record))
+		if node != null:
+			node.name = str(mesh_record.get("mesh_id", "RuntimeMesh"))
+			node.z_index = int(mesh_record.get("z_index", 0))
+			_tag_runtime_node(node, mesh_record)
+			node.add_to_group("modular_runtime_generated")
+			report["meshes"] += 1
 	for sprite in mapping.get("sprites", []) as Array:
 		var record := sprite as Dictionary
 		var node := Sprite2D.new()
 		node.name = str(record.get("sprite_id", "RuntimeSprite"))
 		node.position = _vector(record.get("position", [0.0, 0.0]))
+		node.texture = _texture(record)
+		node.centered = bool(record.get("centered", true))
+		node.z_index = int(record.get("z_index", 0))
+		node.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		_tag_runtime_node(node, record)
 		node.add_to_group("modular_runtime_generated")
-		owner.add_child(node)
+		var bone_id := str(record.get("bone_id", ""))
+		var bone: Node = bone_lookup.call(bone_id) as Node if bone_lookup.is_valid() and not bone_id.is_empty() else null
+		if bone != null: bone.add_child(node)
+		else: owner.add_child(node)
 		report["sprites"] += 1
 	for marker in mapping.get("markers", []) as Array:
 		var record := marker as Dictionary
 		var node := Marker2D.new()
 		node.name = str(record.get("marker_id", record.get("point_id", "RuntimeMarker")))
 		node.position = _vector(record.get("position", record.get("local_position", [0.0, 0.0])))
+		_tag_runtime_node(node, record)
 		node.add_to_group("modular_runtime_generated")
-		owner.add_child(node)
+		var bone_id := str(record.get("bone_id", ""))
+		var bone: Node = bone_lookup.call(bone_id) as Node if bone_lookup.is_valid() and not bone_id.is_empty() else null
+		if bone != null: bone.add_child(node)
+		else: owner.add_child(node)
 		report["markers"] += 1
 	for collision in mapping.get("collision_shapes", []) as Array:
 		var node := _collision_node(collision as Dictionary)
@@ -69,6 +87,17 @@ func _collision_node(record: Dictionary) -> Area2D:
 		var rectangle := RectangleShape2D.new(); rectangle.size = _vector(record.get("size", [16.0, 16.0])); shape_node.shape = rectangle
 	area.add_child(shape_node)
 	return area
+
+
+func _texture(record: Dictionary) -> Texture2D:
+	var path := str(record.get("texture_path", record.get("texture", "")))
+	return load(path) as Texture2D if not path.is_empty() and ResourceLoader.exists(path) else null
+
+
+func _tag_runtime_node(node: Node, record: Dictionary) -> void:
+	node.set_meta("modular_runtime_asset_id", str(record.get("asset_id", "")))
+	node.set_meta("modular_runtime_slot_id", str(record.get("slot_id", "")))
+	node.set_meta("modular_runtime_directions", (record.get("direction_ids", []) as Array).duplicate(true))
 
 
 func _vector(value: Variant) -> Vector2:

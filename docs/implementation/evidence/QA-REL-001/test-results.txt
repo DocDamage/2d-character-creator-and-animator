@@ -1,20 +1,31 @@
-Automated package checks passed:
+Automated release-candidate checks — 2026-08-07
 
-- Windows export generated `Modular2DCharacterStudio.exe` and its companion
-  `.pck`.
-- The executable is PE32+ x86-64 and launched from a fresh Windows temporary
-  folder with `--headless --quit`, returning exit status 0.
-- The rebuild corrects a false startup failure by checking packaged resources
-  instead of source-only `docs` and `editor_plugins` folders.
-- The rebuild corrects a launcher handoff defect where a newly created project
-  remained on the startup screen instead of opening the editor workspace.
-- The rebuild corrects the editor layout by placing docks in labeled tab
-  regions and focusing the active workspace's primary authoring tab.
-- Scoped completion QA: 0 failed. Full regression: 496 PASS, 0 FAIL.
+- Godot: 4.7.1.stable.official.a13da4feb
+- Full regression: 556 PASS, 0 FAIL
+- LPC focused phases 0–7: PASS
+- Main-scene startup: PASS
+- LOC gate: PASS; 12 pre-existing oversized production files remain ratcheted debt
+- Stub gate: PASS; 0 findings
+- Evidence gate: PASS; 123 valid, 0 invalid
+- Portable ZIP structure: PASS
+- Portable checksum manifest: PASS
+- Portable executable launch: exit 0
+- Embedded single-file launch: exit 0
+
+Artifacts:
+
+- PaperQuestCharacterStudio-portable.zip
+  SHA-256 9272A8553DF5998DFC21AAB65793FA3F3D1538850B66750E42A9C342A90852DB
+- PaperQuestCharacterStudio.exe
+  SHA-256 6791DDD77D4A492B1DE41A3A375B237284065ACB602D57AA9FB6B4A28787B074
+- PaperQuestCharacterStudio.pck
+  SHA-256 B7465D7552AD4B8EF87FC7008324B407FD923B3E965960BF79ED7B93F8005A48
+- PaperQuestCharacterStudio-single.exe
+  SHA-256 DB382DF4E16B46C6E08A78B520AB39A1211EF9B7977B494344969B870E6BFBEC
 
 Not yet accepted:
 
-- Start the package interactively on a clean Windows machine.
-- Open and exercise all six samples through their named workflows.
-- Export a package and load its runtime scene in a clean consumer project.
-- Attach the clean-machine smoke log and any findings to this evidence bundle.
+- Interactive clean-Windows-machine workflow across all six samples
+- Human visual approval of the LPC candidate
+- NSIS compilation (makensis unavailable on this machine)
+- Authenticode signing (signtool and release certificate unavailable)
