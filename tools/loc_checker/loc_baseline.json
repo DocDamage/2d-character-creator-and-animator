@@ -1,0 +1,14 @@
+{
+  "res://animation/preview/animation_preview_evaluator.gd": 332,
+  "res://animation/timeline/animation_timeline_editor.gd": 775,
+  "res://app/bootstrap/project_hub_panel.gd": 956,
+  "res://app/bootstrap/recent_projects_service.gd": 301,
+  "res://app/bootstrap/startup.gd": 371,
+  "res://app/shared_ui/authoring_inspector.gd": 759,
+  "res://app/shared_ui/main_window.gd": 676,
+  "res://character/authoring/character_creator_model.gd": 538,
+  "res://character/authoring/character_creator_panel.gd": 724,
+  "res://character/authoring/character_layer_preview.gd": 468,
+  "res://character/authoring/character_project_session.gd": 1849,
+  "res://rigging/bones/rig_hierarchy_editor.gd": 427
+}

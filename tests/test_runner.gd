@@ -39,6 +39,13 @@ const TestRetargetingScript = preload("res://tests/integration/test_retargeting.
 const TestAuthoringCompletionScript = preload("res://tests/integration/test_authoring_completion.gd")
 const TestReleaseHardeningScript = preload("res://tests/integration/test_release_hardening.gd")
 const TestProductionDeliveryScript = preload("res://tests/integration/test_production_delivery.gd")
+const TestLpcPhase01Script = preload("res://tests/integration/test_lpc_phase_0_1.gd")
+const TestLpcPhase2Script = preload("res://tests/integration/test_lpc_phase_2.gd")
+const TestLpcPhase3Script = preload("res://tests/integration/test_lpc_phase_3.gd")
+const TestLpcPhase4Script = preload("res://tests/integration/test_lpc_phase_4.gd")
+const TestLpcPhase5Script = preload("res://tests/integration/test_lpc_phase_5.gd")
+const TestLpcPhase6Script = preload("res://tests/integration/test_lpc_phase_6.gd")
+const TestLpcPhase7Script = preload("res://tests/integration/test_lpc_phase_7.gd")
 func _ready() -> void:
 	print("=== Running Automated Test Suite ===")
 	print("")
@@ -298,6 +305,27 @@ func _ready() -> void:
 	# 43. Exercise runtime-contract preview/export, production automation, collaboration, and approval delivery.
 	var r43 := _exec_sub(TestProductionDeliveryScript.new(), pass_count, fail_count)
 	pass_count = r43[0]; fail_count = r43[1]
+	# 44. Exercise the locked LPC catalog, strict reference raster path, and direct-start project workflow.
+	var r44 := _exec_sub(TestLpcPhase01Script.new(), pass_count, fail_count)
+	pass_count = r44[0]; fail_count = r44[1]
+	# 45. Exercise the focused LPC creator and exact native frame export path.
+	var r45 := _exec_sub(TestLpcPhase2Script.new(), pass_count, fail_count)
+	pass_count = r45[0]; fail_count = r45[1]
+	# 46. Exercise project-owned LPC pixel edits, cels, onion state, and derivative persistence.
+	var r46 := _exec_sub(TestLpcPhase3Script.new(), pass_count, fail_count)
+	pass_count = r46[0]; fail_count = r46[1]
+	# 47. Exercise typed LPC hybrid tracks, persistence, diagnostics, and frame export.
+	var r47 := _exec_sub(TestLpcPhase4Script.new(), pass_count, fail_count)
+	pass_count = r47[0]; fail_count = r47[1]
+	# 48. Exercise strict frame-bound LPC deformation, deterministic bake, persistence, and export parity.
+	var r48 := _exec_sub(TestLpcPhase5Script.new(), pass_count, fail_count)
+	pass_count = r48[0]; fail_count = r48[1]
+	# 49. Exercise direction-specific cutout rigs, rigid pose/IK, gap repair, and hybrid playback.
+	var r49 := _exec_sub(TestLpcPhase6Script.new(), pass_count, fail_count)
+	pass_count = r49[0]; fail_count = r49[1]
+	# 50. Exercise weighted meshes, true cages, diagonal completion, portable runtime delivery, and clean consumer replay.
+	var r50 := _exec_sub(TestLpcPhase7Script.new(), pass_count, fail_count)
+	pass_count = r50[0]; fail_count = r50[1]
 	print("")
 	print("=== Test Suite Finished: %d PASS, %d FAIL ===" % [pass_count, fail_count])
 	get_tree().quit(0 if fail_count == 0 else 1)

@@ -1,0 +1,2 @@
+godot --headless --path . --scene tests/test_runner.tscn
+wc -l app/shared_ui/main_window.gd character/**/*.gd tests/integration/test_character_creator.gd

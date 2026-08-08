@@ -1,28 +1,14 @@
-Command: godot --headless --path . --scene tests/test_runner.tscn
-Result: 496 PASS, 0 FAIL
+Release implementation verification refreshed 2026-08-07.
 
-Windows package build:
-- Command: `godot --headless --path . --export-release "Windows Desktop" release/windows/Modular2DCharacterStudio.exe`
-- Result: 109,071,360-byte PE32+ x86-64 executable and 1,019,972-byte `.pck`.
-- SHA-256 executable: `1a5811e5e987071c1c48000f66d8139431c6dd620a2e0446e0ae6caf33a40341`
-- SHA-256 package: `5b80b54dc9e6d1bbd2e23d8b1ff35ffcfc8ff7444c08491e5816d050046462b0`
-- Native host launch: `Modular2DCharacterStudio.exe --headless --quit` returned
-  exit status 0 on Windows.
-- Fresh-folder launch: copied executable and `.pck` launched from a new Windows
-  temporary directory with `--headless --quit` and returned exit status 0.
-- Startup diagnostics in the rebuilt template now check packaged runtime
-  resources, avoiding false failures for development-only `docs` and
-  `editor_plugins` folders.
-- Launcher actions request the main editor workspace after New Project, Open
-  Project, Open Sample, or Continue Last. This handoff is covered by the full
-  regression suite.
-- Each dock region uses labeled tabs, and selecting an authoring workspace
-  focuses its primary tab instead of stacking every tool vertically.
-- Boundary: build artifact verification is not the clean Windows-machine smoke
-  sequence required by `QA-REL-001`.
+Full regression: 556 PASS, 0 FAIL.
+Governance: LOC PASS, stub PASS, evidence PASS (123/123 bundles).
+Focused LPC phase runners 0–7: PASS.
+Portable ZIP verification and checksum manifest: PASS.
+Portable and embedded executable headless launch: PASS, exit 0.
 
-Focused checks:
-- SMP-001 through SMP-006 sample catalog manifests parse and validate.
-- DOCS-001 through DOCS-004 required manuals and runtime API documentation exist.
-- REL-001 through REL-004 release notes, known issues, license manifests,
-  Windows preset, and reproducible preflight validation exist.
+Candidate hashes are recorded in:
+`docs/implementation/evidence/QA-REL-001/test-results.txt` and
+`release/windows/RELEASE-CANDIDATE.json`.
+
+Boundary: these machine checks do not replace interactive clean-machine,
+human visual, installer, or signing acceptance.

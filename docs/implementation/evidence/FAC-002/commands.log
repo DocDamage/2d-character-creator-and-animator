@@ -1,0 +1,5 @@
+godot --headless --path . --scene tests/test_runner.tscn
+godot --headless --path . --scene tests/test_runner.tscn 2>&1 | rg -n "Direction-set editor acceptance failed|=== Test Suite Finished|ERROR:|SCRIPT ERROR:|WARNING:|CLEAN_CONSUMER_FAIL|FAIL:"
+godot --headless --path . --script tools/loc_checker/loc_checker.gd
+godot --headless --path . --script tools/stub_scanner/stub_scanner.gd
+godot --headless --path . --script tools/evidence_checker/evidence_checker.gd

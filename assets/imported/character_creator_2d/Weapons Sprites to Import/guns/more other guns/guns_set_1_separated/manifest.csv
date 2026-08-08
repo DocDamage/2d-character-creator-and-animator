@@ -1,0 +1,11 @@
+id,name,kind,file,left,top,right,bottom,width,height,pixel_area,labels,source,bbox
+01,top_left_gun,sprite,sprites/01_top_left_gun.png,3,1,45,36,42,35,526,[2],guns set 1.png,"(3, 1, 45, 36)"
+02,top_right_gun,sprite,sprites/02_top_right_gun.png,55,0,126,32,71,32,1003,[1],guns set 1.png,"(55, 0, 126, 32)"
+03,middle_left_gun,sprite,sprites/03_middle_left_gun.png,6,33,59,64,53,31,720,[4],guns set 1.png,"(6, 33, 59, 64)"
+04,middle_right_gun,sprite,sprites/04_middle_right_gun.png,60,30,124,59,64,29,851,[3],guns set 1.png,"(60, 30, 124, 59)"
+05,center_small_parts,sprite,sprites/05_center_small_parts.png,55,56,65,64,10,8,44,"[5, 6, 8]",guns set 1.png,"(55, 56, 65, 64)"
+06,large_left_launcher,sprite,sprites/06_large_left_launcher.png,3,66,74,95,71,29,901,[9],guns set 1.png,"(3, 66, 74, 95)"
+07,right_launcher,sprite,sprites/07_right_launcher.png,78,61,128,97,50,36,765,[7],guns set 1.png,"(78, 61, 128, 97)"
+08,bottom_left_pistol,sprite,sprites/08_bottom_left_pistol.png,1,97,63,125,62,28,695,[11],guns set 1.png,"(1, 97, 63, 125)"
+09,bottom_right_energy_coil,sprite,sprites/09_bottom_right_energy_coil.png,49,94,127,128,78,34,1152,[10],guns set 1.png,"(49, 94, 127, 128)"
+extra_01,lower_right_orphan_2x2_pixel,extra,extras/extra_01_lower_right_orphan_2x2_pixel.png,126,126,128,128,2,2,4,[12],guns set 1.png,"(126, 126, 128, 128)"

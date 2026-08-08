@@ -1,0 +1,1761 @@
+{
+	"copy_only": true,
+	"files": [
+		{
+			"bytes": 13250,
+			"destination_relative_path": "Saved Characters/Dragon Knight/Dragon Knight.cc2d",
+			"extension": "cc2d",
+			"license_status": "unknown_requires_review",
+			"sha256": "0690f3dc2d196470f689e5134ef7851df5a4fdab56eeeabeafa8b51336bc037a",
+			"source_relative_path": "Saved Characters/Dragon Knight/Dragon Knight.cc2d",
+			"status": "copied"
+		},
+		{
+			"bytes": 339061,
+			"destination_relative_path": "Saved Characters/Dragon Knight/Dragon Knight.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "4bbb7b44294892ccb3154bb3f336a468da30c4939a30be918edc6095994e0269",
+			"source_relative_path": "Saved Characters/Dragon Knight/Dragon Knight.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 12691,
+			"destination_relative_path": "Saved Characters/Ronin/Ronin.cc2d",
+			"extension": "cc2d",
+			"license_status": "unknown_requires_review",
+			"sha256": "31f2b6f545e26a77d088d9af9e67e82bc53cd5d38ef64bca949be2e96d0a0365",
+			"source_relative_path": "Saved Characters/Ronin/Ronin.cc2d",
+			"status": "copied"
+		},
+		{
+			"bytes": 75906,
+			"destination_relative_path": "Texture Guides/Guide Armor Female.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "f0b470a70ea9ff023c6af6dc2c93d2169492735656a2a436d56a1b6a87367e51",
+			"source_relative_path": "Texture Guides/Guide Armor Female.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 84958,
+			"destination_relative_path": "Texture Guides/Guide Armor Male.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "294673a0d6ea5e10f9f3778a99cf886dd3fa36e7248d89c4a0d5d51109f388f3",
+			"source_relative_path": "Texture Guides/Guide Armor Male.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 43438,
+			"destination_relative_path": "Texture Guides/Guide Armor Sleeveless Female.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "79ce8a0ba3b4dc09c9fbf61d671beaedb44d784db9280548a96dd1ddbe2b596f",
+			"source_relative_path": "Texture Guides/Guide Armor Sleeveless Female.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 47179,
+			"destination_relative_path": "Texture Guides/Guide Armor Sleeveless Male.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "17101e2772ed4974d710f3cd8885e89675d13d716a00cb2e4b049ac500e7ad43",
+			"source_relative_path": "Texture Guides/Guide Armor Sleeveless Male.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 160296,
+			"destination_relative_path": "Texture Guides/Guide Body Skin Female.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "26c55e9b36ee60e413511bd766f5e9690159142f7202054e1d080abe3f3a167a",
+			"source_relative_path": "Texture Guides/Guide Body Skin Female.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 179377,
+			"destination_relative_path": "Texture Guides/Guide Body Skin Male.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "db2070687dc4e99802b8d9256ba2d8c168d8c2d14a9312f3efbd494664483e15",
+			"source_relative_path": "Texture Guides/Guide Body Skin Male.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 60188,
+			"destination_relative_path": "Texture Guides/Guide Boots.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "5d179ba82423c48d8af650992b49587fb7ef7be89be00939cd3b45a694170cc1",
+			"source_relative_path": "Texture Guides/Guide Boots.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 60382,
+			"destination_relative_path": "Texture Guides/Guide Bow.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "43e8d1e45378f6d2a59877cbaf752504f0a9dd23fede9e3ef588dcaaaa38ae76",
+			"source_relative_path": "Texture Guides/Guide Bow.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 46934,
+			"destination_relative_path": "Texture Guides/Guide Cape.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "5438f6e80889d7b7f0603b1c34777b4e0827171726d0a3324f43e52438eda006",
+			"source_relative_path": "Texture Guides/Guide Cape.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 29567,
+			"destination_relative_path": "Texture Guides/Guide Ear.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "2673191867d0ea74aa8c0c51b45577605bee4768775d82b91da685de23d8cfce",
+			"source_relative_path": "Texture Guides/Guide Ear.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 25124,
+			"destination_relative_path": "Texture Guides/Guide Eyebrow.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "c28f3f7251df121740bb4d51935dde1f23bb7a834808c6feb4df222af9d5782e",
+			"source_relative_path": "Texture Guides/Guide Eyebrow.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 29557,
+			"destination_relative_path": "Texture Guides/Guide Eyes.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "da69155b865798ca4e1dd78b676178e5c1281a22789b233db35f7f50f9350d13",
+			"source_relative_path": "Texture Guides/Guide Eyes.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 32198,
+			"destination_relative_path": "Texture Guides/Guide Facial Hair.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "93c09417aae82b61539fa6bc5d5a1ed52ddad879a7b19878ff3173f1533e3fee",
+			"source_relative_path": "Texture Guides/Guide Facial Hair.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 64396,
+			"destination_relative_path": "Texture Guides/Guide Gloves.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "b53ba9d6f0840b90160f29197737929b5c0e773dba833aadc7333574ba9741cf",
+			"source_relative_path": "Texture Guides/Guide Gloves.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 49034,
+			"destination_relative_path": "Texture Guides/Guide Gun.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "5563838f4c99bc994dc948331775a4119522faa819c983fe2c6b9ef827f694ed",
+			"source_relative_path": "Texture Guides/Guide Gun.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 42109,
+			"destination_relative_path": "Texture Guides/Guide Hair Long.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "fc7859e95fa0b01a50682450d2ec522363590d80f74b2d5f9921352b3ad5b7f4",
+			"source_relative_path": "Texture Guides/Guide Hair Long.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 32331,
+			"destination_relative_path": "Texture Guides/Guide Hair Short.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "d34bac620b73287b28c564a3cec77a9e4ad2643a5c76499a20fdb0cc5a67843a",
+			"source_relative_path": "Texture Guides/Guide Hair Short.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 32735,
+			"destination_relative_path": "Texture Guides/Guide Helmet.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "6ee68f36fd13aa0ffb2524b9a0ce19147d710b41e39d38c8ed36405c87e7a222",
+			"source_relative_path": "Texture Guides/Guide Helmet.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 42582,
+			"destination_relative_path": "Texture Guides/Guide Hood.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "e8fdf066b85bf59f76667a57e622b17899326ba3fcb514762a3812877f8a43d5",
+			"source_relative_path": "Texture Guides/Guide Hood.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 29078,
+			"destination_relative_path": "Texture Guides/Guide Mouth.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "dc260144c39384305a0a5ff26b11280e4d5c299484b9a2e44467d660f4f4585c",
+			"source_relative_path": "Texture Guides/Guide Mouth.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 26605,
+			"destination_relative_path": "Texture Guides/Guide Nose.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "e0b6bc8a83e35e2d35a1bba6d806c428df79235d3aa521ec2c76e3e22af498e8",
+			"source_relative_path": "Texture Guides/Guide Nose.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 51337,
+			"destination_relative_path": "Texture Guides/Guide One Handed Weapon.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "17466a792a73c97f3fcd42d873e9a07c9e422f74775d6b4ceb5850ebd1c3a2e3",
+			"source_relative_path": "Texture Guides/Guide One Handed Weapon.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 72319,
+			"destination_relative_path": "Texture Guides/Guide Pants Female.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "cee81b2d5bfac9a49810b99b394fd1ee60656acb2313065285e3d93157b6951e",
+			"source_relative_path": "Texture Guides/Guide Pants Female.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 76346,
+			"destination_relative_path": "Texture Guides/Guide Pants Male.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "bcdb0350447eeaef7c4e1692edccdee63179077f75b86c755dcab4e9bb5dfdc6",
+			"source_relative_path": "Texture Guides/Guide Pants Male.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 62475,
+			"destination_relative_path": "Texture Guides/Guide Rifle.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "3db7218437baa3ed011ad0cb435b60a64abf115f197b48894a2d0a20dcd6348d",
+			"source_relative_path": "Texture Guides/Guide Rifle.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 100557,
+			"destination_relative_path": "Texture Guides/Guide Shield.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "35ad61a31326b16158c6484008212e004003776d008effd0ff9bfb13721ed9b8",
+			"source_relative_path": "Texture Guides/Guide Shield.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 36786,
+			"destination_relative_path": "Texture Guides/Guide Shoes.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "014da7f837ccaec8d2413153dcecf28d7f888f5b642021a95a14ed2f87ce363e",
+			"source_relative_path": "Texture Guides/Guide Shoes.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 52244,
+			"destination_relative_path": "Texture Guides/Guide Shorts Female.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "6fa0c6e50335a0f3acb7c393d4893c03c5d351261cf1896823e1c42c0b2e490d",
+			"source_relative_path": "Texture Guides/Guide Shorts Female.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 52650,
+			"destination_relative_path": "Texture Guides/Guide Shorts Male.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "eceaf6f2f1521036dab86c64dace104625c4c42c1b6c724be98c0d04d03b0060",
+			"source_relative_path": "Texture Guides/Guide Shorts Male.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 147498,
+			"destination_relative_path": "Texture Guides/Guide Skin Details Female.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "8bef65f7c7c8d4ecb1a25ad1fc54ce16b43b2b0e5462925b1d89e779b91bfc84",
+			"source_relative_path": "Texture Guides/Guide Skin Details Female.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 164623,
+			"destination_relative_path": "Texture Guides/Guide Skin Details Male.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "ebd188ef1486f48e75f94925d3647a6958189f76859fadd66021f445a72c39b7",
+			"source_relative_path": "Texture Guides/Guide Skin Details Male.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 58086,
+			"destination_relative_path": "Texture Guides/Guide Skirt.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "b03b79dd3575e82dfa02ee94e8719a276b8cc0d4a399c93201cd40cfc0c515e5",
+			"source_relative_path": "Texture Guides/Guide Skirt.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 68927,
+			"destination_relative_path": "Texture Guides/Guide Two Handed Weapon.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "be28ff3887b12e2930d243429f7845ac5c72fa0538ff27d6ed2bc6c3f572bfba",
+			"source_relative_path": "Texture Guides/Guide Two Handed Weapon.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 368,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_00.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "e6dcf1b8f3d84aad4c43703c85c26f9409da1ea4c96e87284443cf8b4890dcc2",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_00.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 395,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_01.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "64ff17d19dc8637078a64c1c78bf577986a1697e1d9022cb4a38cf869de25dec",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_01.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 432,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_02.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "568cdbcc236795290c7639c6f584c0587f69b9001399a5fdaf262f0c5f8c5c2f",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_02.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 478,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_03.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "f45f0a0863d1327d1351eb8b1a3f29be5e6dd816d79b83653866f505c793f282",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_03.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 512,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_04.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "08fadd7d2fb8993eac19da7dd2109e7bdec338b570cc7cb54e60f5acd3bba466",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_04.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 361,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_05.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "b5c461f6f3148b9e99b11ad4174492b7d5a7d45cc7b62927e81356bfe0dbaa4c",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_05.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 367,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_06.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "afcf6e56bffe209d15a816b77042d7be74305469c96bfcf7d702bf3a715f553d",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_06.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 388,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_07.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "f46b90c6042a1bf0dec4ba90e88cdbb0bda4431bef65098784501bd847f1a078",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_07.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 416,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_08.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "df9c2fa0f90459937007cdfa9aefc2262de870358a494fc8ea2cae5de83e1fb6",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_08.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 450,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_09.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "35b8b7f5d23614964f7fb8a556351ec97d5abed9e82c4a4451494663da98678d",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_09.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 370,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_10.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "07a62841e6c993753740681eb3bd4b6d283e577251905b1b70b3cc8b48e5117e",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_10.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 361,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_11.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "0c56186d859e6364eaa27eb555a561b79ce36acbbd06760bee48edf0fe836b0d",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_11.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 367,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_12.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "575e490d2f6cd6ce1f8bb0ec9d46ed1f8ae275d54d47dc605b70c712e290d284",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_12.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 398,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_13.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "cf2a0b50552015058681c2bf236c0b0fd9be5ea229e469685287eb46fd01f949",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_13.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 430,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_14.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "2850d63c9ff4a0c68dab7abe4965bd58253d25db655768216fd853d58b33590b",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_14.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 368,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_15.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "43050437ac0b8d97b50c188334d41ff4e08943496b8e408f0d5d61e02ed68333",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_15.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 371,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_16.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "7a0327062fb22392e80b20b93a7763f0d2e3797395483ae7df0c59bfae62f646",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_16.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 380,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_17.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "59bbff0e361b463ef9449b9eae2c95c79a808b9684cd451a646cd185c3f69555",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_17.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 413,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_18.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "36a8e782534cef36ad3269eff04dbc835c4662a74da1b27061652526e0b210af",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_18.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 412,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_19.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "db3e0ed332b7f4f95043355757bbdd5e6470dc0ce3dad91179d8571418dc3389",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_19.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 367,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_20.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "d740f7e1fde1b3f66be3ba61520fe3feed929594982692fe510475f92283bb75",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_20.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 385,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_21.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "1635debd5c7b389fd0c870aab9a670eda372ca43276c1e8914528925f984aee2",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_21.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 390,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_22.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "41793b7a840ce12b71f983598bff1411f4bbf686f26cbd53ecc95d3bdd713589",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_22.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 421,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_23.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "89dcff6317e121043fd09f7815528476900791ad0ed2447e4f52d07c2345edac",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_23.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 438,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_24.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "71fe8957dde738215a4b7b0e989237c84a327853a5d465bbd5a614620c8c0143",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_24.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 83,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_25.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "ba04f531df0c7a12124750d521add77c55b16a6432d653c5559c16680dbd9f50",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_25.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 83,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_26.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "ba04f531df0c7a12124750d521add77c55b16a6432d653c5559c16680dbd9f50",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_26.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 83,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_27.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "ba04f531df0c7a12124750d521add77c55b16a6432d653c5559c16680dbd9f50",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_27.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 83,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_28.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "ba04f531df0c7a12124750d521add77c55b16a6432d653c5559c16680dbd9f50",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_28.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 83,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_29.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "ba04f531df0c7a12124750d521add77c55b16a6432d653c5559c16680dbd9f50",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_29.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 219,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_30.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "08b5a2b8f22730763fcd57135311ca9f84f031f3f642496aa9edb8bbfc83971e",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_30.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 228,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_31.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "04c5ab75046596bfa57bb794bebb970e68c8b16ec316a3d95121176b7e910b77",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_31.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 241,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_32.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "dacfe181356434fedbe6aadd6db7416091b4793c22fc477a627fda1f13e3faa8",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_32.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 83,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_33.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "ba04f531df0c7a12124750d521add77c55b16a6432d653c5559c16680dbd9f50",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_33.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 83,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_34.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "ba04f531df0c7a12124750d521add77c55b16a6432d653c5559c16680dbd9f50",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_34.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 222,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_35.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "cdebc5e6aee572ed45fead5f68c43a1e5c210c4f6fd65bcdcd3be5e6f1373ac6",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_35.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 221,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_36.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "6db7c7608e3a29a967808c9db9e683f1bbb32fe3abbe650faf1e47e49ff382d0",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_36.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 234,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_37.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "395ab58e797fa678e088cde2898fb72d3e894738755e50febe707d201abaff7e",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_37.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 265,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_38.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "7682b00315d18e0114876e7a68c55351718e85ca3e463e333c1035b3a00ed686",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_38.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 275,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_39.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "70069347ef8370c01a6dbd67959bdfa1cf5c166dc6fdb100d5fe2b4f616fe908",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_39.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 217,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_40.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "9380acc548990c4207161e46bc1b70d3937eb6f9784bc8596be94155f5a0eb81",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_40.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 209,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_41.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "8c1715e8d9e971295b47b3d49bdc0f32cda20da891a05155cc291c76a1ae8e41",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_41.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 207,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_42.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "e3a294608dfb75f67b2259dee894677bc29c5106865a5dd1e456c91a37e6f5e0",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_42.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 218,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_43.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "9f090b195dcc72f5a9375e8d8a4f4573976abba1c0e065b0babfc296c9d902bd",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_43.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 236,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_44.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "c40ca4619fc8daa24396bd291c2e704cf3ad888e52a1b4add46da1f4b005b28e",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_44.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 219,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_45.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "e0c242ab1c26250e105d757e73f1b6306dbef7029986508a8f411b4f4f788d3d",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_45.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 221,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_46.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "daddd2024f66baeb1ce0bea8bed503362922b2ad5a061b5a6296884d80189675",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_46.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 239,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_47.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "4212bd14760c7d78d9e250eec96529fc20129cae4a20093be386095efc256365",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_47.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 239,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_48.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "9f3cdb3d4920f055b4ceb4a5f0909812f3fdb93f34ee7523dfb51eea4f2b8621",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_48.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 83,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_49.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "ba04f531df0c7a12124750d521add77c55b16a6432d653c5559c16680dbd9f50",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_49.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 222,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_50.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "5a3e4cdafbe6225f8e0b324f2b5c1529b03303bc1f6411bc910addf6b79a5729",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_50.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 219,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_51.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "08b5a2b8f22730763fcd57135311ca9f84f031f3f642496aa9edb8bbfc83971e",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_51.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 233,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_52.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "0ea97cbc49289f82eecb349a45df6f07d9c090c7d66bc7da068779fd96eb3c61",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_52.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 242,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_53.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "55fb9208a3abe29a9087003c35a6a6298fe541d85bdfe22510ff0db0366fe424",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_53.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 83,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_54.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "ba04f531df0c7a12124750d521add77c55b16a6432d653c5559c16680dbd9f50",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_54.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 277,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_55.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "8fea318c9f1293a541c8c41bc8d4580f6a9ec11438231a8493815d91f4f8a591",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_55.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 310,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_56.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "db93198d793cb22f7fb6a82292c2a2d566706c07151ba2cff37587418bc7d827",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_56.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 331,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_57.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "bc7374fee21910f42be828d458f2eda544f28724e4b833ccd47c4402c3278210",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_57.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 385,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_58.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "5a3aaebcdcd50fdd1749fe8e79bdb31452a96ff645f93a032b085bc90e1b6a07",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_58.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 418,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_59.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "0f196a4e6a637bb00f8be1465c4999a9143d9a89695010507d97d340e0ebfd4e",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_59.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 267,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_60.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "61fa50d9c814fd3302014cff6fb701db9351f4fb16d440d7249872fc1359537a",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_60.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 276,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_61.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "bb7de3c9746406e3ca475d0b985a68351c64cb211cf92d1e63f88aec6215c9f4",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_61.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 296,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_62.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "526f71498b1af7c3a09ffde85e8dc9ccc1241d4dbdbd9c05f6e419b8f1ee2926",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_62.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 297,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_63.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "8cbdfe05f077fb9d3c28d60f3ed189815049bc59191b5190330259e1105a18ed",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_63.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 321,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_64.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "b2888eb97b86d3a97bedc5e164fa5e1c6e6f72ad5fa4da2bc10bffd1f4108c94",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_64.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 279,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_65.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "276a662a336516f72d3ed711589c037ddf3a70291af5e32ff975ad9e1a6e4183",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_65.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 284,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_66.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "20d6d872c1d1dbe1c36fb272925038d07cbbbc10868362dfcb9539c37bc189f3",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_66.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 298,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_67.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "95fbd285d9084aec4ab430fdf126e00722aa62bc940b66b3b9a799bcdb2ee965",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_67.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 322,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_68.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "e5349ea4dd19119623aaa208afaa749a28788eee44e0cc981175f8ae5f480d49",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_68.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 346,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_69.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "42b1100c2f3a3c8d6387ec960db7ad1e5d61d1892190c23507455ac2a9113599",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_69.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 280,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_70.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "c08d1c424e6b4cc29034e22972972a44764bd12d63e18219faeb1d181c356b09",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_70.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 273,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_71.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "8375534f9dd59d5a4803257adc83fd08060be267cbf03c4280cbfcb89e2bde26",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_71.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 281,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_72.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "d0fcd34bf1b103281ddc47458464ad03a07949daef22b4540f42a29bdb1be090",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_72.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 308,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_73.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "c091a87671b2f894cc29449d0e7ac50301dbd492f8ab984ee0359b413ea2430d",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_73.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 318,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_74.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "a9d34d7d81f02ac7daa80e227fa8519e2f7ee96c122086cdc53533ee31c623db",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_74.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 280,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_75.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "24a1f6deade8be66a8a89d2019f148f9afaf7e2f03c31cff7a2424fcb3cec677",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_75.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 304,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_76.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "840d17fe263863b0bd33fc9f241b57ab57e724c71cc9fd3682d58f3056a9249d",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_76.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 304,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_77.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "e4339b1563008091b3b9e7528c5eeb6ed72ee1128b40254bcc743bcd5f5fe44c",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_77.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 341,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_78.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "67429d75b7f0813e9da070ab96cf5e3c5cfe2567f8dd231caa446a8b658ebb49",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_78.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 344,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_79.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "efadcf9c4059192db13e68f6e738bab2eafd55f8a77ff6a0681c717c400f6fdf",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/EB_79.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 546,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/Read Me.txt",
+			"extension": "txt",
+			"license_status": "unknown_requires_review",
+			"sha256": "f4faef7c033a4eb44e76bba1fa8eaa691d1f9b26b34a3a0ea392cde553d89ea0",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/Read Me.txt",
+			"status": "copied"
+		},
+		{
+			"bytes": 7277,
+			"destination_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/evolving bows example Image.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "e84760e82712f6b7ee0d9294fd7cb73fe33b95de3d3bd7d7fd351a39a35855fe",
+			"source_relative_path": "Weapons Sprites to Import/Bows/Evolving Bows/evolving bows example Image.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 12539,
+			"destination_relative_path": "Weapons Sprites to Import/Swords/swords_asset.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "2aa2a1c15cff07b9d147860ac3f6793ee67b18970333dfa76538d05ac95231ec",
+			"source_relative_path": "Weapons Sprites to Import/Swords/swords_asset.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 278242,
+			"destination_relative_path": "Weapons Sprites to Import/guns/animations/50 BMG sniper reload gif.gif",
+			"extension": "gif",
+			"license_status": "unknown_requires_review",
+			"sha256": "741a1e618cf5121494b9e1eb88fb60ee0a462568e248374bcc0ea738fb6bd91d",
+			"source_relative_path": "Weapons Sprites to Import/guns/animations/50 BMG sniper reload gif.gif",
+			"status": "copied"
+		},
+		{
+			"bytes": 415095,
+			"destination_relative_path": "Weapons Sprites to Import/guns/animations/50 BMG sniper reload sprite sheet.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "9ab7e8d607137a20ab9164a5f5100fc15524189dacd7c827ef447307a5fb37e7",
+			"source_relative_path": "Weapons Sprites to Import/guns/animations/50 BMG sniper reload sprite sheet.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 263190,
+			"destination_relative_path": "Weapons Sprites to Import/guns/animations/MAC reload 2 sprite sheet.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "8fce60486d7269947b0587fbf5fa13f93272ae5f4f51e5a7072b21bd32584ce2",
+			"source_relative_path": "Weapons Sprites to Import/guns/animations/MAC reload 2 sprite sheet.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 148901,
+			"destination_relative_path": "Weapons Sprites to Import/guns/animations/MAC reload gif 2.gif",
+			"extension": "gif",
+			"license_status": "unknown_requires_review",
+			"sha256": "bc57aee0f1747b5f02470fd02bfe1634ce233fbf1f7de055882426feb6b7483f",
+			"source_relative_path": "Weapons Sprites to Import/guns/animations/MAC reload gif 2.gif",
+			"status": "copied"
+		},
+		{
+			"bytes": 85416,
+			"destination_relative_path": "Weapons Sprites to Import/guns/animations/colt m1911 reload gif.gif",
+			"extension": "gif",
+			"license_status": "unknown_requires_review",
+			"sha256": "9cae43b42c73d88897903adefa8faeee2c52d0d477e95c1785627866eb70e681",
+			"source_relative_path": "Weapons Sprites to Import/guns/animations/colt m1911 reload gif.gif",
+			"status": "copied"
+		},
+		{
+			"bytes": 139307,
+			"destination_relative_path": "Weapons Sprites to Import/guns/animations/colt m1911 reload sprite sheet.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "62e8bff02c0a1e44e28154ed84422a534fa0a7fc09ee6d7ac8e6cd77490afe79",
+			"source_relative_path": "Weapons Sprites to Import/guns/animations/colt m1911 reload sprite sheet.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 81086,
+			"destination_relative_path": "Weapons Sprites to Import/guns/animations/fn 509 reload gif.gif",
+			"extension": "gif",
+			"license_status": "unknown_requires_review",
+			"sha256": "67ef332744b803137888a82ad14a6f7fdf7b3d5a923ded025358d92509a585bd",
+			"source_relative_path": "Weapons Sprites to Import/guns/animations/fn 509 reload gif.gif",
+			"status": "copied"
+		},
+		{
+			"bytes": 156651,
+			"destination_relative_path": "Weapons Sprites to Import/guns/animations/fn 509 reload sprite sheet.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "c72dd4f5ec2e265a5491c309e1af7c4edd25446409f074731b290163f927ee0a",
+			"source_relative_path": "Weapons Sprites to Import/guns/animations/fn 509 reload sprite sheet.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 59145,
+			"destination_relative_path": "Weapons Sprites to Import/guns/animations/grenade charge sprite sheet.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "93f348da675ff5d4858f2b37918b091300aaa853b5d128c1e47e5b84988820cb",
+			"source_relative_path": "Weapons Sprites to Import/guns/animations/grenade charge sprite sheet.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 98306,
+			"destination_relative_path": "Weapons Sprites to Import/guns/animations/masuer reload gif.gif",
+			"extension": "gif",
+			"license_status": "unknown_requires_review",
+			"sha256": "9554ea59807ddc58feeb70becfbe1619530b082b12a4a163a28d9315f0ade246",
+			"source_relative_path": "Weapons Sprites to Import/guns/animations/masuer reload gif.gif",
+			"status": "copied"
+		},
+		{
+			"bytes": 184849,
+			"destination_relative_path": "Weapons Sprites to Import/guns/animations/mauser reload sprite sheet.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "3394475484b5fd0b37d8c19c77bdbb1b96cd306fe55c550802e6d12d255dab00",
+			"source_relative_path": "Weapons Sprites to Import/guns/animations/mauser reload sprite sheet.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 31910,
+			"destination_relative_path": "Weapons Sprites to Import/guns/animations/mk2 grenade prime.gif",
+			"extension": "gif",
+			"license_status": "unknown_requires_review",
+			"sha256": "7565d4f7f138f1a2c909fd3eb2814b4152f5b8d2b66a56265466bcfc226a5e14",
+			"source_relative_path": "Weapons Sprites to Import/guns/animations/mk2 grenade prime.gif",
+			"status": "copied"
+		},
+		{
+			"bytes": 113366,
+			"destination_relative_path": "Weapons Sprites to Import/guns/animations/silenced a205 reload.gif",
+			"extension": "gif",
+			"license_status": "unknown_requires_review",
+			"sha256": "65eef388246935b60a71c3bdf9dd891f92878c3f9b8d4cb6d4642b13b8f78741",
+			"source_relative_path": "Weapons Sprites to Import/guns/animations/silenced a205 reload.gif",
+			"status": "copied"
+		},
+		{
+			"bytes": 222619,
+			"destination_relative_path": "Weapons Sprites to Import/guns/animations/silenced a205 reload.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "47805f2a5816fc9c6c0d721c1f275cdc391bf5f40ca6d8a1564cbce0a8290d33",
+			"source_relative_path": "Weapons Sprites to Import/guns/animations/silenced a205 reload.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 137701,
+			"destination_relative_path": "Weapons Sprites to Import/guns/animations/vector reload gif.gif",
+			"extension": "gif",
+			"license_status": "unknown_requires_review",
+			"sha256": "238e9672584de63f7a8f7a6bbb826be85922f4acc95814a8c47125127e24e66e",
+			"source_relative_path": "Weapons Sprites to Import/guns/animations/vector reload gif.gif",
+			"status": "copied"
+		},
+		{
+			"bytes": 246913,
+			"destination_relative_path": "Weapons Sprites to Import/guns/animations/vector reload sprite sheet.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "5cba84bcdd8ad7f6352d244a8d24b79ac6a490b43334448deeb65cdd51e4e0bf",
+			"source_relative_path": "Weapons Sprites to Import/guns/animations/vector reload sprite sheet.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 54974,
+			"destination_relative_path": "Weapons Sprites to Import/guns/animations/winchester charge gif.gif",
+			"extension": "gif",
+			"license_status": "unknown_requires_review",
+			"sha256": "c209d8e7cf302c659f789a172a946c7cb8839adbfa4ddaf8069f870233f9d238",
+			"source_relative_path": "Weapons Sprites to Import/guns/animations/winchester charge gif.gif",
+			"status": "copied"
+		},
+		{
+			"bytes": 71352,
+			"destination_relative_path": "Weapons Sprites to Import/guns/animations/winchester charge sprite sheet.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "7bb226ee97b2ea3b45cb4d4623431ff314f7d2cf8cc123125fb76df5ee3976ba",
+			"source_relative_path": "Weapons Sprites to Import/guns/animations/winchester charge sprite sheet.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 11750,
+			"destination_relative_path": "Weapons Sprites to Import/guns/full sized/50 BMG sniper.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "f375629cbd9235b8f43c64e0cfe2363f97951927d25d9e6429844d4869b6c3b0",
+			"source_relative_path": "Weapons Sprites to Import/guns/full sized/50 BMG sniper.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 10391,
+			"destination_relative_path": "Weapons Sprites to Import/guns/full sized/AR.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "980cc1e67f19cdd332163ae7133adc19929d55d3764379ea261aed79ab3655ae",
+			"source_relative_path": "Weapons Sprites to Import/guns/full sized/AR.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 10245,
+			"destination_relative_path": "Weapons Sprites to Import/guns/full sized/LMG full size.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "c340da70189f40c906ce7cfc0be28016f79f5239ec0334560dcae360d70e8d71",
+			"source_relative_path": "Weapons Sprites to Import/guns/full sized/LMG full size.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 8504,
+			"destination_relative_path": "Weapons Sprites to Import/guns/full sized/NAPLAM grenade.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "c47e88be25efdf54ddaac29ccd097cafbb87b5c868c9d75169ab36b244872738",
+			"source_relative_path": "Weapons Sprites to Import/guns/full sized/NAPLAM grenade.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 8715,
+			"destination_relative_path": "Weapons Sprites to Import/guns/full sized/colt m1911.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "344b0b6f55bd1af38ea644700d0ce64bed14997c90df3b40f6a66c4b431dc3f9",
+			"source_relative_path": "Weapons Sprites to Import/guns/full sized/colt m1911.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 9033,
+			"destination_relative_path": "Weapons Sprites to Import/guns/full sized/colt revolver.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "dfbd827043b1659f950af6fcbc20f1e03daaefd9bd6cab804bb55904956c0e14",
+			"source_relative_path": "Weapons Sprites to Import/guns/full sized/colt revolver.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 8539,
+			"destination_relative_path": "Weapons Sprites to Import/guns/full sized/flashbang.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "105e98bf60a6d45115a44de54ce7d5b32ba0a21f46e00f26917d0072dd932590",
+			"source_relative_path": "Weapons Sprites to Import/guns/full sized/flashbang.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 9116,
+			"destination_relative_path": "Weapons Sprites to Import/guns/full sized/fn 509 tac pistol full size.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "d926e5107036de363b4573048643945960fb4ffbd2f98a4bdf9d169f74a7f1c9",
+			"source_relative_path": "Weapons Sprites to Import/guns/full sized/fn 509 tac pistol full size.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 9161,
+			"destination_relative_path": "Weapons Sprites to Import/guns/full sized/mac full size.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "df9f0ff7046b47185a65f53fe051380ca5063747585b0b8ca5bb116ed847bc1c",
+			"source_relative_path": "Weapons Sprites to Import/guns/full sized/mac full size.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 9025,
+			"destination_relative_path": "Weapons Sprites to Import/guns/full sized/mauser c96.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "776ff26334e9d1b0f23d7f288708c142922311609e982a305f59f2e885591602",
+			"source_relative_path": "Weapons Sprites to Import/guns/full sized/mauser c96.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 8337,
+			"destination_relative_path": "Weapons Sprites to Import/guns/full sized/mk2 frag grenade.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "64fa8d1857e8ca05618ab1c8914bc24ed801875db9def54afeabf4bae93dba75",
+			"source_relative_path": "Weapons Sprites to Import/guns/full sized/mk2 frag grenade.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 9083,
+			"destination_relative_path": "Weapons Sprites to Import/guns/full sized/mk25.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "0b263a4ae16e2857ecd437568d8b22d4585e538f3f8ff1aa679d502447667482",
+			"source_relative_path": "Weapons Sprites to Import/guns/full sized/mk25.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 9440,
+			"destination_relative_path": "Weapons Sprites to Import/guns/full sized/silenced a205.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "7303232224a4c4fff002aa29eb10482bfe13c4a8082cf4d4c437b7602f55b675",
+			"source_relative_path": "Weapons Sprites to Import/guns/full sized/silenced a205.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 9569,
+			"destination_relative_path": "Weapons Sprites to Import/guns/full sized/vector full size.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "5408235fe83d154edefb7097ee0bb992eb52d711936f5edff5563a6ef605a932",
+			"source_relative_path": "Weapons Sprites to Import/guns/full sized/vector full size.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 10250,
+			"destination_relative_path": "Weapons Sprites to Import/guns/full sized/winchester shotgun WW2 version.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "707a6eaa443e44d4ccc7062b403c28e5591ea525b4697a59be482975433f7862",
+			"source_relative_path": "Weapons Sprites to Import/guns/full sized/winchester shotgun WW2 version.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 9656,
+			"destination_relative_path": "Weapons Sprites to Import/guns/more other guns/guns set 1.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "497b5c2fabd2b50d90b6689c684cefce6f782b2691f6a54bb295dc5b449f996e",
+			"source_relative_path": "Weapons Sprites to Import/guns/more other guns/guns set 1.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 6923,
+			"destination_relative_path": "Weapons Sprites to Import/guns/more other guns/guns set 2.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "3abe2a5eb31aa7962deea3188b7eb3f1ae90dff98aaa10620673a9973a41279a",
+			"source_relative_path": "Weapons Sprites to Import/guns/more other guns/guns set 2.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 77,
+			"destination_relative_path": "Weapons Sprites to Import/guns/more other guns/guns_set_1_separated/extras/extra_01_lower_right_orphan_2x2_pixel.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "bc7a8a052f3a535395b8cc6584be23328c04ebd024e0c687c7b7b3ba0a693a88",
+			"source_relative_path": "Weapons Sprites to Import/guns/more other guns/guns_set_1_separated/extras/extra_01_lower_right_orphan_2x2_pixel.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 1343,
+			"destination_relative_path": "Weapons Sprites to Import/guns/more other guns/guns_set_1_separated/manifest.csv",
+			"extension": "csv",
+			"license_status": "unknown_requires_review",
+			"sha256": "f778fdb655f7b4bd47d15d878ec9d3757be84a1e4d5938b983b7f06ac468ccd6",
+			"source_relative_path": "Weapons Sprites to Import/guns/more other guns/guns_set_1_separated/manifest.csv",
+			"status": "copied"
+		},
+		{
+			"bytes": 3791,
+			"destination_relative_path": "Weapons Sprites to Import/guns/more other guns/guns_set_1_separated/manifest.json",
+			"extension": "json",
+			"license_status": "unknown_requires_review",
+			"sha256": "798469cae6efc62fe4fc67e5b3110ff04eadfc793c96caaa5e791e0b527a64ab",
+			"source_relative_path": "Weapons Sprites to Import/guns/more other guns/guns_set_1_separated/manifest.json",
+			"status": "copied"
+		},
+		{
+			"bytes": 35374,
+			"destination_relative_path": "Weapons Sprites to Import/guns/more other guns/guns_set_1_separated/preview.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "a9a84c9d259ad7b445df282588d0f128aa41d950f64b112cab004ff251cc63db",
+			"source_relative_path": "Weapons Sprites to Import/guns/more other guns/guns_set_1_separated/preview.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 923,
+			"destination_relative_path": "Weapons Sprites to Import/guns/more other guns/guns_set_1_separated/sprites/01_top_left_gun.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "fee007ecc447a7ecf268fb09e8ee3293ec51d9e86fb56fd8ea5ac4b9634c8216",
+			"source_relative_path": "Weapons Sprites to Import/guns/more other guns/guns_set_1_separated/sprites/01_top_left_gun.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 1549,
+			"destination_relative_path": "Weapons Sprites to Import/guns/more other guns/guns_set_1_separated/sprites/02_top_right_gun.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "6252cdbafaf7d8da4f5a673d93ab4ecbacc3a11d1d89244be5bd757ac0bd903a",
+			"source_relative_path": "Weapons Sprites to Import/guns/more other guns/guns_set_1_separated/sprites/02_top_right_gun.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 1243,
+			"destination_relative_path": "Weapons Sprites to Import/guns/more other guns/guns_set_1_separated/sprites/03_middle_left_gun.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "2c19430bd7ed189c0dfafa2dd148f95953da90a5875ad3b9eb5ea2165053ccdb",
+			"source_relative_path": "Weapons Sprites to Import/guns/more other guns/guns_set_1_separated/sprites/03_middle_left_gun.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 1385,
+			"destination_relative_path": "Weapons Sprites to Import/guns/more other guns/guns_set_1_separated/sprites/04_middle_right_gun.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "ec121f723c0bab69efee1de41f2b20bb084a8154671e844ba945f100b672ca38",
+			"source_relative_path": "Weapons Sprites to Import/guns/more other guns/guns_set_1_separated/sprites/04_middle_right_gun.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 144,
+			"destination_relative_path": "Weapons Sprites to Import/guns/more other guns/guns_set_1_separated/sprites/05_center_small_parts.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "092e82d1728d6515368f1ca112998969ef17649729dc8964548760aa69946c17",
+			"source_relative_path": "Weapons Sprites to Import/guns/more other guns/guns_set_1_separated/sprites/05_center_small_parts.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 950,
+			"destination_relative_path": "Weapons Sprites to Import/guns/more other guns/guns_set_1_separated/sprites/06_large_left_launcher.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "c9889eba6784dc529e2e6230d838780c4450143ed40c41db08306cc1936d0849",
+			"source_relative_path": "Weapons Sprites to Import/guns/more other guns/guns_set_1_separated/sprites/06_large_left_launcher.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 1186,
+			"destination_relative_path": "Weapons Sprites to Import/guns/more other guns/guns_set_1_separated/sprites/07_right_launcher.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "32cff246a031a8a42a18c13ea7eeb53d5692941b50585d650672b12b0cf23499",
+			"source_relative_path": "Weapons Sprites to Import/guns/more other guns/guns_set_1_separated/sprites/07_right_launcher.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 894,
+			"destination_relative_path": "Weapons Sprites to Import/guns/more other guns/guns_set_1_separated/sprites/08_bottom_left_pistol.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "3ca1acec2c665f6b2308d9945bc3e4ebee16b0e80df72d7872bc8b6d44ea02c1",
+			"source_relative_path": "Weapons Sprites to Import/guns/more other guns/guns_set_1_separated/sprites/08_bottom_left_pistol.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 1282,
+			"destination_relative_path": "Weapons Sprites to Import/guns/more other guns/guns_set_1_separated/sprites/09_bottom_right_energy_coil.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "0dcd6ac310f7e7d37b947ba0e69a587e913a26937a361301dd4cd91667157de8",
+			"source_relative_path": "Weapons Sprites to Import/guns/more other guns/guns_set_1_separated/sprites/09_bottom_right_energy_coil.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 3600,
+			"destination_relative_path": "Weapons Sprites to Import/guns/original sized/50 bmg sniper.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "b877b3fe158239542c790fc3a3d03d8c0e1ff8af6b588696e22c6def5dd9b769",
+			"source_relative_path": "Weapons Sprites to Import/guns/original sized/50 bmg sniper.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 3023,
+			"destination_relative_path": "Weapons Sprites to Import/guns/original sized/AR.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "7bd1e85b1f2e0f785e65bcf750c2c3d6327f58aeca7c0767dcb2634ed356e54e",
+			"source_relative_path": "Weapons Sprites to Import/guns/original sized/AR.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 2918,
+			"destination_relative_path": "Weapons Sprites to Import/guns/original sized/LMG.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "81a4183940ea472680c93771c9dfd2f41b244d2a6adcc3a763276ebbb9b0b1be",
+			"source_relative_path": "Weapons Sprites to Import/guns/original sized/LMG.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 1902,
+			"destination_relative_path": "Weapons Sprites to Import/guns/original sized/NAPALM grenade.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "26905936f1c194205f27c69461f323303f695d72e26f85f6bc79b558b445ccd7",
+			"source_relative_path": "Weapons Sprites to Import/guns/original sized/NAPALM grenade.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 1982,
+			"destination_relative_path": "Weapons Sprites to Import/guns/original sized/colt m1911.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "56cd59396929772dba2c04835d865f3a3759efbc1f3b70a9fa6b4a5eb64d416b",
+			"source_relative_path": "Weapons Sprites to Import/guns/original sized/colt m1911.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 2242,
+			"destination_relative_path": "Weapons Sprites to Import/guns/original sized/colt revolver.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "9714fb850b467a848bec7bfbd770b14938dbfdaea10363a165e24141ae3f3a14",
+			"source_relative_path": "Weapons Sprites to Import/guns/original sized/colt revolver.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 1879,
+			"destination_relative_path": "Weapons Sprites to Import/guns/original sized/flashbang.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "8e0ac288466fc6c8df931fd6f4c5e23c0ea520ecf7c5829be7689f9167274d00",
+			"source_relative_path": "Weapons Sprites to Import/guns/original sized/flashbang.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 2346,
+			"destination_relative_path": "Weapons Sprites to Import/guns/original sized/fn 509 tac pistol.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "d9a6f3f14ffdd73f26b43e312125d50de83bd411b548c98fe2d62a958a626b80",
+			"source_relative_path": "Weapons Sprites to Import/guns/original sized/fn 509 tac pistol.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 2556,
+			"destination_relative_path": "Weapons Sprites to Import/guns/original sized/idk.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "e3d7e6f7796ac6359e2094057eb28899801f6e5f7a920fde8df0731f96d71f66",
+			"source_relative_path": "Weapons Sprites to Import/guns/original sized/idk.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 2433,
+			"destination_relative_path": "Weapons Sprites to Import/guns/original sized/mac.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "730703989fc56b6e11c5a23b5fe71bdc77acb4b69552d47192a1e62302c988c9",
+			"source_relative_path": "Weapons Sprites to Import/guns/original sized/mac.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 2295,
+			"destination_relative_path": "Weapons Sprites to Import/guns/original sized/mauser c96.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "e714e337077d972b054eca388b3c96e674560b66b08fdd259f379c9dbc62e76e",
+			"source_relative_path": "Weapons Sprites to Import/guns/original sized/mauser c96.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 1912,
+			"destination_relative_path": "Weapons Sprites to Import/guns/original sized/mk2 grenade.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "56674e8aeecf3eadb35f57a7e048b50592b104edb10c8eb034dec80bac98eb9c",
+			"source_relative_path": "Weapons Sprites to Import/guns/original sized/mk2 grenade.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 2262,
+			"destination_relative_path": "Weapons Sprites to Import/guns/original sized/mk25.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "7b4f359167f333ef79f8fda3030996ea15557ecdc66543ba85d37d541251a748",
+			"source_relative_path": "Weapons Sprites to Import/guns/original sized/mk25.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 2507,
+			"destination_relative_path": "Weapons Sprites to Import/guns/original sized/silenced a205.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "9355c6d9861f479da06170cc4ea7aa8cc57daf3756e499a0f412c67fdb8325b4",
+			"source_relative_path": "Weapons Sprites to Import/guns/original sized/silenced a205.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 2588,
+			"destination_relative_path": "Weapons Sprites to Import/guns/original sized/vector.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "9fc1d4891f6804b3d61ba456287c0cc3bebb55f02be46973eaa46fcd464659c3",
+			"source_relative_path": "Weapons Sprites to Import/guns/original sized/vector.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 2929,
+			"destination_relative_path": "Weapons Sprites to Import/guns/original sized/winchester shotgun ww2 version.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "2426b79522448427ecd004305b155fb392238804c6ead3077e2865b5ca0bdb80",
+			"source_relative_path": "Weapons Sprites to Import/guns/original sized/winchester shotgun ww2 version.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 9408,
+			"destination_relative_path": "Weapons Sprites to Import/guns/other guns/ANT gun.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "a480a92482b84cd5cc35f84b38f4dc41f997099cb4c2731f1c4f15b89f0ce42a",
+			"source_relative_path": "Weapons Sprites to Import/guns/other guns/ANT gun.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 9410,
+			"destination_relative_path": "Weapons Sprites to Import/guns/other guns/RED revolver.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "0833474a1eb35fd2b507c8c5d5fdba9a6312023fddcc8f2f28265761e15ab20c",
+			"source_relative_path": "Weapons Sprites to Import/guns/other guns/RED revolver.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 11609,
+			"destination_relative_path": "Weapons Sprites to Import/guns/other guns/big goob.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "50dcb12658ae65d3ac1a42dc9abb04c1fa3afdff601571ef7cce385ed065f830",
+			"source_relative_path": "Weapons Sprites to Import/guns/other guns/big goob.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 8577,
+			"destination_relative_path": "Weapons Sprites to Import/guns/other guns/freedom glock.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "c823d7709fd491e307cca3b75d0fbe38315a8dd01aa868e6d1c44cd93ee92567",
+			"source_relative_path": "Weapons Sprites to Import/guns/other guns/freedom glock.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 9217,
+			"destination_relative_path": "Weapons Sprites to Import/guns/other guns/old gun.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "548ae988244609f71cd6dea208cf1e4733764dbdd810be01b53c2b5db66d4b5f",
+			"source_relative_path": "Weapons Sprites to Import/guns/other guns/old gun.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 9510,
+			"destination_relative_path": "Weapons Sprites to Import/guns/other guns/pistol.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "8236cd15cfe344ae576a8e6eda3202cb4b9d4655bfe5df978154abb9684f9d14",
+			"source_relative_path": "Weapons Sprites to Import/guns/other guns/pistol.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 8853,
+			"destination_relative_path": "Weapons Sprites to Import/guns/other guns/revolver.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "cfbcb0e90912383b9bf67e87a81ee4505ef2033f63ecbc95b370780e5d48a71e",
+			"source_relative_path": "Weapons Sprites to Import/guns/other guns/revolver.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 9461,
+			"destination_relative_path": "Weapons Sprites to Import/guns/other guns/sidearm.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "f42a51506e1c13c4a2b52c2d3fa319e78193aba007dab7fede48b289c0ea4b16",
+			"source_relative_path": "Weapons Sprites to Import/guns/other guns/sidearm.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 10139,
+			"destination_relative_path": "Weapons Sprites to Import/guns/other guns/smg.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "8bc942fc45d01d44899450180940c876083da19dbf52bbffbb74ec6f5b2f9f07",
+			"source_relative_path": "Weapons Sprites to Import/guns/other guns/smg.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 9471,
+			"destination_relative_path": "Weapons Sprites to Import/guns/other guns/the goober gun.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "36ef8ec640e0f6d8b779710cbd0d22320ce2667dbb6e9e5b3a434ba22c706047",
+			"source_relative_path": "Weapons Sprites to Import/guns/other guns/the goober gun.png",
+			"status": "copied"
+		},
+		{
+			"bytes": 9598,
+			"destination_relative_path": "Weapons Sprites to Import/guns/other guns/worm.png",
+			"extension": "png",
+			"license_status": "unknown_requires_review",
+			"sha256": "6494080348d0c133b174afa3c6cf6f5ce4999c0cad54e5cb3fefb04bfae65c7c",
+			"source_relative_path": "Weapons Sprites to Import/guns/other guns/worm.png",
+			"status": "copied"
+		}
+	],
+	"imported_at": "2026-08-07 17:20:18",
+	"importer": "paper-quest-legacy-character-creator-import/1.0.0",
+	"license_notice": "Source licenses were not established by this import. Review each asset before redistribution.",
+	"schema_version": "1.0.0",
+	"source_folders": [
+		"Weapons Sprites to Import",
+		"Texture Guides",
+		"Saved Characters"
+	],
+	"source_label": "Character Creator 2D"
+}

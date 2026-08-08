@@ -1,0 +1,20 @@
+[2026-08-05T14:28:16Z] godot --headless tests/test_runner.tscn
+Result: 166 PASS, 0 FAIL (Pre-flight repository baseline verification)
+
+[2026-08-05T14:28:19Z] godot --headless --script tools/loc_checker/loc_checker.gd
+Result: 35 files scanned, 0 files exceed 300 lines
+
+[2026-08-05T14:28:20Z] godot --headless --script tools/stub_scanner/stub_scanner.gd
+Result: 32 files scanned, 0 stubs found
+
+[2026-08-05T14:28:22Z] godot --headless --script tools/evidence_checker/evidence_checker.gd
+Result: 19 evidence bundles checked, 19 valid
+
+[2026-08-05T14:29:57Z] godot --headless tests/test_runner.tscn
+Result: 184 PASS, 0 FAIL (Includes 18 assertions in Test 14: Project Manifest Schema Workflows)
+
+[2026-08-05T14:29:59Z] godot --headless --script tools/loc_checker/loc_checker.gd
+Result: 37 files scanned, 0 files exceed 300 lines
+
+[2026-08-05T14:30:01Z] godot --headless --script tools/stub_scanner/stub_scanner.gd
+Result: 34 files scanned, 0 stubs found

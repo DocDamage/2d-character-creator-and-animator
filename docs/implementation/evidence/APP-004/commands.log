@@ -1,0 +1,47 @@
+=== APP-004 Execution & Verification Commands Log ===
+Date: 2026-08-05
+
+1. Test Runner Execution:
+$ godot --headless tests/test_runner.tscn
+Godot Engine v4.7.1.stable.official.a13da4feb - https://godotengine.org
+=== Running Automated Test Suite ===
+[TEST 1] Baseline valid fixture loading...
+  PASS: Baseline fixture loaded and validated successfully.
+[TEST 2] Malformed corrupt fixture handling...
+  PASS: Malformed fixture handled safely without crash.
+[TEST 3] IDService UUID & registration...
+  PASS: IDService generated and registered valid UUID
+[TEST 4] CommandService stack...
+  PASS: CommandService initialized clean stack.
+[TEST 5] Startup script instantiation & diagnostic sequence...
+  PASS: Startup sequence reported completion successfully.
+[TEST 6] Main window instantiation & dock layout management...
+  PASS: DockLayoutManager registered 6 default panels.
+[TEST 7] Workspace Manager workflows & state preservation...
+  PASS: WorkspaceManager registers 6 default workspaces
+[TEST 8] Command Palette & Shortcut Registry workflows...
+  PASS: ShortcutRegistry command registration and lookup verified.
+  PASS: ShortcutRegistry search filtering verified.
+  PASS: ShortcutRegistry command execution verified.
+  PASS: Shortcut matching and rebinding verified.
+  PASS: Shortcut bindings export and import verified.
+  PASS: CommandPalette UI behavior verified.
+  PASS: ShortcutRebindDialog UI behavior verified.
+=== Test Suite Finished: 46 PASS, 0 FAIL ===
+
+2. LOC Checker Execution:
+$ godot --headless --script tools/loc_checker/loc_checker.gd
+Scanned 22 files.
+PASS: No files exceed the 300-line limit.
+
+3. Stub Scanner Execution:
+$ godot --headless --script tools/stub_scanner/stub_scanner.gd
+Scanned 19 files.
+PASS: No stubs or placeholders found.
+
+4. Evidence Checker Execution:
+$ godot --headless --script tools/evidence_checker/evidence_checker.gd
+Evidence bundles checked: 13
+Valid:   13
+Invalid: 0
+PASS: All evidence bundles meet required structure.

@@ -1,0 +1,14 @@
+godot --headless --path . --scene res://tests/test_runner.tscn
+godot --headless --path . --script tools/loc_checker/loc_checker.gd
+godot --headless --path . --script tools/stub_scanner/stub_scanner.gd
+godot --headless --path . --script tools/evidence_checker/evidence_checker.gd
+godot --headless --path . --scene res://tests/lpc_phase01_runner.tscn
+godot --headless --path . --scene res://tests/lpc_phase2_runner.tscn
+godot --headless --path . --scene res://tests/lpc_phase3_runner.tscn
+godot --headless --path . --scene res://tests/lpc_phase4_runner.tscn
+godot --headless --path . --scene res://tests/lpc_phase5_runner.tscn
+godot --headless --path . --scene res://tests/lpc_phase6_runner.tscn
+godot --headless --path . --scene res://tests/lpc_phase7_runner.tscn
+godot --headless --path . --scene res://release/build_release_candidate.tscn
+PaperQuestCharacterStudio.exe --headless --quit
+PaperQuestCharacterStudio-single.exe --headless --quit

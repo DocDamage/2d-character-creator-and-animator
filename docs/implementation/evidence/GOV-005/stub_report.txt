@@ -1,24 +1,7 @@
 === Stub Scanner Report ===
-Generated: 2026-08-07T07:25:36
-Files scanned: 347
-Findings: 8
+Generated: 2026-08-07T23:54:16
+Files scanned: 344
+Findings: 0
 
-  [ERROR] res://app/bootstrap/project_hub_panel.gd:345  PLACEHOLDER
-       _rename_input.placeholder_text = "Project title"
-  [ERROR] res://app/bootstrap/project_hub_panel.gd:452  PLACEHOLDER
-       _snapshot_name_input.placeholder_text = "Milestone name (for example: before rig rewrite)"
-  [ERROR] res://app/bootstrap/project_hub_panel.gd:456  PLACEHOLDER
-       _snapshot_note_input.placeholder_text = "Optional note"
-  [ERROR] res://app/bootstrap/project_hub_panel.gd:497  PLACEHOLDER
-       _appearance_name_input.placeholder_text = "Knight, Mage, Red Outfit…"
-  [ERROR] res://app/bootstrap/project_hub_panel.gd:564  PLACEHOLDER
-       _asset_author_input.placeholder_text = "Artist / rights holder (optional)"
-  [ERROR] res://app/bootstrap/project_hub_panel.gd:568  PLACEHOLDER
-       _asset_license_input.placeholder_text = "License or permission (optional)"
-  [ERROR] res://app/bootstrap/project_hub_panel.gd:572  PLACEHOLDER
-       _asset_source_input.placeholder_text = "Source reference or purchase record (optional)"
-  [ERROR] res://rigging/bones/rig_hierarchy_editor.gd:93  PLACEHOLDER
-       _name_input.placeholder_text = "Bone name"
 
 Classification:
-  PLACEHOLDER: 8

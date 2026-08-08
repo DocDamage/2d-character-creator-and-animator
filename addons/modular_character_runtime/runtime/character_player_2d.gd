@@ -42,7 +42,7 @@ func _process(delta: float) -> void:
 	var previous: String = state_evaluator.current_state_id
 	var snapshot: Dictionary = state_evaluator.update(delta, {"events": []})
 	_play_clip(str(snapshot.get("clip_id", "")))
-	_track_state = RuntimeTrackPlayerScript.new().evaluate(_content.get("runtime_tracks", _content.get("tracks", [])) as Array, state_evaluator.state_time)
+	_track_state = RuntimeTrackPlayerScript.new().evaluate(_tracks_for_clip(str(snapshot.get("clip_id", ""))), state_evaluator.state_time)
 	if previous != snapshot.get("state_id", ""):
 		state_changed.emit(previous, str(snapshot.get("state_id", "")))
 		_evaluate_rules(snapshot)
@@ -64,7 +64,7 @@ func load_package(package: Dictionary) -> bool:
 	rule_graph = null
 	_configure_state_machine(_content.get("state_machine", {}), _content.get("clip_durations", {}))
 	rebuild_skeleton(_content.get("rig", _content.get("skeleton", {})))
-	_runtime_report = RuntimeSceneBuilderScript.new().build(self, _runtime_mapping(), Callable(self, "add_mesh"))
+	_runtime_report = RuntimeSceneBuilderScript.new().build(self, _runtime_mapping(), Callable(self, "add_mesh"), Callable(self, "get_runtime_bone"))
 	_animation_player = get_node_or_null("RuntimeAnimationPlayer") as AnimationPlayer
 	set_appearance((_runtime_mapping().get("appearance", {}) as Dictionary))
 	if _content.get("rule_graph", {}) is Dictionary and not (_content.get("rule_graph", {}) as Dictionary).is_empty():
@@ -99,6 +99,26 @@ func set_facing_direction(direction: Vector2) -> Dictionary:
 	}
 	facing_result["primary_cell"] = (cells.get(facing_result["primary_direction"], {}) as Dictionary).duplicate(true)
 	facing_result["secondary_cell"] = (cells.get(facing_result["secondary_direction"], {}) as Dictionary).duplicate(true)
+	_apply_facing_visibility()
+	return facing_result.duplicate(true)
+
+
+func set_direction_id(direction_id: String) -> Dictionary:
+	var grid := _facing_grid()
+	var direction_ids := _direction_ids(grid)
+	if direction_id not in direction_ids:
+		return {"valid": false, "direction_id": direction_id}
+	var cells: Dictionary = grid.get("cells", {})
+	facing_result = {
+		"valid": true,
+		"mode": "hard_switch",
+		"primary_direction": direction_id,
+		"secondary_direction": "",
+		"weight": 0.0,
+		"primary_cell": (cells.get(direction_id, {}) as Dictionary).duplicate(true),
+		"secondary_cell": {},
+	}
+	_apply_facing_visibility()
 	return facing_result.duplicate(true)
 
 
@@ -116,34 +136,47 @@ func get_current_state_id() -> String:
 
 func equip(slot_id: String, item: Variant) -> void:
 	equipment[slot_id] = item
+	_apply_equipment(slot_id, item)
 	equipment_changed.emit(slot_id, item)
 
 
 func unequip(slot_id: String) -> Variant:
 	var item: Variant = equipment.get(slot_id)
 	equipment.erase(slot_id)
+	_apply_equipment(slot_id, null)
 	equipment_changed.emit(slot_id, null)
 	return item
 
 
 func add_mesh(mesh_data: Dictionary, texture: Texture2D = null) -> Polygon2D:
 	var node := Polygon2D.new()
+	node.name = str(mesh_data.get("mesh_id", "RuntimeMesh"))
 	var points := PackedVector2Array()
 	for vertex in mesh_data.get("vertices", []) as Array:
-		points.append(_vector((vertex as Dictionary).get("position", [0.0, 0.0])))
+		points.append(_vector((vertex as Dictionary).get("position", [0.0, 0.0]) if vertex is Dictionary else vertex))
 	node.polygon = points
 	node.texture = texture
+	node.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
 	if mesh_data.has("uvs"):
 		var uvs := PackedVector2Array()
 		for value in mesh_data.get("uvs", []) as Array:
 			uvs.append(_vector(value))
 		node.uv = uvs
 	add_child(node)
-	if mesh_data.has("bone_ids") and mesh_data.has("weights"):
+	var per_bone: Dictionary = mesh_data.get("weights_by_bone", {})
+	if not per_bone.is_empty():
+		for bone_id in per_bone:
+			if _bones.has(bone_id): node.add_bone(node.get_path_to(_bones[bone_id] as Node), PackedFloat32Array(per_bone[bone_id] as Array))
+	elif mesh_data.has("bone_ids") and mesh_data.has("weights"):
 		for bone_id in mesh_data.get("bone_ids", []) as Array:
 			if _bones.has(bone_id): node.add_bone(node.get_path_to(_bones[bone_id] as Node), PackedFloat32Array(mesh_data.get("weights", []) as Array))
 		if _skeleton != null: node.skeleton = node.get_path_to(_skeleton)
+	if not per_bone.is_empty() and _skeleton != null: node.skeleton = node.get_path_to(_skeleton)
 	return node
+
+
+func get_runtime_bone(bone_id: String) -> Bone2D:
+	return _bones.get(bone_id, null) as Bone2D
 
 
 func rebuild_skeleton(rig: Variant) -> bool:
@@ -207,7 +240,8 @@ func _configure_state_machine(data: Variant, durations: Variant) -> void:
 
 func set_appearance(data: Dictionary) -> void:
 	_appearance = data.duplicate(true)
-	for slot_id in _appearance.get("equipment", {}) as Dictionary: equip(str(slot_id), _appearance.equipment[slot_id])
+	for slot_id in _appearance.get("equipment", {}) as Dictionary:
+		equip(str(slot_id), (_appearance.get("equipment", {}) as Dictionary)[slot_id])
 
 
 func get_appearance() -> Dictionary:
@@ -219,10 +253,17 @@ func get_appearance() -> Dictionary:
 func save_appearance() -> Dictionary: return get_appearance()
 func restore_appearance(data: Dictionary) -> void: set_appearance(data)
 func set_debug_views_enabled(enabled: bool) -> void: _debug_views_enabled = enabled
+func get_credits() -> Variant: return _content.get("credits", [])
+func play_runtime_clip(clip_id: String) -> bool:
+	var library := (_runtime_mapping().get("animation_library", {}) as Dictionary)
+	if not library.has(clip_id): return false
+	_play_clip(clip_id)
+	_track_state = RuntimeTrackPlayerScript.new().evaluate(_tracks_for_clip(clip_id), 0.0)
+	return true
 
 
 func get_debug_snapshot() -> Dictionary:
-	return {"enabled": _debug_views_enabled, "state": state_evaluator.snapshot(), "facing": facing_result.duplicate(true), "runtime_nodes": _runtime_report.duplicate(true), "equipment": equipment.duplicate(true), "tracks": _track_state.duplicate(true), "baked_fallback": _runtime_mapping().get("baked_fallback", {}), "bones": _bones.keys()}
+	return {"enabled": _debug_views_enabled, "state": state_evaluator.snapshot(), "facing": facing_result.duplicate(true), "runtime_nodes": _runtime_report.duplicate(true), "equipment": equipment.duplicate(true), "tracks": _track_state.duplicate(true), "baked_fallback": _runtime_mapping().get("baked_fallback", {}), "bones": _bones.keys(), "credits": get_credits()}
 
 
 func resolve_grip_target(weapon_id: String, grip_id: String) -> Dictionary:
@@ -237,6 +278,44 @@ func resolve_grip_target(weapon_id: String, grip_id: String) -> Dictionary:
 
 func _play_clip(clip_id: String) -> void:
 	if _animation_player != null and not clip_id.is_empty() and _animation_player.has_animation(clip_id) and _animation_player.current_animation != clip_id: _animation_player.play(clip_id)
+
+
+func _tracks_for_clip(clip_id: String) -> Array:
+	var raw_tracks: Variant = _content.get("runtime_tracks", _content.get("tracks", []))
+	if raw_tracks is Dictionary:
+		return ((raw_tracks as Dictionary).get(clip_id, []) as Array).duplicate(true)
+	return (raw_tracks as Array).duplicate(true) if raw_tracks is Array else []
+
+
+func _apply_facing_visibility() -> void:
+	var direction_id := str(facing_result.get("primary_direction", ""))
+	if direction_id.is_empty() or not is_inside_tree():
+		return
+	var tree := get_tree()
+	if tree == null: return
+	for node in tree.get_nodes_in_group("modular_runtime_generated"):
+		if not node is CanvasItem or not node.has_meta("modular_runtime_directions"):
+			continue
+		var directions: Array = node.get_meta("modular_runtime_directions") as Array
+		if not directions.is_empty():
+			(node as CanvasItem).visible = direction_id in directions
+
+
+func _apply_equipment(slot_id: String, item: Variant) -> void:
+	if not is_inside_tree():
+		return
+	var tree := get_tree()
+	if tree == null: return
+	var expected_asset_id := ""
+	if item is Dictionary:
+		expected_asset_id = str((item as Dictionary).get("asset_id", ""))
+	elif item is String:
+		expected_asset_id = str(item)
+	for node in tree.get_nodes_in_group("modular_runtime_generated"):
+		if not node is CanvasItem or str(node.get_meta("modular_runtime_slot_id", "")) != slot_id:
+			continue
+		var asset_id := str(node.get_meta("modular_runtime_asset_id", ""))
+		(node as CanvasItem).visible = item != null and (expected_asset_id.is_empty() or expected_asset_id == asset_id)
 
 
 func _runtime_mapping() -> Dictionary:
@@ -277,6 +356,9 @@ func _facing_grid() -> Dictionary:
 
 
 func _direction_ids(grid: Dictionary) -> Array:
+	var authored: Array = grid.get("custom_directions", []) as Array
+	if not authored.is_empty():
+		return authored.duplicate(true)
 	match int(grid.get("direction_set", 8)):
 		4: return ["north", "east", "south", "west"]
 		8: return ["north", "north_east", "east", "south_east", "south", "south_west", "west", "north_west"]

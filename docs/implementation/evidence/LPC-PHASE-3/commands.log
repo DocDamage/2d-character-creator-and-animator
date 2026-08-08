@@ -1,0 +1,3 @@
+godot --headless --path . --scene tests/lpc_phase3_runner.tscn
+godot --headless --path . --scene res://tests/test_runner.tscn
+godot --headless --path . --quit-after 10
